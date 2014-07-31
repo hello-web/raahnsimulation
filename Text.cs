@@ -6,8 +6,7 @@ namespace RaahnSimulation
 {
 	class Text : ClickableEntity
 	{
-		private const int LETTER_ASCII_OFFSET = 65;
-		private const int NUMBER_ASCII_OFFSET = 48;
+		private const int ASCII_OFFSET = 32;
 
 		protected string text;
 		private int length;
@@ -60,20 +59,15 @@ namespace RaahnSimulation
 	        {
 	            char currentChar = text[i];
 
-	            //is it a letter, number, or space
-	            if (currentChar >= 65 && currentChar <= 90)
+                //Is the character within the representable character range.
+	            if (currentChar >= 32 && currentChar <= 126)
 	            {
-	                charTexPos.x = Utils.LETTER_POSITIONS[currentChar - LETTER_ASCII_OFFSET].x;
-	                charTexPos.y = Utils.LETTER_POSITIONS[currentChar - LETTER_ASCII_OFFSET].y;
+	                charTexPos.x = Utils.CHAR_MAPPINGS[currentChar - ASCII_OFFSET].x;
+	                charTexPos.y = Utils.CHAR_MAPPINGS[currentChar - ASCII_OFFSET].y;
 	            }
-	            else if (currentChar >= 48 && currentChar <= 57)
+	            else
 	            {
-	                charTexPos.x = Utils.NUMBER_POSITIONS[currentChar - NUMBER_ASCII_OFFSET].x;
-	                charTexPos.y = Utils.NUMBER_POSITIONS[currentChar - NUMBER_ASCII_OFFSET].y;
-	            }
-	            else if (currentChar == 32)
-	            {
-	                charTexPos.x = 3.0f;
+	                charTexPos.x = 0.0f;
 	                charTexPos.y = 0.0f;
 	            }
 

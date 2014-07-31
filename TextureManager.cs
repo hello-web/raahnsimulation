@@ -25,7 +25,7 @@ namespace RaahnSimulation
 		private string[] TEXTURE_RESOURCES =
 		{
 			"Data/Textures/TopViewCar.png", "Data/Textures/Road0.png", "Data/Textures/Road1.png",
-			"Data/Textures/Cursor0.png", "Data/Textures/Cursor1.png", "Data/Textures/FreeMonoChars.png",
+			"Data/Textures/Cursor0.png", "Data/Textures/Cursor1.png", "Data/Textures/CharMap.png",
 			"Data/Textures/raahn.png", "Data/Textures/Cone.png"
 		};
 

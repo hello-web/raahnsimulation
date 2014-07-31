@@ -11,8 +11,8 @@ namespace RaahnSimulation
 		private const int PANEL_OPTION_COUNT = 2;
 		private const float MAP_WIDTH_PERCENTAGE = 0.05f;
 		private const float MAP_HEIGHT_PERCENTAGE = 0.1f;
-		private const string P0 = "ROADS";
-		private const string P1 = "OBSTACLES";
+		private const string P0 = "Roads";
+		private const string P1 = "Obstacles";
 
 
 		private static readonly string[] PANEL_OPTIONS = { P0, P1 };
