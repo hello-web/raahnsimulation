@@ -4,14 +4,14 @@ namespace RaahnSimulation
 {	
 	public class EntityPool<T>
 	{
-		public const int ENTITY_POOL_DEFAULT_SIZE = 100;
-		protected LinkedList<T> elements;
+		public const int DEFAULT_SIZE = 100;
+		protected List<T> elements;
 
 		protected EntityPool() {}
 
 		protected EntityPool(Simulator sim, int size) 
         {
-            elements = new LinkedList<T>();
+            elements = new List<T>();
         }
 
 		~EntityPool()
@@ -32,15 +32,16 @@ namespace RaahnSimulation
 			T returnElement = default(T);
 			if (elements.Count > 0)
 			{
-				returnElement = elements.Last.Value;
-				elements.RemoveLast();
+				returnElement = elements[elements.Count - 1];
+				elements.RemoveAt(elements.Count - 1);
 			}
 			return returnElement;
 		}
 
 		public void Free(T element)
 		{
-			elements.Remove(element);
+            if (element != null)
+			    elements.Add(element);
 		}
 	}
 }

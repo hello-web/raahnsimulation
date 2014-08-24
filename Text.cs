@@ -62,8 +62,11 @@ namespace RaahnSimulation
                 //Is the character within the representable character range.
 	            if (currentChar >= 32 && currentChar <= 126)
 	            {
-	                charTexPos.x = Utils.CHAR_MAPPINGS[currentChar - ASCII_OFFSET].x;
-	                charTexPos.y = Utils.CHAR_MAPPINGS[currentChar - ASCII_OFFSET].y;
+                    int index = currentChar - ASCII_OFFSET;
+                    charTexPos.y = index / Utils.CHARACTER_TEX_COLUMN_COUNT;
+                    charTexPos.x = index - Utils.CHARACTER_TEX_COLUMN_COUNT * (int)charTexPos.y;
+                    //Flip y array position because the character used starts from the bottom.
+                    charTexPos.y = Utils.CHARACTER_TEX_ROW_COUNT - 1 - charTexPos.y;
 	            }
 	            else
 	            {

@@ -57,6 +57,8 @@ namespace RaahnSimulation
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
 		public const int INDEX_COUNT = 6;
+        public const uint CHARACTER_TEX_COLUMN_COUNT = 11;
+        public const uint CHARACTER_TEX_ROW_COUNT = 9;
 
         public const float MIN_GL_VERSION = 1.5f;
 		public const float WIDTH_PERCENTAGE = 0.6f;
@@ -66,8 +68,8 @@ namespace RaahnSimulation
 		public const float DISCARD_Z_POS = 0.0f;
 		public const float DISCARD_Z_SCALE = 1.0f;
 		public const float DEG_TO_RAD = (float)3.1415926535 / 180.0f;
-		public const float TEXTURE_CHAR_WIDTH = 1.0f / 11.0f;
-		public const float TEXTURE_CHAR_HEIGHT = 1.0f / 9.0f;
+        public const float TEXTURE_CHAR_WIDTH = 1 / (float)CHARACTER_TEX_COLUMN_COUNT;
+        public const float TEXTURE_CHAR_HEIGHT = 1.0f / (float)CHARACTER_TEX_ROW_COUNT;
 
 		public const char FILE_COMMENT = '#';
 		public const char FILE_VALUE_SEPERATOR = ' ';
@@ -75,35 +77,9 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.1";
+		public const string VERSION_STRING = "Version 1.2";
         //My computer uses es-CO, but our files use points for decimals, hard code culture for now.
         public static readonly CultureInfo EN_US = CultureInfo.CreateSpecificCulture("en-US");
-
-        public static readonly Vector2[] CHAR_MAPPINGS = {
-            new Vector2(0.0f, 8.0f), new Vector2(1.0f, 8.0f), new Vector2(2.0f, 8.0f), new Vector2(3.0f, 8.0f),
-            new Vector2(4.0f, 8.0f), new Vector2(5.0f, 8.0f), new Vector2(6.0f, 8.0f), new Vector2(7.0f, 8.0f),
-            new Vector2(8.0f, 8.0f), new Vector2(9.0f, 8.0f), new Vector2(10.0f, 8.0f), new Vector2(0.0f, 7.0f),
-            new Vector2(1.0f, 7.0f), new Vector2(2.0f, 7.0f), new Vector2(3.0f, 7.0f), new Vector2(4.0f, 7.0f),
-            new Vector2(5.0f, 7.0f), new Vector2(6.0f, 7.0f), new Vector2(7.0f, 7.0f), new Vector2(8.0f, 7.0f),
-            new Vector2(9.0f, 7.0f), new Vector2(10.0f, 7.0f), new Vector2(0.0f, 6.0f), new Vector2(1.0f, 6.0f),
-            new Vector2(2.0f, 6.0f), new Vector2(3.0f, 6.0f), new Vector2(4.0f, 6.0f), new Vector2(5.0f, 6.0f),
-            new Vector2(6.0f, 6.0f), new Vector2(7.0f, 6.0f), new Vector2(8.0f, 6.0f), new Vector2(9.0f, 6.0f),
-            new Vector2(10.0f, 6.0f), new Vector2(0.0f, 5.0f), new Vector2(1.0f, 5.0f), new Vector2(2.0f, 5.0f),
-            new Vector2(3.0f, 5.0f), new Vector2(4.0f, 5.0f), new Vector2(5.0f, 5.0f), new Vector2(6.0f, 5.0f),
-            new Vector2(7.0f, 5.0f), new Vector2(8.0f, 5.0f), new Vector2(9.0f, 5.0f), new Vector2(10.0f, 5.0f),
-            new Vector2(0.0f, 4.0f), new Vector2(1.0f, 4.0f), new Vector2(2.0f, 4.0f), new Vector2(3.0f, 4.0f),
-            new Vector2(4.0f, 4.0f), new Vector2(5.0f, 4.0f), new Vector2(6.0f, 4.0f), new Vector2(7.0f, 4.0f),
-            new Vector2(8.0f, 4.0f), new Vector2(9.0f, 4.0f), new Vector2(10.0f, 4.0f), new Vector2(0.0f, 3.0f),
-            new Vector2(1.0f, 3.0f), new Vector2(2.0f, 3.0f), new Vector2(3.0f, 3.0f), new Vector2(4.0f, 3.0f),
-            new Vector2(5.0f, 3.0f), new Vector2(6.0f, 3.0f), new Vector2(7.0f, 3.0f), new Vector2(8.0f, 3.0f),
-            new Vector2(9.0f, 3.0f), new Vector2(10.0f, 3.0f), new Vector2(0.0f, 2.0f), new Vector2(1.0f, 2.0f),
-            new Vector2(2.0f, 2.0f), new Vector2(3.0f, 2.0f), new Vector2(4.0f, 2.0f), new Vector2(5.0f, 2.0f),
-            new Vector2(6.0f, 2.0f), new Vector2(7.0f, 2.0f), new Vector2(8.0f, 2.0f), new Vector2(9.0f, 2.0f),
-            new Vector2(10.0f, 2.0f), new Vector2(0.0f, 1.0f), new Vector2(1.0f, 1.0f), new Vector2(2.0f, 1.0f),
-            new Vector2(3.0f, 1.0f), new Vector2(4.0f, 1.0f), new Vector2(5.0f, 1.0f), new Vector2(6.0f, 1.0f),
-            new Vector2(7.0f, 1.0f), new Vector2(8.0f, 1.0f), new Vector2(9.0f, 1.0f), new Vector2(10.0f, 1.0f),
-            new Vector2(0.0f, 0.0f), new Vector2(1.0f, 0.0f), new Vector2(2.0f, 0.0f), new Vector2(3.0f, 0.0f),
-            new Vector2(4.0f, 0.0f), new Vector2(5.0f, 0.0f), new Vector2(6.0f, 0.0f)};
 
 		public static float DegToRad(float deg)
 		{
