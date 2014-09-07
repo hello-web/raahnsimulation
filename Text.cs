@@ -4,12 +4,11 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	class Text : ClickableEntity
+	public class Text : ClickableEntity
 	{
 		private const int ASCII_OFFSET = 32;
 
 		protected string text;
-		private int length;
 		private float spacing;
 		private float charWidth;
 		private Utils.Vector2 charTexPos;
@@ -24,7 +23,6 @@ namespace RaahnSimulation
 	    public Text(Simulator sim, string str) : base(sim)
 	    {
 	        text = str;
-	        length = str.Length;
 	        spacing = 1.0f;
 	        texture = TextureManager.TextureType.CHAR_MAP;
             charTexPos = new Utils.Vector2(0.0f, 0.0f);
@@ -42,20 +40,13 @@ namespace RaahnSimulation
 	        base.Update(nEvent);
 	    }
 
-	    public void SetColor(float r, float g, float b)
-	    {
-	        color.x = r;
-	        color.y = g;
-	        color.z = b;
-	    }
-
 	    public override void Draw()
 	    {
 	        base.Draw();
 
 	        Gl.glColor3f(color.x, color.y, color.z);
 
-	        for (int i = 0; i < length; i++)
+	        for (int i = 0; i < text.Length; i++)
 	        {
 	            char currentChar = text[i];
 
@@ -108,7 +99,7 @@ namespace RaahnSimulation
 	        charWidth = cWidth;
 	        height = cHeight;
 	        spacing = charWidth * 0.8f;
-	        width = spacing * length;
+	        width = spacing * text.Length;
 	        if (fromCenter)
 	        {
 	            drawingVec.x = x - (width / 2.0f);
@@ -123,11 +114,37 @@ namespace RaahnSimulation
 
 	    public void SetText(string newText)
 	    {
-	        int newLength = 0;
 	        text = newText;
-	        newLength = text.Length;
-	        length = newLength;
-	        width = spacing * length;
+	        width = spacing * text.Length;
 	    }
+
+        public void SetColor(float r, float g, float b)
+        {
+            color.x = r;
+            color.y = g;
+            color.z = b;
+        }
+
+        public void AppendCharacter(char appendChar)
+        {
+            text += appendChar;
+        }
+
+        public void AppendText(string appendText)
+        {
+            text += appendText;
+        }
+
+        //Remove from the end of the string.
+        public void RemoveCharacter()
+        {
+            if (text.Length > 0)
+                text = text.Substring(0, text.Length - 1);
+        }
+
+        public string GetText()
+        {
+            return text;
+        }
 	}
 }

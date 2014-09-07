@@ -21,21 +21,21 @@ namespace RaahnSimulation
 	    public override void Update(Nullable<Event> nEvent)
 	    {
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Left))
-	            angle += CAR_ROTATE_SPEED * context.deltaTime;
+	            angle += CAR_ROTATE_SPEED * context.GetDeltaTime();
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Right))
-	            angle -= CAR_ROTATE_SPEED * context.deltaTime;
+	            angle -= CAR_ROTATE_SPEED * context.GetDeltaTime();
 
 	        base.Update(nEvent);
 
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
 	        {
-	            worldPos.x += velocity.x * context.deltaTime;
-	            worldPos.y += velocity.y * context.deltaTime;
+	            worldPos.x += velocity.x * context.GetDeltaTime();
+	            worldPos.y += velocity.y * context.GetDeltaTime();
 	        }
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Down))
 	        {
-	            worldPos.x -= velocity.x * context.deltaTime;
-	            worldPos.y -= velocity.y * context.deltaTime;
+	            worldPos.x -= velocity.x * context.GetDeltaTime();
+	            worldPos.y -= velocity.y * context.GetDeltaTime();
 	        }
 	    }
 

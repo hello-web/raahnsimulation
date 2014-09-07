@@ -4,7 +4,7 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	class ToggleText : Text
+	public class ToggleText : Text
 	{
 		private List<string> toggleStrings;
 		private int toggleIndex;

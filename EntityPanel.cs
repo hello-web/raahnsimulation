@@ -25,8 +25,14 @@ namespace RaahnSimulation
 	            road = new Road(context);
 				road.width = winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[i];
 				road.height = (float)context.GetWindowHeight() * RoadMap.ROAD_HEIGHT_PERCENTAGES[i];
+                road.aabb.UpdateSize(road.width, road.height);
 	            road.SetWindowAsDrawingVec(true);
-				road.windowPos.x = i * (winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[i] + PANEL_SPACING_PERCENTAGE * winWidth);
+
+                uint roadIndex = 0;
+                if (i > 0)
+                    roadIndex = (uint)(i - 1);
+
+				road.windowPos.x = i * (winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[roadIndex] + PANEL_SPACING_PERCENTAGE * winWidth);
 	            road.windowPos.y = 0.0f;
 				road.SetTexture((TextureManager.TextureType)(TextureManager.ROAD_INDEX_OFFSET + i));
 	            items.Add(road);
@@ -47,7 +53,7 @@ namespace RaahnSimulation
 	        for (int i = 0; i < items.Count; i++)
 	        {
 	            items[i].Update(sevent);
-	            intersections[i] = items[i].Intersects(cursor.bounds);
+	            intersections[i] = items[i].Intersects(cursor.aabb.GetBounds());
 	        }
 	    }
 
@@ -70,9 +76,9 @@ namespace RaahnSimulation
 	    {
 	        for (int i = 0; i < items.Count; i++)
 	        {
-	            if (x > items[i].bounds.left && x < items[i].bounds.right)
+                if (x > items[i].aabb.GetBounds().left && x < items[i].aabb.GetBounds().right)
 	            {
-	                if (y > items[i].bounds.bottom && y < items[i].bounds.top)
+                    if (y > items[i].aabb.GetBounds().bottom && y < items[i].aabb.GetBounds().top)
 	                    return true;
 	            }
 	        }
@@ -83,8 +89,8 @@ namespace RaahnSimulation
 	    {
 	        for (int i = 0; i < items.Count; i++)
 	        {
-	            if (!(items[i].bounds.left > bounds.right || items[i].bounds.right < bounds.left
-	            || items[i].bounds.bottom > bounds.top || items[i].bounds.top < bounds.bottom))
+                if (!(items[i].aabb.GetBounds().left > bounds.right || items[i].aabb.GetBounds().right < bounds.left
+                || items[i].aabb.GetBounds().bottom > bounds.top || items[i].aabb.GetBounds().top < bounds.bottom))
 	                return true;
 	        }
 	        return false;

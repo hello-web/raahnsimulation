@@ -51,7 +51,7 @@ namespace RaahnSimulation
 
 	        if (!Mouse.IsButtonPressed(Mouse.Button.Left))
 	            panning = false;
-	        if (Mouse.IsButtonPressed(Mouse.Button.Left) && !entityPanel.Intersects(cursor.bounds)
+	        if (Mouse.IsButtonPressed(Mouse.Button.Left) && !entityPanel.Intersects(cursor.aabb.GetBounds())
 	        && !mapBuilder.GetFloating() && context.GetWindowHasFocus())
 	            panning = true;
 	    }

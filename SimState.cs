@@ -3,7 +3,7 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	class SimState : State
+	public class SimState : State
 	{
 		private const float CAR_WIDTH_SCALE = 0.1f;
 		private const float CAR_HEIGHT_SCALE = 0.1f;
@@ -25,6 +25,7 @@ namespace RaahnSimulation
 	        raahnCar = new Car(context);
 	        raahnCar.width = (float)context.GetWindowWidth() * CAR_WIDTH_SCALE;
 	        raahnCar.height = (float)context.GetWindowHeight() * CAR_HEIGHT_SCALE;
+            raahnCar.aabb.UpdateSize(raahnCar.width, raahnCar.height);
 	        raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
 	        raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
 

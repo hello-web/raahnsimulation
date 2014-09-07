@@ -14,7 +14,7 @@ namespace RaahnSimulation
 		public Utils.Vector2 worldPos;
 		public Utils.Vector2 windowPos;
 		public Utils.Vector2 drawingVec;
-        public Utils.Rect bounds;
+        public Utils.AABB aabb;
 		protected Simulator context;
 		protected Utils.Vector2 velocity;
 		protected Utils.Vector2 speed;
@@ -33,12 +33,15 @@ namespace RaahnSimulation
 	        width = 1.0f;
 	        height = 1.0f;
 	        angle = 0.0f;
+
+            aabb = new Utils.AABB();
+            aabb.UpdateSize(width, height);
 	        windowPos = new Utils.Vector2(0.0f, 0.0f);
 	        worldPos = new Utils.Vector2(0.0f, 0.0f);
             velocity = new Utils.Vector2(0.0f, 0.0f);
             speed = new Utils.Vector2(0.0f, 0.0f);
             center = new Utils.Vector2(0.0f, 0.0f);
-            bounds = new Utils.Rect();
+
 	        //Default drawing vector is worldPos.
 	        drawingVec = worldPos;
 	        velocity.x = 0.0f;
@@ -55,15 +58,21 @@ namespace RaahnSimulation
 	    public virtual void Update(Nullable<Event> nEvent)
 	    {
 	        Camera cam = context.GetCamera();
-	        if (ReferenceEquals(drawingVec, windowPos))
-	            Entity.WindowToWorld(windowPos, worldPos, cam);
-	        else
-	            Entity.WorldToWindow(worldPos, windowPos, cam);
+            if (ReferenceEquals(drawingVec, windowPos))
+            {
+                Utils.Vector2 transform = Entity.WindowToWorld(windowPos, cam);
+                worldPos.x = transform.x;
+                worldPos.y = transform.y;
+            }
+            else
+            {
+                Utils.Vector2 transform = Entity.WorldToWindow(worldPos, cam);
+                windowPos.x = transform.x;
+                windowPos.y = transform.y;
+            }
 
-	        bounds.bottom = worldPos.y;
-	        bounds.top = worldPos.y + height;
-	        bounds.left = worldPos.x;
-	        bounds.right = worldPos.x + width;
+            aabb.Rotate(Utils.DegToRad(angle));
+            aabb.Translate(worldPos.x, worldPos.y);
 	        center.x = drawingVec.x + (width / 2.0f);
 	        center.y = drawingVec.y + (height / 2.0f);
 	        //OpenGL uses degress, standard math uses radians.
@@ -77,18 +86,16 @@ namespace RaahnSimulation
 	            context.GetTexMan().SetTexture(texture);
 	    }
 
-		public static void WorldToWindow(Utils.Vector2 world, Utils.Vector2 pos, Camera cam)
+		public static Utils.Vector2 WorldToWindow(Utils.Vector2 world, Camera cam)
 		{
 			Utils.Vector2 camPos = cam.GetPosition();
-            pos.x = world.x - camPos.x;
-            pos.y = world.y - camPos.y;
+            return new Utils.Vector2(world.x - camPos.x, world.y - camPos.y);
 		}
 
-		public static void WindowToWorld(Utils.Vector2 window, Utils.Vector2 pos, Camera cam)
+		public static Utils.Vector2 WindowToWorld(Utils.Vector2 window, Camera cam)
 		{
 			Utils.Vector2 camPos = cam.GetPosition();
-            pos.x = window.x + camPos.x;
-            pos.y = window.y + camPos.y;
+            return new Utils.Vector2(window.x + camPos.x, window.y + camPos.y);
 		}
 
 		public void SetTexture(TextureManager.TextureType t)
@@ -106,9 +113,9 @@ namespace RaahnSimulation
 
 		public virtual bool Intersects(float x, float y)
 		{
-			if (x > bounds.left && x < bounds.right)
+			if (x > aabb.GetBounds().left && x < aabb.GetBounds().right)
 			{
-				if (y > bounds.bottom && y < bounds.top)
+				if (y > aabb.GetBounds().bottom && y < aabb.GetBounds().top)
 					return true;
 				else
 					return false;
@@ -119,7 +126,7 @@ namespace RaahnSimulation
 
 		public virtual bool Intersects(Utils.Rect r)
 		{
-			if (r.left > bounds.right || r.right < bounds.left || r.bottom > bounds.top || r.top < bounds.bottom)
+			if (r.left > aabb.GetBounds().right || r.right < aabb.GetBounds().left || r.bottom > aabb.GetBounds().top || r.top < aabb.GetBounds().bottom)
 				return false;
 			else
 				return true;

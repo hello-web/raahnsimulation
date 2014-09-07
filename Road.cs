@@ -4,7 +4,7 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	class Road : Entity
+	public class Road : Entity
 	{
 	    public Road(Simulator sim) : base(sim)
 	    {

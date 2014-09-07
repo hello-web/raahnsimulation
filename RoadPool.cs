@@ -1,6 +1,6 @@
 namespace RaahnSimulation
 {
-	class RoadPool : EntityPool<Road>
+    public class RoadPool : EntityPool<Road>
 	{
 	    public RoadPool(Simulator sim, int size = DEFAULT_SIZE) : base(sim, size)
 	    {

@@ -21,22 +21,26 @@ namespace RaahnSimulation
 		private static Simulator simulator = new Simulator();
 
 		public bool running;
-		public float deltaTime;
+        public bool debugging;
 		public Queue<Event> eventQueue;
 		private bool headLess;
+        private bool terminalOpen;
 		private bool windowHasFocus;
 		private bool stateChangeRequested;
 		private uint windowWidth;
 		private uint windowHeight;
+        private uint vb;
+        private uint ib;
 		private int lastTime;
 		private int curTime;
+        private float deltaTime;
 		private List<State> states;
 		//Events are copied.
 		private Window simWindow;
 		private Clock clock;
-		private uint vb;
-		private uint ib;
+        private Keyboard.Key terminalKey;
 		private Camera camera;
+        private Terminal terminal;
 		private TextureManager texMan;
 		private State requestedState;
 		private StateChangeType changeType;
@@ -46,10 +50,15 @@ namespace RaahnSimulation
 	        lastTime = 0;
 	        curTime = 0;
 	        deltaTime = 0.0f;
+
 	        running = true;
 	        headLess = false;
+            terminalOpen = false;
+            debugging = false;
 	        windowHasFocus = false;
 	        stateChangeRequested = false;
+
+            terminalKey = Keyboard.Key.F1;
 	        requestedState = null;
 	        changeType = StateChangeType.NONE;
 			clock = new Clock();
@@ -110,11 +119,14 @@ namespace RaahnSimulation
 			simWindow.KeyReleased += new EventHandler<KeyEventArgs>(OnKeyReleased);
 			simWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
 			simWindow.MouseButtonReleased += new EventHandler<MouseButtonEventArgs>(OnMouseButtonReleased);
+            simWindow.TextEntered += new EventHandler<TextEventArgs>(OnTextEntered);
 			simWindow.GainedFocus += new EventHandler(OnGainnedFocus);
 			simWindow.LostFocus += new EventHandler(OnLostFocus);
 			simWindow.Closed += new EventHandler(OnClosed);
 
 			simWindow.SetActive();
+
+            terminal = new Terminal(this);
 
             string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
             if (float.Parse(glVersion, NumberStyles.Float, Utils.EN_US) < Utils.MIN_GL_VERSION)
@@ -198,10 +210,26 @@ namespace RaahnSimulation
 
 	    private void Update()
 	    {
-			if (eventQueue.Count > 0)
-				states[states.Count - 1].Update(eventQueue.Peek());
+            Nullable<Event> e = null;
+            if (eventQueue.Count > 0)
+            {
+                e = eventQueue.Peek();
+                if (e.Value.Type == EventType.KeyPressed && e.Value.Key.Code == terminalKey)
+                {
+                    if (terminalOpen)
+                        terminalOpen = false;
+                    else
+                        terminalOpen = true;
+                }
+
+                states[states.Count - 1].Update(e);
+            }
 			else 
 				states[states.Count - 1].Update(Utils.NULL_EVENT);
+
+            if (terminalOpen)
+                terminal.Update(e);
+
 	        if (eventQueue.Count > 0)
 	            eventQueue.Dequeue();
 	    }
@@ -227,6 +255,9 @@ namespace RaahnSimulation
 	        camera.Render();
 
 	        states[states.Count - 1].Draw();
+
+            if (terminalOpen)
+                terminal.Draw();
 
 	        simWindow.Display();
 	    }
@@ -367,6 +398,14 @@ namespace RaahnSimulation
 			SaveEvent(e);
 		}
 
+        static void OnTextEntered(Object sender, TextEventArgs tea)
+        {
+            Event e = new Event();
+            e.Type = EventType.TextEntered;
+            e.Text.Unicode = (char)tea.Unicode[0];
+            SaveEvent(e);
+        }
+
 		static void OnGainnedFocus(Object sender, EventArgs ea)
 		{
 			Event e = new Event();
@@ -402,6 +441,10 @@ namespace RaahnSimulation
 			s.eventQueue.Enqueue(e);
 		}
 
+        public float GetDeltaTime()
+        {
+            return deltaTime;
+        }
 		public Window GetWindow()
 		{
 			return simWindow;
@@ -414,6 +457,10 @@ namespace RaahnSimulation
 		{
 			return texMan;
 		}
+        public Clock GetClock()
+        {
+            return clock;
+        }
 		public uint GetWindowWidth()
 		{
 			return windowWidth;

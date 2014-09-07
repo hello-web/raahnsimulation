@@ -37,7 +37,9 @@ namespace RaahnSimulation
 
 	        Utils.Vector2 mousePosWindowf = new Utils.Vector2((float)mousePosWindowi.X, (float)(context.GetWindowHeight()) - (float)mousePosWindowi.Y);
             Utils.Vector2 mousePosWorldf = new Utils.Vector2(0.0f, 0.0f);
-            Entity.WindowToWorld(mousePosWindowf, mousePosWorldf, context.GetCamera());
+            Utils.Vector2 transform = Entity.WindowToWorld(mousePosWindowf, context.GetCamera());
+            mousePosWorldf.x = transform.x;
+            mousePosWorldf.y = transform.y;
 
 	        if (Intersects(mousePosWorldf.x, mousePosWorldf.y))
 	        {

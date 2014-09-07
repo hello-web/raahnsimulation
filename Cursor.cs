@@ -18,6 +18,7 @@ namespace RaahnSimulation
 	        texture = TextureManager.TextureType.CURSOR_0;
 	        width = (float)context.GetWindowWidth() * CURSOR_SIZE_PERCENTAGE_X;
 	        height = (float)context.GetWindowHeight() * CURSOR_SIZE_PERCENTAGE_Y;
+            aabb.UpdateSize(width, height);
 	        lastPos = new Utils.Vector2(0.0f, 0.0f);
 	        deltaPos = new Utils.Vector2(0.0f, 0.0f);
 			SetWindowAsDrawingVec (true);

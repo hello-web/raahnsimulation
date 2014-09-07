@@ -4,7 +4,7 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	class Graphic : Entity
+	public class Graphic : Entity
 	{
 		private const float DEFALUT_WIDTH_PERCENTAGE = 0.2f;
 		private const float DEFAULT_HEIGHT_PERCENTAGE = 0.2f;
@@ -14,6 +14,7 @@ namespace RaahnSimulation
 			texture = TextureManager.TextureType.DEFAULT;
 			width = DEFALUT_WIDTH_PERCENTAGE * (float)context.GetWindowWidth();
 			height = DEFAULT_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight();
+            aabb.UpdateSize(width, height);
 		}
 
 		public override void Update(Nullable<Event> nEvent)

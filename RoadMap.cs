@@ -7,7 +7,7 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	class RoadMap : Entity
+	public class RoadMap : Entity
 	{
 		public static readonly float[] ROAD_WIDTH_PERCENTAGES = { RWP0, RWP1 };
 		public static readonly float[] ROAD_HEIGHT_PERCENTAGES = { RHP0, RHP1 };
@@ -18,10 +18,10 @@ namespace RaahnSimulation
 		private const int STRAIGHT = 0;
 		private const int TURN = 1;
 
-		private const float RWP0 = 0.15f;
-		private const float RWP1 = 0.15f;
-		private const float RHP0 = 0.15f;
-		private const float RHP1 = 0.219f;
+        private const float RWP0 = 0.266666667f * 0.8f;
+        private const float RWP1 = 0.20625f * 0.8f;
+        private const float RHP0 = 0.205925926f * 0.8f;
+        private const float RHP1 = 0.293333333f * 0.8f;
 
 		private List<Road> roads;
 		private StreamReader fileStr;
