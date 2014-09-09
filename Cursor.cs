@@ -22,11 +22,10 @@ namespace RaahnSimulation
 	        lastPos = new Utils.Vector2(0.0f, 0.0f);
 	        deltaPos = new Utils.Vector2(0.0f, 0.0f);
 			SetWindowAsDrawingVec (true);
-            Nullable<Event> e = null;
-	        Update(e);
+	        Update();
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
+	    public override void Update()
 	    {
 	        Vector2i mousePos = Mouse.GetPosition(context.GetWindow());
 	        //Subtract width / 2 to center the mouse.
@@ -52,8 +51,13 @@ namespace RaahnSimulation
 	        lastPos.x = windowPos.x;
             lastPos.y = windowPos.y;
 
-	        base.Update(nEvent);
+	        base.Update();
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+        }
 
 	    public override void Draw()
 	    {

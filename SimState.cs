@@ -33,10 +33,15 @@ namespace RaahnSimulation
 	        entityList.Add(raahnCar);
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
+	    public override void Update()
 	    {
-	        base.Update(nEvent);
+	        base.Update();
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+        }
 
 	    public override void Draw()
 	    {

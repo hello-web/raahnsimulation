@@ -186,8 +186,6 @@ namespace RaahnSimulation
             }
         }
 
-        public static readonly Nullable<Event> NULL_EVENT = null;
-
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
 		public const int INDEX_COUNT = 6;
@@ -211,7 +209,7 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.3";
+		public const string VERSION_STRING = "Version 1.325";
         //My computer uses es-CO, but our files use points for decimals, hard code culture for now.
         public static readonly CultureInfo EN_US = CultureInfo.CreateSpecificCulture("en-US");
 

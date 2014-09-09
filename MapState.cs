@@ -39,7 +39,7 @@ namespace RaahnSimulation
 	        entityList.Add(cursor);
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
+	    public override void Update()
 	    {
 	        if (panning)
 	        {
@@ -47,7 +47,7 @@ namespace RaahnSimulation
 	            cam.IncrementPosition(new Utils.Vector2(-deltaPos.x, -deltaPos.y));
 	        }
 	        //Perform camera transformations before updating positions.
-	        base.Update(nEvent);
+	        base.Update();
 
 	        if (!Mouse.IsButtonPressed(Mouse.Button.Left))
 	            panning = false;
@@ -55,6 +55,11 @@ namespace RaahnSimulation
 	        && !mapBuilder.GetFloating() && context.GetWindowHasFocus())
 	            panning = true;
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+        }
 
 	    public override void Draw()
 	    {

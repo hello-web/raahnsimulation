@@ -204,17 +204,22 @@ namespace RaahnSimulation
 	    {
 	        while (running)
 	        {
-	            states[states.Count - 1].Update(Utils.NULL_EVENT);
+	            states[states.Count - 1].Update();
 	        }
 	    }
 
 	    private void Update()
 	    {
-            Nullable<Event> e = null;
-            if (eventQueue.Count > 0)
+            //Update with events.
+            Event e = new Event();
+            while (eventQueue.Count > 0)
             {
                 e = eventQueue.Peek();
-                if (e.Value.Type == EventType.KeyPressed && e.Value.Key.Code == terminalKey)
+                eventQueue.Dequeue();
+
+                states[states.Count - 1].UpdateEvent(e);
+
+                if (e.Type == EventType.KeyPressed && e.Key.Code == terminalKey)
                 {
                     if (terminalOpen)
                         terminalOpen = false;
@@ -222,16 +227,15 @@ namespace RaahnSimulation
                         terminalOpen = true;
                 }
 
-                states[states.Count - 1].Update(e);
+                if (terminalOpen)
+                    terminal.UpdateEvent(e);
             }
-			else 
-				states[states.Count - 1].Update(Utils.NULL_EVENT);
+
+            //Regular update per frame.
+            states[states.Count - 1].Update();
 
             if (terminalOpen)
-                terminal.Update(e);
-
-	        if (eventQueue.Count > 0)
-	            eventQueue.Dequeue();
+                terminal.Update();
 	    }
 
 	    private void RenderFrame()

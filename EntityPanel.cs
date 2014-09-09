@@ -48,14 +48,21 @@ namespace RaahnSimulation
 	        }
 	    }
 
-	    public override void Update(Nullable<Event> sevent)
+	    public override void Update()
 	    {
 	        for (int i = 0; i < items.Count; i++)
 	        {
-	            items[i].Update(sevent);
+	            items[i].Update();
 	            intersections[i] = items[i].Intersects(cursor.aabb.GetBounds());
 	        }
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+            for (int i = 0; i < items.Count; i++)
+                items[i].UpdateEvent(e);
+        }
 
 	    public override void Draw()
 	    {
@@ -63,10 +70,14 @@ namespace RaahnSimulation
 	        {
 	            if (intersections[i])
 	                Gl.glColor4f(0.0f, 0.0f, 1.0f, 0.85f);
+
 	            Gl.glPushMatrix();
+
 	            Gl.glLoadIdentity();
 	            items[i].Draw();
+
 	            Gl.glPopMatrix();
+
 	            if (intersections[i])
 	                Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	        }

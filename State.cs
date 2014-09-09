@@ -29,18 +29,26 @@ namespace RaahnSimulation
 	    beginning of the subclass's update method.
 	    Make sure to avoid event handling if
 	    currentEvent is null*/
-	    public virtual void Update(Nullable<Event> nEvent)
+	    public virtual void Update()
 	    {
 	        for (int i = 0; i < entityList.Count; i++)
-	            entityList[i].Update(nEvent);
+	            entityList[i].Update();
 	    }
+
+        public virtual void UpdateEvent(Event e)
+        {
+            for (int i = 0; i < entityList.Count; i++)
+                entityList[i].UpdateEvent(e);
+        }
 
 	    public virtual void Draw()
 	    {
 	        for (int i = 0; i < entityList.Count; i++)
 	        {
 	            Gl.glPushMatrix();
+
 	            entityList[i].Draw();
+
 	            Gl.glPopMatrix();
 	        }
 	    }

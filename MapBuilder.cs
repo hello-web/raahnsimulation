@@ -55,7 +55,7 @@ namespace RaahnSimulation
 
             for (uint i = 1; i < PANEL_OPTION_COUNT; i++)
 	            panelOption.AddString(PANEL_OPTIONS[i]);
-	        panelOption.Update(Utils.NULL_EVENT);
+	        panelOption.Update();
 
 	        flag = new Graphic(context);
 	        flag.SetTexture(TextureManager.TextureType.FLAG);
@@ -80,7 +80,7 @@ namespace RaahnSimulation
 	        }
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
+	    public override void Update()
 	    {
 	        if (entityFloating != null)
 	        {
@@ -123,36 +123,46 @@ namespace RaahnSimulation
 	                }
 	            }
 	        }
-            //If there is an event, process it.
-	        if (nEvent != null)
-	        {
-	            if (nEvent.Value.Type == EventType.KeyPressed && nEvent.Value.Key.Code == Keyboard.Key.Space)
-	            {
-	                if (flagVisible)
-	                    flagVisible = false;
-	                else
-	                {
-	                    Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
-	                    float x = (float)(mousePosi.X) - (cursor.width / 2.0f);
-	                    float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.height;
-	                    Utils.Vector2 mousePosf = new Utils.Vector2(x, y);
-	                    Utils.Vector2 transform = Entity.WindowToWorld(mousePosf, cam);
-                        flag.worldPos.x = transform.x;
-                        flag.worldPos.y = transform.y;
-	                    flagVisible = true;
-	                }
-	            }
-	        }
 
             for (int x = 0; x < entities.Count; x++)
             {
                 for (int y = 0; y < entities[x].Count; y++)
-                    entities[x][y].Update(nEvent);
+                    entities[x][y].Update();
             }
-	        flag.Update(nEvent);
-	        panelOption.Update(nEvent);
-	        base.Update(nEvent);
+	        flag.Update();
+	        panelOption.Update();
+	        base.Update();
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+
+            if (e.Type == EventType.KeyPressed && e.Key.Code == Keyboard.Key.Space)
+            {
+                if (flagVisible)
+                    flagVisible = false;
+                else
+                {
+                    Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
+                    float x = (float)(mousePosi.X) - (cursor.width / 2.0f);
+                    float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.height;
+                    Utils.Vector2 mousePosf = new Utils.Vector2(x, y);
+                    Utils.Vector2 transform = Entity.WindowToWorld(mousePosf, cam);
+                    flag.worldPos.x = transform.x;
+                    flag.worldPos.y = transform.y;
+                    flagVisible = true;
+                }
+            }
+            //Update entities with the event.
+            for (int x = 0; x < entities.Count; x++)
+            {
+                for (int y = 0; y < entities[x].Count; y++)
+                    entities[x][y].UpdateEvent(e);
+            }
+            flag.UpdateEvent(e);
+            panelOption.UpdateEvent(e);
+        }
 
 	    public override void Draw()
 	    {
@@ -216,7 +226,7 @@ namespace RaahnSimulation
         {
             entityFloating.worldPos.x = mouseWorldPos.x;
             entityFloating.worldPos.y = mouseWorldPos.y;
-            entityFloating.Update(Utils.NULL_EVENT);
+            entityFloating.Update();
 
             int boundsUsageX = 0;
             int boundsUsageY = 0;
@@ -326,9 +336,9 @@ namespace RaahnSimulation
         private void UpdateAngle()
         {
             if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
-                floatingExactAngle += ENTITY_ROTATE_SPEED * context.GetDeltaTime();
+                floatingExactAngle += ROTATE_SPEED * context.GetDeltaTime();
             if (Keyboard.IsKeyPressed(Keyboard.Key.Down))
-                floatingExactAngle -= ENTITY_ROTATE_SPEED * context.GetDeltaTime();
+                floatingExactAngle -= ROTATE_SPEED * context.GetDeltaTime();
 
             if (floatingExactAngle >= 360.0f)
                 floatingExactAngle -= 360.0f;

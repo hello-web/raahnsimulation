@@ -134,11 +134,18 @@ namespace RaahnSimulation
 	        return true;
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
+	    public override void Update()
 	    {
 	        for (int i = 0; i < roads.Count; i++)
-	            roads[i].Update(nEvent);
+	            roads[i].Update();
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+            for (int i = 0; i < roads.Count; i++)
+                roads[i].UpdateEvent(e);
+        }
 
 	    public override void Draw()
 	    {

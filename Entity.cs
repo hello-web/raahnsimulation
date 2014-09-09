@@ -6,7 +6,7 @@ namespace RaahnSimulation
 {
 	public abstract class Entity
 	{
-		public const float ENTITY_ROTATE_SPEED = 90.0f;
+		public const float ROTATE_SPEED = 90.0f;
 
 		public float width;
 		public float height;
@@ -55,10 +55,10 @@ namespace RaahnSimulation
 
 	    }
 
-	    public virtual void Update(Nullable<Event> nEvent)
+	    public virtual void Update()
 	    {
 	        Camera cam = context.GetCamera();
-            if (ReferenceEquals(drawingVec, windowPos))
+            if (drawingVec == windowPos)
             {
                 Utils.Vector2 transform = Entity.WindowToWorld(windowPos, cam);
                 worldPos.x = transform.x;
@@ -79,6 +79,11 @@ namespace RaahnSimulation
 	        velocity.x = (float)Math.Cos(Utils.DegToRad(angle)) * speed.x;
 	        velocity.y = (float)Math.Sin(Utils.DegToRad(angle)) * speed.y;
 	    }
+
+        public virtual void UpdateEvent(Event e)
+        {
+            Update();
+        }
 
 	    public virtual void Draw()
 	    {

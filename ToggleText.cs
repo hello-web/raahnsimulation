@@ -16,12 +16,18 @@ namespace RaahnSimulation
 	        toggleStrings.Add(defaultMsg);
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
+	    public override void Update()
 	    {
-	        base.Update(nEvent);
-	        if (clicked)
-	            Toggle();
+	        base.Update();
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+
+            if (clicked)
+                Toggle();
+        }
 
 	    public void AddString(string newString)
 	    {

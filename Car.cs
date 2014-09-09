@@ -18,14 +18,14 @@ namespace RaahnSimulation
 	        speed.y = (float)context.GetWindowHeight() * CAR_SPEED_Y_PERCENTAGE;
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
+	    public override void Update()
 	    {
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Left))
 	            angle += CAR_ROTATE_SPEED * context.GetDeltaTime();
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Right))
 	            angle -= CAR_ROTATE_SPEED * context.GetDeltaTime();
 
-	        base.Update(nEvent);
+	        base.Update();
 
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
 	        {
@@ -38,6 +38,11 @@ namespace RaahnSimulation
 	            worldPos.y -= velocity.y * context.GetDeltaTime();
 	        }
 	    }
+
+        public override void UpdateEvent(Event e)
+        {
+            base.UpdateEvent(e);
+        }
 
 		public override void Draw()
 	    {

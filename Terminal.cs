@@ -53,9 +53,10 @@ namespace RaahnSimulation
             lastTime = 0.0f;
             currentTime = 0.0f;
             backspaceDelay = BACKSPACE_DELAY;
+            command = Command.NO_COMMAND;
 
             initialText.SetCharBounds(0.0f, (float)context.GetWindowHeight() / 2.0f, charWidth, charHeight, false);
-            initialText.Update(null);
+            initialText.Update();
 
             currentTextPos.x = initialText.windowPos.x + initialText.width;
             currentTextPos.y = initialText.windowPos.y;
@@ -68,9 +69,9 @@ namespace RaahnSimulation
             lines.Enqueue(firstText);
         }
 
-        public void Update(Nullable<Event> sevent)
+        public void Update()
         {
-            initialText.Update(sevent);
+            initialText.Update();
 
             if (Keyboard.IsKeyPressed(Keyboard.Key.BackSpace))
             {
@@ -83,18 +84,20 @@ namespace RaahnSimulation
             }
             else
                 lastTime = currentTime;
+        }
 
-            if (sevent == null)
-                return;
+        public void UpdateEvent(Event e)
+        {
+            initialText.UpdateEvent(e);
 
-            if (sevent.Value.Type == EventType.TextEntered)
+            if (e.Type == EventType.TextEntered)
             {
                 //Check to make sure we can represent the character.
-                if (sevent.Value.Text.Unicode >= 32 && sevent.Value.Text.Unicode <= 126)
-                    lines.ToArray()[lines.Count - 1].AppendCharacter((char)sevent.Value.Text.Unicode);
+                if (e.Text.Unicode >= 32 && e.Text.Unicode <= 126)
+                    lines.ToArray()[lines.Count - 1].AppendCharacter((char)e.Text.Unicode);
             }
 
-            if (sevent.Value.Type == EventType.KeyPressed && sevent.Value.Key.Code == Keyboard.Key.Return)
+            if (e.Type == EventType.KeyPressed && e.Key.Code == Keyboard.Key.Return)
             {
                 Text currentText = null;
                 for (uint i = 0; i < lines.Count; i++)
@@ -124,7 +127,7 @@ namespace RaahnSimulation
                     lines.Enqueue(newText);
                 }
 
-                InterpretCommand(commandString);
+                ProcessCommand(commandString);
             }
         }
 
@@ -155,7 +158,7 @@ namespace RaahnSimulation
             Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
-        private void InterpretCommand(string commandString)
+        private void ProcessCommand(string commandString)
         {
             //Enumerate the command.
             for (uint i = 0; i < COMMAND_COUNT; i++)

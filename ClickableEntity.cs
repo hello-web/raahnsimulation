@@ -24,14 +24,17 @@ namespace RaahnSimulation
 	        hasListener = false;
 	    }
 
-	    public override void Update(Nullable<Event> nEvent)
-	    {
-	        base.Update(nEvent);
-
+        public override void Update()
+        {
+            base.Update();
+            /*Clicked should only be used by other
+            objects when updating with events.*/
             clicked = false;
+        }
 
-	        if (nEvent == null)
-	            return;
+	    public override void UpdateEvent(Event e)
+	    {
+            base.UpdateEvent(e);
 
 	        Vector2i mousePosWindowi = Mouse.GetPosition(context.GetWindow());
 
@@ -45,14 +48,14 @@ namespace RaahnSimulation
 	        {
 	            hovering = true;
 
-	            if (nEvent.Value.Type == EventType.MouseButtonPressed && nEvent.Value.MouseButton.Button == Mouse.Button.Left && !pressed)
+	            if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left && !pressed)
 	            {
 	                clicked = true;
 	                if (hasListener)
 	                    OnClick(context);
 	            }
 
-	            if (nEvent.Value.Type == EventType.MouseButtonPressed && nEvent.Value.MouseButton.Button == Mouse.Button.Left)
+	            if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
 	                pressed = true;
 	        }
 	        else
@@ -65,7 +68,7 @@ namespace RaahnSimulation
 	        write of size 1 will occur, fix this
 	        with a state request function which
 	        changes the state after all updating.*/
-            if (nEvent.Value.Type == EventType.MouseButtonReleased && nEvent.Value.MouseButton.Button == Mouse.Button.Left)
+            if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
 	            pressed = false;
 	    }
 
