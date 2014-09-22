@@ -51,7 +51,7 @@ namespace RaahnSimulation
 	        panelOption = new ToggleText(context, PANEL_OPTIONS[0]);
 	        panelOption.SetWindowAsDrawingVec(true);
 	        panelOption.SetCharBounds(0.0f, RoadMap.ROAD_HEIGHT_PERCENTAGES[0] * (float)context.GetWindowHeight(), charWidth, charHeight, false);
-            panelOption.aabb.UpdateSize(panelOption.width, panelOption.height);
+            panelOption.aabb.SetSize(panelOption.width, panelOption.height);
 
             for (uint i = 1; i < PANEL_OPTION_COUNT; i++)
 	            panelOption.AddString(PANEL_OPTIONS[i]);
@@ -107,11 +107,16 @@ namespace RaahnSimulation
 	                {
                         for (int y = entities[x].Count - 1; y >= 0; y--)
                         {
-                            if (entities[x][y].Intersects(cursor.aabb.GetBounds()) && Mouse.IsButtonPressed(Mouse.Button.Left))
+                            //The cursor's bounds are in window coordinates, we need world coordinates.
+                            Utils.Rect comparisonRect;
+                            comparisonRect = Entity.WindowToWorld(cursor.aabb.GetBounds(), cam);
+
+                            if (entities[x][y].Intersects(comparisonRect) && Mouse.IsButtonPressed(Mouse.Button.Left))
                             {
                                 entityFloating = entities[x][y];
                                 dist.x = cursor.worldPos.x - entities[x][y].worldPos.x;
                                 dist.y = cursor.worldPos.y - entities[x][y].worldPos.y;
+                                floatingExactAngle = entityFloating.angle;
                                 UpdateEntityFloating();
                                 shouldBreak = true;
                             }
@@ -174,7 +179,9 @@ namespace RaahnSimulation
                         Gl.glColor4f(0.0f, 0.0f, 1.0f, 0.85f);
 
                     Gl.glPushMatrix();
+
                     entities[x][y].Draw();
+
                     Gl.glPopMatrix();
 
                     if (entities[x][y] == entityFloating)
@@ -184,14 +191,55 @@ namespace RaahnSimulation
 	        if (flagVisible)
 	        {
 	            Gl.glPushMatrix();
+
 	            flag.Draw();
+
 	            Gl.glPopMatrix();
 	        }
 	        Gl.glPushMatrix();
+
 	        Gl.glLoadIdentity();
+
 	        panelOption.Draw();
+
 	        Gl.glPopMatrix();
 	    }
+
+        public override void DebugDraw()
+        {
+            for (int x = 0; x < entities.Count; x++)
+            {
+                for (int y = 0; y < entities[x].Count; y++)
+                {
+                    Gl.glPushMatrix();
+
+                    // Disable camera transformation.
+                    if (entities[x][y].drawingVec == entities[x][y].windowPos)
+                        Gl.glLoadIdentity();
+
+                    entities[x][y].DebugDraw();
+
+                    Gl.glPopMatrix();
+                }
+            }
+            if (flagVisible)
+            {
+                Gl.glPushMatrix();
+
+                flag.DebugDraw();
+
+                Gl.glPopMatrix();
+            }
+
+            Gl.glPushMatrix();
+
+            //panelOption's drawing vector should always be windowPos, disable camera transformations.
+            Gl.glLoadIdentity();
+
+            panelOption.DebugDraw();
+
+            Gl.glPopMatrix();
+        }
 
         private void AddEntity(int itemIndex)
         {
@@ -201,7 +249,7 @@ namespace RaahnSimulation
                 newRoad.SetTexture((TextureManager.TextureType)(itemIndex + TextureManager.ROAD_INDEX_OFFSET));
                 newRoad.width = RoadMap.ROAD_WIDTH_PERCENTAGES[itemIndex] * (float)context.GetWindowWidth();
                 newRoad.height = RoadMap.ROAD_HEIGHT_PERCENTAGES[itemIndex] * (float)context.GetWindowHeight();
-                newRoad.aabb.UpdateSize(newRoad.width, newRoad.height);
+                newRoad.aabb.SetSize(newRoad.width, newRoad.height);
                 entities[0].Add(newRoad);
                 entityFloating = newRoad;
                 entitySnappingDist.x = newRoad.width / 4.0f;
@@ -232,6 +280,7 @@ namespace RaahnSimulation
             int boundsUsageY = 0;
             int[] closetEntityIndexX = { 0, 0 };
             int[] closetEntityIndexY = { 0, 0 };
+
             Utils.Vector2 shortestXYDist = new Utils.Vector2(entitySnappingDist.x, entitySnappingDist.y);
             List<float> xDistances = new List<float>();
             List<float> yDistances = new List<float>();

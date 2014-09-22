@@ -99,6 +99,11 @@ namespace RaahnSimulation
 	        Gl.glMatrixMode(Gl.GL_MODELVIEW);
 	    }
 
+        public override void DebugDraw()
+        {
+            base.DebugDraw();
+        }
+
 	    public void SetCharBounds(float x, float y, float cWidth, float cHeight, bool fromCenter)
 	    {
 	        charWidth = cWidth;
@@ -121,6 +126,7 @@ namespace RaahnSimulation
 	    {
 	        text = newText;
 	        width = spacing * text.Length;
+            aabb.SetSize(width, height);
 	    }
 
         public void SetColor(float r, float g, float b)

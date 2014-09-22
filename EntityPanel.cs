@@ -25,7 +25,7 @@ namespace RaahnSimulation
 	            road = new Road(context);
 				road.width = winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[i];
 				road.height = (float)context.GetWindowHeight() * RoadMap.ROAD_HEIGHT_PERCENTAGES[i];
-                road.aabb.UpdateSize(road.width, road.height);
+                road.aabb.SetSize(road.width, road.height);
 	            road.SetWindowAsDrawingVec(true);
 
                 uint roadIndex = 0;
@@ -73,7 +73,9 @@ namespace RaahnSimulation
 
 	            Gl.glPushMatrix();
 
+                // Disable camera transformation.
 	            Gl.glLoadIdentity();
+
 	            items[i].Draw();
 
 	            Gl.glPopMatrix();
@@ -82,6 +84,21 @@ namespace RaahnSimulation
 	                Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	        }
 	    }
+
+        public override void DebugDraw()
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                Gl.glPushMatrix();
+
+                // Disable camera transformation.
+                Gl.glLoadIdentity();
+
+                items[i].DebugDraw();
+
+                Gl.glPopMatrix();
+            }
+        }
 
 	    public override bool Intersects(float x, float y)
 	    {

@@ -18,10 +18,10 @@ namespace RaahnSimulation
 	        texture = TextureManager.TextureType.CURSOR_0;
 	        width = (float)context.GetWindowWidth() * CURSOR_SIZE_PERCENTAGE_X;
 	        height = (float)context.GetWindowHeight() * CURSOR_SIZE_PERCENTAGE_Y;
-            aabb.UpdateSize(width, height);
+            aabb.SetSize(width, height);
 	        lastPos = new Utils.Vector2(0.0f, 0.0f);
 	        deltaPos = new Utils.Vector2(0.0f, 0.0f);
-			SetWindowAsDrawingVec (true);
+			SetWindowAsDrawingVec(true);
 	        Update();
 	    }
 
@@ -71,6 +71,11 @@ namespace RaahnSimulation
 	        Gl.glScalef(width, height, Utils.DISCARD_Z_SCALE);
 	        Gl.glDrawElements(Gl.GL_TRIANGLES, Utils.INDEX_COUNT, Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 	    }
+
+        public override void DebugDraw()
+        {
+            base.DebugDraw();
+        }
 
 		public Utils.Vector2 GetDeltaPosition()
 		{

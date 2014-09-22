@@ -29,24 +29,24 @@ namespace RaahnSimulation
 	        title = new Text(context, Utils.WINDOW_TITLE);
 	        title.SetWindowAsDrawingVec(true);
 	        title.SetCharBounds((float)context.GetWindowWidth() / 2.0f, (float)context.GetWindowHeight() - charHeight, charWidth, charHeight, true);
-            title.aabb.UpdateSize(title.width, title.height);
+            title.aabb.SetSize(title.width, title.height);
 
 	        startSim = new Text(context, Utils.START_SIM);
 	        startSim.SetWindowAsDrawingVec(true);
 	        startSim.SetCharBounds((float)context.GetWindowWidth() / 2.0f, title.windowPos.y - 2.0f * charHeight, charWidth, charHeight, true);
             startSim.SetOnClickListener(startSimOnClick);
-            startSim.aabb.UpdateSize(startSim.width, startSim.height);
+            startSim.aabb.SetSize(startSim.width, startSim.height);
 
 	        startMap = new Text(context, Utils.START_MAP);
 	        startMap.SetWindowAsDrawingVec(true);
 	        startMap.SetCharBounds((float)context.GetWindowWidth() / 2.0f, startSim.windowPos.y - 2.0f * charHeight, charWidth, charHeight, true);
 	        startMap.SetOnClickListener(startMapOnClick);
-            startMap.aabb.UpdateSize(startMap.width, startMap.height);
+            startMap.aabb.SetSize(startMap.width, startMap.height);
 
 	        version = new Text(context, Utils.VERSION_STRING);
 	        version.SetWindowAsDrawingVec(true);
 	        version.SetCharBounds(0.0f, 0.0f, charWidth, charHeight, false);
-            version.aabb.UpdateSize(version.width, version.height);
+            version.aabb.SetSize(version.width, version.height);
 
 	        entityList.Add(title);
 	        entityList.Add(startSim);

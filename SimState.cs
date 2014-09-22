@@ -25,7 +25,7 @@ namespace RaahnSimulation
 	        raahnCar = new Car(context);
 	        raahnCar.width = (float)context.GetWindowWidth() * CAR_WIDTH_SCALE;
 	        raahnCar.height = (float)context.GetWindowHeight() * CAR_HEIGHT_SCALE;
-            raahnCar.aabb.UpdateSize(raahnCar.width, raahnCar.height);
+            raahnCar.aabb.SetSize(raahnCar.width, raahnCar.height);
 	        raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
 	        raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
 

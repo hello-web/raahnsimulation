@@ -152,9 +152,27 @@ namespace RaahnSimulation
 	        for (int i = 0; i < roads.Count; i++)
 	        {
 	            Gl.glPushMatrix();
+
 	            roads[i].Draw();
+
 	            Gl.glPopMatrix();
 	        }
 	    }
+
+        public override void DebugDraw()
+        {
+            for (int i = 0; i < roads.Count; i++)
+            {
+                Gl.glPushMatrix();
+
+                // Disable camera transformation.
+                if (roads[i].drawingVec == roads[i].windowPos)
+                    Gl.glLoadIdentity();
+
+                roads[i].DebugDraw();
+
+                Gl.glPopMatrix();
+            }
+        }
 	}
 }

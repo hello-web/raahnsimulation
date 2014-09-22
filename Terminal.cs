@@ -7,7 +7,7 @@ namespace RaahnSimulation
 {
     public class Terminal
     {
-        private const uint COMMAND_COUNT = 1;
+        private const uint COMMAND_COUNT = 2;
 
         private const float TEXT_WIDTH_PERCENTAGE = 0.025f;
         private const float TEXT_HEIGHT_PERCENTAGE = 0.05f;
@@ -17,13 +17,14 @@ namespace RaahnSimulation
 
         private readonly string[] COMMANDS =
         {
-            "debug"
+            "exit", "debug"
         };
 
         private enum Command
         {
             NO_COMMAND = -1,
-            DEBUG = 0
+            EXIT = 0,
+            DEBUG = 1
         };
 
         private float transparency;
@@ -138,6 +139,8 @@ namespace RaahnSimulation
 
             Gl.glColor4f(0.0f, 0.0f, 0.0f, transparency);
 
+            Gl.glLoadIdentity();
+
             Gl.glPushMatrix();
 
             Gl.glTranslatef(0.0f, (float)context.GetWindowHeight() / 2.0f, Utils.DISCARD_Z_POS);
@@ -174,6 +177,11 @@ namespace RaahnSimulation
             {
                 case Command.NO_COMMAND:
                 {
+                    break;
+                }
+                case Command.EXIT:
+                {
+                    context.running = false;
                     break;
                 }
                 case Command.DEBUG:

@@ -38,13 +38,14 @@ namespace RaahnSimulation
 
 	        Vector2i mousePosWindowi = Mouse.GetPosition(context.GetWindow());
 
+            Utils.Vector2 comparisonVec;
 	        Utils.Vector2 mousePosWindowf = new Utils.Vector2((float)mousePosWindowi.X, (float)(context.GetWindowHeight()) - (float)mousePosWindowi.Y);
-            Utils.Vector2 mousePosWorldf = new Utils.Vector2(0.0f, 0.0f);
-            Utils.Vector2 transform = Entity.WindowToWorld(mousePosWindowf, context.GetCamera());
-            mousePosWorldf.x = transform.x;
-            mousePosWorldf.y = transform.y;
+            if (drawingVec == windowPos)
+                comparisonVec = mousePosWindowf;
+            else
+                comparisonVec = Entity.WindowToWorld(mousePosWindowf, context.GetCamera());
 
-	        if (Intersects(mousePosWorldf.x, mousePosWorldf.y))
+	        if (Intersects(comparisonVec.x, comparisonVec.y))
 	        {
 	            hovering = true;
 

@@ -50,6 +50,27 @@ namespace RaahnSimulation
 	            entityList[i].Draw();
 
 	            Gl.glPopMatrix();
+
+                if (context.debugging)
+                {
+                    Gl.glPushMatrix();
+
+                    Gl.glDisable(Gl.GL_TEXTURE_2D);
+
+                    Gl.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+
+                    // Disable camera transformation.
+                    if (entityList[i].drawingVec == entityList[i].windowPos)
+                        Gl.glLoadIdentity();
+
+                    entityList[i].DebugDraw();
+
+                    Gl.glPopMatrix();
+
+                    Gl.glEnable(Gl.GL_TEXTURE_2D);
+
+                    Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                }
 	        }
 	    }
 

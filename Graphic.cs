@@ -14,7 +14,7 @@ namespace RaahnSimulation
 			texture = TextureManager.TextureType.DEFAULT;
 			width = DEFALUT_WIDTH_PERCENTAGE * (float)context.GetWindowWidth();
 			height = DEFAULT_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight();
-            aabb.UpdateSize(width, height);
+            aabb.SetSize(width, height);
 		}
 
 		public override void Update()
@@ -35,5 +35,10 @@ namespace RaahnSimulation
 			Gl.glScalef(width, height, Utils.DISCARD_Z_SCALE);
 			Gl.glDrawElements(Gl.GL_TRIANGLES, Utils.INDEX_COUNT, Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 		}
+
+        public override void DebugDraw()
+        {
+            base.DebugDraw();
+        }
 	}
 }

@@ -14,12 +14,14 @@ namespace RaahnSimulation
 		public Utils.Vector2 worldPos;
 		public Utils.Vector2 windowPos;
 		public Utils.Vector2 drawingVec;
-        public Utils.AABB aabb;
+        public AABB aabb;
 		protected Simulator context;
 		protected Utils.Vector2 velocity;
 		protected Utils.Vector2 speed;
 		protected TextureManager.TextureType texture;
+        private float previousAngle;
 		private Utils.Vector2 center;
+        private Utils.Vector2 previousPos;
 
 		protected Entity()
 		{
@@ -33,14 +35,16 @@ namespace RaahnSimulation
 	        width = 1.0f;
 	        height = 1.0f;
 	        angle = 0.0f;
+            previousAngle = 0.0f;
 
-            aabb = new Utils.AABB();
-            aabb.UpdateSize(width, height);
+            aabb = new AABB();
+            aabb.SetSize(width, height);
 	        windowPos = new Utils.Vector2(0.0f, 0.0f);
 	        worldPos = new Utils.Vector2(0.0f, 0.0f);
             velocity = new Utils.Vector2(0.0f, 0.0f);
             speed = new Utils.Vector2(0.0f, 0.0f);
             center = new Utils.Vector2(0.0f, 0.0f);
+            previousPos = new Utils.Vector2(0.0f, 0.0f);
 
 	        //Default drawing vector is worldPos.
 	        drawingVec = worldPos;
@@ -71,8 +75,24 @@ namespace RaahnSimulation
                 windowPos.y = transform.y;
             }
 
-            aabb.Rotate(Utils.DegToRad(angle));
-            aabb.Translate(worldPos.x, worldPos.y);
+            float deltaAngle = angle - previousAngle;
+
+            if (deltaAngle != 0.0f)
+            {
+                aabb.Rotate(deltaAngle);
+                previousAngle = angle;
+            }
+
+            float deltaX = drawingVec.x - previousPos.x;
+            float deltaY = drawingVec.y - previousPos.y;
+
+            if (deltaX != 0.0f || deltaY != 0.0f)
+            {
+                aabb.Translate(deltaX, deltaY);
+                previousPos.x = drawingVec.x;
+                previousPos.y = drawingVec.y;
+            }
+
 	        center.x = drawingVec.x + (width / 2.0f);
 	        center.y = drawingVec.y + (height / 2.0f);
 	        //OpenGL uses degress, standard math uses radians.
@@ -102,6 +122,34 @@ namespace RaahnSimulation
 			Utils.Vector2 camPos = cam.GetPosition();
             return new Utils.Vector2(window.x + camPos.x, window.y + camPos.y);
 		}
+
+        //Only transforms bounding properties.
+        public static Utils.Rect WorldToWindow(Utils.Rect world, Camera cam)
+        {
+            Utils.Vector2 camPos = cam.GetPosition();
+            Utils.Rect transform = new Utils.Rect();
+
+            transform.left = world.left - camPos.x;
+            transform.right = world.right - camPos.x;
+            transform.bottom = world.bottom - camPos.y;
+            transform.top = world.top - camPos.y;
+
+            return transform;
+        }
+
+        //Only transforms bounding properties.
+        public static Utils.Rect WindowToWorld(Utils.Rect window, Camera cam)
+        {
+            Utils.Vector2 camPos = cam.GetPosition();
+            Utils.Rect transform = new Utils.Rect();
+
+            transform.left = window.left + camPos.x;
+            transform.right = window.right + camPos.x;
+            transform.bottom = window.bottom + camPos.y;
+            transform.top = window.top + camPos.y;
+
+            return transform;
+        }
 
 		public void SetTexture(TextureManager.TextureType t)
 		{
@@ -137,11 +185,27 @@ namespace RaahnSimulation
 				return true;
 		}
 
+        public virtual void DebugDraw()
+        {
+            //Handle all generic debug drawing here.
+            DrawAABB();
+        }
+
 	    protected void RotateAroundCenter()
 	    {
 	        Gl.glTranslatef(center.x, center.y, Utils.DISCARD_Z_POS);
 	        Gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
 	        Gl.glTranslatef(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 	    }
+
+        private void DrawAABB()
+        {
+            Utils.Rect bounds = aabb.GetBounds();
+
+            Gl.glTranslatef(bounds.left, bounds.bottom, Utils.DISCARD_Z_POS);
+            Gl.glScalef(bounds.width, bounds.height, Utils.DISCARD_Z_SCALE);
+
+            Gl.glDrawElements(Gl.GL_TRIANGLES, Utils.INDEX_COUNT, Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+        }
 	}
 }
