@@ -332,50 +332,70 @@ namespace RaahnSimulation
 
             if (shortestXYDist.x < entitySnappingDist.x && shortestXYDist.y < entitySnappingDist.y)
             {
+                Utils.Rect floatingBounds = entityFloating.aabb.GetBounds();
+                Utils.Rect iteratingEntityBounds = entities[closetEntityIndexX[0]][closetEntityIndexX[1]].aabb.GetBounds();
+                float distanceToBound = 0.0f;
+
                 switch (boundsUsageX)
                 {
+                    //Snap left aabb to left aabb.
                     case 0:
                     {
-                        entityFloating.worldPos.x = entities[closetEntityIndexX[0]][closetEntityIndexX[1]].aabb.GetBounds().left;
+                        distanceToBound = entityFloating.worldPos.x - floatingBounds.left;
+                        entityFloating.worldPos.x = iteratingEntityBounds.left + distanceToBound;
                         break;
                     }
+                    //Snap left aabb to right aabb.
                     case 1:
                     {
-                        entityFloating.worldPos.x = entities[closetEntityIndexX[0]][closetEntityIndexX[1]].aabb.GetBounds().right;
+                        distanceToBound = entityFloating.worldPos.x - floatingBounds.left;
+                        entityFloating.worldPos.x = iteratingEntityBounds.right + distanceToBound;
                         break;
                     }
+                    //Snap right aabb to left aabb.
                     case 2:
                     {
-                        entityFloating.worldPos.x = entities[closetEntityIndexX[0]][closetEntityIndexX[1]].aabb.GetBounds().left - entityFloating.width;
+                        distanceToBound = floatingBounds.right - entityFloating.worldPos.x;
+                        entityFloating.worldPos.x = iteratingEntityBounds.left - distanceToBound;
                         break;
                     }
+                    //Snap right aabb to right aabb.
                     case 3:
                     {
-                        entityFloating.worldPos.x = entities[closetEntityIndexX[0]][closetEntityIndexX[1]].aabb.GetBounds().right - entityFloating.width;
+                        distanceToBound = floatingBounds.right - entityFloating.worldPos.x;
+                        entityFloating.worldPos.x = iteratingEntityBounds.right - distanceToBound;
                         break;
                     }
                 }
 
                 switch (boundsUsageY)
                 {
+                    //Snap bottom aabb to left bottom.
                     case 0:
                     {
-                        entityFloating.worldPos.y = entities[closetEntityIndexY[0]][closetEntityIndexY[1]].aabb.GetBounds().bottom;
+                        distanceToBound = entityFloating.worldPos.y - floatingBounds.bottom;
+                        entityFloating.worldPos.y = iteratingEntityBounds.bottom + distanceToBound;
                         break;
                     }
+                    //Snap bottom aabb to top aabb.
                     case 1:
                     {
-                        entityFloating.worldPos.y = entities[closetEntityIndexY[0]][closetEntityIndexY[1]].aabb.GetBounds().top;
+                        distanceToBound = entityFloating.worldPos.y - floatingBounds.bottom;
+                        entityFloating.worldPos.y = iteratingEntityBounds.top + distanceToBound;
                         break;
                     }
+                    //Snap top aabb to bottom aabb.
                     case 2:
                     {
-                        entityFloating.worldPos.y = entities[closetEntityIndexY[0]][closetEntityIndexY[1]].aabb.GetBounds().bottom - entityFloating.height;
+                        distanceToBound = floatingBounds.top - entityFloating.worldPos.y;
+                        entityFloating.worldPos.y = iteratingEntityBounds.bottom - distanceToBound;
                         break;
                     }
+                    //Snap top aabb to top aabb.
                     case 3:
                     {
-                        entityFloating.worldPos.y = entities[closetEntityIndexY[0]][closetEntityIndexY[1]].aabb.GetBounds().top - entityFloating.height;
+                        distanceToBound = floatingBounds.top - entityFloating.worldPos.y;
+                        entityFloating.worldPos.y = iteratingEntityBounds.top - distanceToBound;
                         break;
                     }
                 }

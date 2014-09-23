@@ -81,7 +81,7 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.325";
+		public const string VERSION_STRING = "Version 1.351";
         //My computer uses es-CO, but our files use points for decimals, hard code culture for now.
         public static readonly CultureInfo EN_US = CultureInfo.CreateSpecificCulture("en-US");
 
