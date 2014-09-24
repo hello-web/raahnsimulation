@@ -122,8 +122,8 @@ namespace RaahnSimulation
 		            newRoad.worldPos.y = (float)context.GetWindowHeight() * y;
 		            newRoad.SetTexture((TextureManager.TextureType)(road + TextureManager.ROAD_INDEX_OFFSET));
 		            newRoad.angle = angle;
-		            newRoad.width = (float)context.GetWindowWidth() * ROAD_WIDTH_PERCENTAGES[road];
-		            newRoad.height = (float)context.GetWindowHeight() * ROAD_HEIGHT_PERCENTAGES[road];
+		            newRoad.SetWidth((float)context.GetWindowWidth() * ROAD_WIDTH_PERCENTAGES[road]);
+		            newRoad.SetHeight((float)context.GetWindowHeight() * ROAD_HEIGHT_PERCENTAGES[road]);
 		            roads.Add(newRoad);
 		        }
 			}

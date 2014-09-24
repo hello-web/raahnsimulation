@@ -8,13 +8,13 @@ namespace RaahnSimulation
 	{
 		public const float ROTATE_SPEED = 90.0f;
 
-		public float width;
-		public float height;
 		public float angle;
 		public Utils.Vector2 worldPos;
 		public Utils.Vector2 windowPos;
 		public Utils.Vector2 drawingVec;
         public AABB aabb;
+        protected float width;
+        protected float height;
 		protected Simulator context;
 		protected Utils.Vector2 velocity;
 		protected Utils.Vector2 speed;
@@ -149,6 +149,28 @@ namespace RaahnSimulation
             transform.top = window.top + camPos.y;
 
             return transform;
+        }
+
+        public float GetWidth()
+        {
+            return width;
+        }
+
+        public float GetHeight()
+        {
+            return height;
+        }
+
+        public void SetWidth(float w)
+        {
+            width = w;
+            aabb.SetSize(width, height);
+        }
+
+        public void SetHeight(float h)
+        {
+            height = h;
+            aabb.SetSize(width, height);
         }
 
 		public void SetTexture(TextureManager.TextureType t)

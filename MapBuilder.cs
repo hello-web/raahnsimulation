@@ -12,8 +12,10 @@ namespace RaahnSimulation
         private const uint SNAPPING_ANGLES_COUNT = 4;
         private const uint UNIQUE_entities = 1;
 
-		private const float MAP_WIDTH_PERCENTAGE = 0.05f;
-		private const float MAP_HEIGHT_PERCENTAGE = 0.1f;
+		private const float FLAG_WIDTH_PERCENTAGE = 0.05f;
+		private const float FLAG_HEIGHT_PERCENTAGE = 0.1f;
+        private const float TRASH_WIDTH_PERCENTAGE = 0.08f;
+        private const float TRASH_HEIGHT_PERCENTAGE = 0.16f;
         private const float SNAPPING_ANGLE_BOUNDS = 7.5f;
 
         private readonly float[] SNAPPING_ANGLES = { 0.0f, 90.0f, 180.0f, 270.0f };
@@ -24,6 +26,7 @@ namespace RaahnSimulation
 		private static readonly string[] PANEL_OPTIONS = { P0, P1 };
 
 		private bool flagVisible;
+        private bool trashHovering;
         private float floatingExactAngle;
 		private List<List<Entity>> entities;
 		private RoadPool roadPool;
@@ -32,6 +35,7 @@ namespace RaahnSimulation
 		private EntityPanel entityPanel;
 		private Entity entityFloating;
 		private Graphic flag;
+        private Graphic trash;
 		private ToggleText panelOption;
 		private Utils.Vector2 dist;
         private Utils.Vector2 entitySnappingDist;
@@ -39,6 +43,8 @@ namespace RaahnSimulation
         public MapBuilder(Simulator sim, Cursor c, Camera camera, EntityPanel panel) : base(sim)
 	    {
 	        flagVisible = false;
+            trashHovering = false;
+
 	        roadPool = new RoadPool(context);
             entitySnappingDist = new Utils.Vector2(0.0f, 0.0f);
             entities = new List<List<Entity>>();
@@ -51,7 +57,7 @@ namespace RaahnSimulation
 	        panelOption = new ToggleText(context, PANEL_OPTIONS[0]);
 	        panelOption.SetWindowAsDrawingVec(true);
 	        panelOption.SetCharBounds(0.0f, RoadMap.ROAD_HEIGHT_PERCENTAGES[0] * (float)context.GetWindowHeight(), charWidth, charHeight, false);
-            panelOption.aabb.SetSize(panelOption.width, panelOption.height);
+            panelOption.aabb.SetSize(panelOption.GetWidth(), panelOption.GetHeight());
 
             for (uint i = 1; i < PANEL_OPTION_COUNT; i++)
 	            panelOption.AddString(PANEL_OPTIONS[i]);
@@ -59,8 +65,23 @@ namespace RaahnSimulation
 
 	        flag = new Graphic(context);
 	        flag.SetTexture(TextureManager.TextureType.FLAG);
-	        flag.width = MAP_WIDTH_PERCENTAGE * (float)context.GetWindowWidth();
-	        flag.height = MAP_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight();
+	        flag.SetWidth(FLAG_WIDTH_PERCENTAGE * (float)context.GetWindowWidth());
+	        flag.SetHeight(FLAG_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight());
+
+            trash = new Graphic(context);
+            trash.SetTexture(TextureManager.TextureType.TRASH);
+            //Default to black.
+            trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+            trash.SetWidth(TRASH_WIDTH_PERCENTAGE * (float)context.GetWindowWidth());
+            trash.SetHeight(TRASH_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight());
+            trash.SetWindowAsDrawingVec(true);
+
+            float xBorderOffset = trash.GetWidth() * 0.2f;
+            float yBorderOffset = trash.GetHeight() * 0.1f;
+
+            trash.windowPos.x = (float)context.GetWindowWidth() - trash.GetWidth() - xBorderOffset;
+            trash.windowPos.y = yBorderOffset;
+
 	        cursor = c;
 	        cam = camera;
 	        entityPanel = panel;
@@ -83,12 +104,7 @@ namespace RaahnSimulation
 	    public override void Update()
 	    {
 	        if (entityFloating != null)
-	        {
 	            UpdateEntityFloating();
-
-	            if (!Mouse.IsButtonPressed(Mouse.Button.Left))
-	                entityFloating = null;
-	        }
 	        else if (!MapState.Instance().GetPanning())
 	        {
 	            int selectedEntity = entityPanel.GetSelectedEntity();
@@ -129,13 +145,33 @@ namespace RaahnSimulation
 	            }
 	        }
 
+            if (entityFloating != null)
+            {
+                if (entityFloating.Intersects(Entity.WindowToWorld(trash.aabb.GetBounds(), cam)))
+                {
+                    if (!trashHovering)
+                    {
+                        //Turn the trash red when hovering.
+                        trash.SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+                        trashHovering = true;
+                    }
+                }
+                else
+                {
+                    trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    trashHovering = false;
+                }
+            }
+
             for (int x = 0; x < entities.Count; x++)
             {
                 for (int y = 0; y < entities[x].Count; y++)
                     entities[x][y].Update();
             }
+
 	        flag.Update();
 	        panelOption.Update();
+            trash.Update();
 	        base.Update();
 	    }
 
@@ -150,15 +186,31 @@ namespace RaahnSimulation
                 else
                 {
                     Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
-                    float x = (float)(mousePosi.X) - (cursor.width / 2.0f);
-                    float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.height;
+
+                    float x = (float)(mousePosi.X) - (cursor.GetWidth() / 2.0f);
+                    float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.GetHeight();
+
                     Utils.Vector2 mousePosf = new Utils.Vector2(x, y);
                     Utils.Vector2 transform = Entity.WindowToWorld(mousePosf, cam);
+
                     flag.worldPos.x = transform.x;
                     flag.worldPos.y = transform.y;
                     flagVisible = true;
                 }
             }
+
+            if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
+            {
+                if (trashHovering)
+                {
+                    entities[0].Remove(entityFloating);
+                    roadPool.Free((Road)entityFloating);
+                    trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    trashHovering = false;
+                }
+                entityFloating = null;
+            }
+
             //Update entities with the event.
             for (int x = 0; x < entities.Count; x++)
             {
@@ -167,10 +219,19 @@ namespace RaahnSimulation
             }
             flag.UpdateEvent(e);
             panelOption.UpdateEvent(e);
+            trash.UpdateEvent(e);
         }
 
 	    public override void Draw()
 	    {
+            Gl.glPushMatrix();
+
+            Gl.glLoadIdentity();
+
+            trash.Draw();
+
+            Gl.glPopMatrix();
+
 	        for (int x = 0; x < entities.Count; x++)
 	        {
                 for (int y = 0; y < entities[x].Count; y++)
@@ -207,6 +268,14 @@ namespace RaahnSimulation
 
         public override void DebugDraw()
         {
+            Gl.glPushMatrix();
+
+            Gl.glLoadIdentity();
+
+            trash.DebugDraw();
+
+            Gl.glPopMatrix();
+
             for (int x = 0; x < entities.Count; x++)
             {
                 for (int y = 0; y < entities[x].Count; y++)
@@ -247,13 +316,13 @@ namespace RaahnSimulation
             {
                 Road newRoad = roadPool.Alloc();
                 newRoad.SetTexture((TextureManager.TextureType)(itemIndex + TextureManager.ROAD_INDEX_OFFSET));
-                newRoad.width = RoadMap.ROAD_WIDTH_PERCENTAGES[itemIndex] * (float)context.GetWindowWidth();
-                newRoad.height = RoadMap.ROAD_HEIGHT_PERCENTAGES[itemIndex] * (float)context.GetWindowHeight();
-                newRoad.aabb.SetSize(newRoad.width, newRoad.height);
+                newRoad.SetWidth(RoadMap.ROAD_WIDTH_PERCENTAGES[itemIndex] * (float)context.GetWindowWidth());
+                newRoad.SetHeight(RoadMap.ROAD_HEIGHT_PERCENTAGES[itemIndex] * (float)context.GetWindowHeight());
+                newRoad.aabb.SetSize(newRoad.GetWidth(), newRoad.GetHeight());
                 entities[0].Add(newRoad);
                 entityFloating = newRoad;
-                entitySnappingDist.x = newRoad.width / 4.0f;
-                entitySnappingDist.y = newRoad.height / 4.0f;
+                entitySnappingDist.x = newRoad.GetWidth() / 4.0f;
+                entitySnappingDist.y = newRoad.GetHeight() / 4.0f;
                 floatingExactAngle = newRoad.angle;
             }
         }
@@ -262,8 +331,8 @@ namespace RaahnSimulation
         {
             //TODO consider using layers instead.
             Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
-            float x = (float)(mousePosi.X) - (cursor.width / 2.0f) - dist.x;
-            float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.height - dist.y;
+            float x = (float)(mousePosi.X) - (cursor.GetWidth() / 2.0f) - dist.x;
+            float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.GetHeight() - dist.y;
             Utils.Vector2 mousePosf = new Utils.Vector2(x, y);
             UpdatePosition(Entity.WindowToWorld(mousePosf, cam));
 

@@ -5,19 +5,20 @@ namespace RaahnSimulation
 {
     public class AABB
     {
-        private Utils.Rect bounds;
+        //Angle and pos refer to the angle and position of the encapsulated entity.
+        private float angle;
+        private Utils.Vector2 pos;
         private Utils.Vector2 center;
+        private Utils.Rect bounds;
 
         public AABB()
         {
-            bounds = new Utils.Rect();
-            center = new Utils.Vector2(0.0f, 0.0f);
+            Construct();
         }
 
         public AABB(float w, float h)
         {
-            bounds = new Utils.Rect();
-            center = new Utils.Vector2(0.0f, 0.0f);
+            Construct();
 
             bounds.ll.x = 0.0f;
             bounds.ll.y = 0.0f;
@@ -25,8 +26,27 @@ namespace RaahnSimulation
             SetSize(w, h);
         }
 
+        public Utils.Rect GetBounds()
+        {
+            return bounds;
+        }
+
+        public float GetAngle()
+        {
+            return angle;
+        }
+
+        public Utils.Vector2 GetPos()
+        {
+            return pos;
+        }
+
         public void SetSize(float w, float h)
         {
+            float currentAngle = angle;
+            //Undo the rotation so we can scale.
+            Rotate(-currentAngle);
+
             bounds.width = w;
             bounds.height = h;
 
@@ -47,11 +67,16 @@ namespace RaahnSimulation
             center.x = bounds.ll.x + (bounds.width / 2.0f);
             center.y = bounds.ll.y + (bounds.height / 2.0f);
 
+            //Restore the pervious rotation.
+            Rotate(currentAngle);
+
             Update();
         }
 
         public void Rotate(float rotationChange)
         {
+            angle += rotationChange;
+
             float angleTransform = Utils.DegToRad(rotationChange);
             
             RotateVector2(bounds.ll, angleTransform);
@@ -65,6 +90,9 @@ namespace RaahnSimulation
         // Translates by a distance rather than an actual point.
         public void Translate(float xDist, float yDist)
         {
+            pos.x += xDist;
+            pos.y += yDist;
+
             bounds.ll.x += xDist;
             bounds.ll.y += yDist;
 
@@ -81,6 +109,15 @@ namespace RaahnSimulation
             center.y += yDist;
 
             Update();
+        }
+
+        private void Construct()
+        {
+            angle = 0.0f;
+
+            pos = new Utils.Vector2(0.0f, 0.0f);
+            center = new Utils.Vector2(0.0f, 0.0f);
+            bounds = new Utils.Rect();
         }
 
         private void RotateVector2(Utils.Vector2 vec, float angle)
@@ -122,11 +159,6 @@ namespace RaahnSimulation
 
             bounds.width = bounds.right - bounds.left;
             bounds.height = bounds.top - bounds.bottom;
-        }
-
-        public Utils.Rect GetBounds()
-        {
-            return bounds;
         }
     }
 }

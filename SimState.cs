@@ -23,9 +23,9 @@ namespace RaahnSimulation
 	        roadMap = new RoadMap(context, Utils.ROAD_FILE);
 
 	        raahnCar = new Car(context);
-	        raahnCar.width = (float)context.GetWindowWidth() * CAR_WIDTH_SCALE;
-	        raahnCar.height = (float)context.GetWindowHeight() * CAR_HEIGHT_SCALE;
-            raahnCar.aabb.SetSize(raahnCar.width, raahnCar.height);
+	        raahnCar.SetWidth((float)context.GetWindowWidth() * CAR_WIDTH_SCALE);
+	        raahnCar.SetHeight((float)context.GetWindowHeight() * CAR_HEIGHT_SCALE);
+            raahnCar.aabb.SetSize(raahnCar.GetWidth(), raahnCar.GetHeight());
 	        raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
 	        raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
 

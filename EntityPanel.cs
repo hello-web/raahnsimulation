@@ -23,9 +23,9 @@ namespace RaahnSimulation
 	        for (int i = 0; i < RoadMap.UNIQUE_ROAD_COUNT; i++)
 	        {
 	            road = new Road(context);
-				road.width = winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[i];
-				road.height = (float)context.GetWindowHeight() * RoadMap.ROAD_HEIGHT_PERCENTAGES[i];
-                road.aabb.SetSize(road.width, road.height);
+				road.SetWidth(winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[i]);
+				road.SetHeight((float)context.GetWindowHeight() * RoadMap.ROAD_HEIGHT_PERCENTAGES[i]);
+                road.aabb.SetSize(road.GetWidth(), road.GetHeight());
 	            road.SetWindowAsDrawingVec(true);
 
                 uint roadIndex = 0;

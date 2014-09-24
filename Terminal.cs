@@ -59,7 +59,7 @@ namespace RaahnSimulation
             initialText.SetCharBounds(0.0f, (float)context.GetWindowHeight() / 2.0f, charWidth, charHeight, false);
             initialText.Update();
 
-            currentTextPos.x = initialText.windowPos.x + initialText.width;
+            currentTextPos.x = initialText.windowPos.x + initialText.GetWidth();
             currentTextPos.y = initialText.windowPos.y;
 
             textPool = new TextPool(sim);
@@ -108,7 +108,7 @@ namespace RaahnSimulation
                 }
 
                 //The text on the command line must change it's x coordinate too and possibly be removed.
-                lines.ToArray()[lines.Count - 1].windowPos.x -= initialText.width;
+                lines.ToArray()[lines.Count - 1].windowPos.x -= initialText.GetWidth();
 
                 Text frontText = lines.Peek();
                 if (frontText.windowPos.y >= (float)context.GetWindowHeight())

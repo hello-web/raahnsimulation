@@ -106,7 +106,7 @@ namespace RaahnSimulation
 	        windowWidth = (uint)((float)monitor.Width * Utils.WIDTH_PERCENTAGE);
 	        windowHeight = (uint)((float)monitor.Height * Utils.HEIGHT_PERCENTAGE);
 
-	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Default);
+	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Close);
 
 	        Vector2i windowPos = new Vector2i((int)((monitor.Width / 2) - (windowWidth / 2)), (int)((monitor.Height / 2) - (windowHeight / 2)));
 	        simWindow.Position = windowPos;
@@ -140,8 +140,11 @@ namespace RaahnSimulation
 	        Gl.glEnable(Gl.GL_BLEND);
 	        Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
 
-	        if (!texMan.LoadTextures())
-	            return false;
+            if (!texMan.LoadTextures())
+            {
+                Console.WriteLine(Utils.TEXTURE_LOAD_FAILED);
+                return false;
+            }
 
 	        //Allocate verticies and indicies
             //Can't get struct elements to be placed sequentially, using an array for now.
