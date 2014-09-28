@@ -1,6 +1,5 @@
 using System;
 using Tao.OpenGl;
-using SFML.System;
 using SFML.Window;
 
 namespace RaahnSimulation

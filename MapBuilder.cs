@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Tao.OpenGl;
-using SFML.System;
 using SFML.Window;
 
 namespace RaahnSimulation

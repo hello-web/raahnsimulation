@@ -1,5 +1,6 @@
 using System;
 using Tao.OpenGl;
+using SFML.Window;
 using SFML.Graphics;
 
 namespace RaahnSimulation
@@ -32,18 +33,15 @@ namespace RaahnSimulation
 
 		private const int TEXTURE_COUNT = 9;
 
+        private bool loadedTextures;
 		private uint[] textures;
 		private TextureType currentTexture;
 
 	    public TextureManager()
 	    {
+            loadedTextures = false;
 			textures = new uint[TEXTURE_COUNT];
 	        currentTexture = (TextureType)(TEXTURE_COUNT - 1);
-	    }
-
-	    ~TextureManager()
-	    {
-			Gl.glDeleteTextures(TEXTURE_COUNT, textures);
 	    }
 
 	    public bool LoadTextures()
@@ -56,7 +54,9 @@ namespace RaahnSimulation
 	        {
 				if (!System.IO.File.Exists(TEXTURE_RESOURCES[i]))
 					return false;
+
 				Image currentImage = new Image(TEXTURE_RESOURCES[i]);
+                //SFML loads textures from the top left.
                 currentImage.FlipVertically();
 
 				Gl.glBindTexture(Gl.GL_TEXTURE_2D, textures[i]);
@@ -64,12 +64,22 @@ namespace RaahnSimulation
 				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MIN_FILTER, Gl.GL_LINEAR);
 				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_S, Gl.GL_REPEAT);
 				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_T, Gl.GL_REPEAT);
-				SFML.System.Vector2u size = currentImage.Size;
+				Vector2u size = currentImage.Size;
 				Gl.glTexImage2D(Gl.GL_TEXTURE_2D, 0, Gl.GL_RGBA, (int)size.X, (int)size.Y, 0, Gl.GL_RGBA, Gl.GL_UNSIGNED_BYTE, currentImage.Pixels);
 	        }
 
+            loadedTextures = true;
+
 	        return true;
 	    }
+
+        //Returns whether textures were deleted or not.
+        public bool DeleteTextures()
+        {
+            if (loadedTextures)
+                Gl.glDeleteTextures(TEXTURE_COUNT, textures);
+            return loadedTextures;
+        }
 
 	    public void SetTexture(TextureType t)
 	    {

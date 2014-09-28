@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.Globalization;
 using Tao.OpenGl;
-using SFML.System;
 using SFML.Window;
 
 namespace RaahnSimulation
@@ -23,6 +23,7 @@ namespace RaahnSimulation
 		public bool running;
         public bool debugging;
 		public Queue<Event> eventQueue;
+        private bool glInitFailed;
 		private bool headLess;
         private bool terminalOpen;
 		private bool windowHasFocus;
@@ -31,13 +32,13 @@ namespace RaahnSimulation
 		private uint windowHeight;
         private uint vb;
         private uint ib;
-		private int lastTime;
-		private int curTime;
+		private long lastTime;
+		private long curTime;
         private float deltaTime;
 		private List<State> states;
 		//Events are copied.
 		private Window simWindow;
-		private Clock clock;
+        private Stopwatch stopwatch;
         private Keyboard.Key terminalKey;
 		private Camera camera;
         private Terminal terminal;
@@ -52,6 +53,7 @@ namespace RaahnSimulation
 	        deltaTime = 0.0f;
 
 	        running = true;
+            glInitFailed = false;
 	        headLess = false;
             terminalOpen = false;
             debugging = false;
@@ -61,7 +63,7 @@ namespace RaahnSimulation
             terminalKey = Keyboard.Key.F1;
 	        requestedState = null;
 	        changeType = StateChangeType.NONE;
-			clock = new Clock();
+            stopwatch = new Stopwatch();
 			camera = new Camera();
 			states = new List<State>();
 			eventQueue = new Queue<Event>();
@@ -91,10 +93,11 @@ namespace RaahnSimulation
 	        }
 	        else
 	        {
-	            lastTime = clock.ElapsedTime.AsMilliseconds();
 	            ChangeState(MenuState.Instance());
 	            MainLoop();
 	        }
+
+            Clean();
 
 	        return Utils.EXIT_S;
 	    }
@@ -129,8 +132,10 @@ namespace RaahnSimulation
             terminal = new Terminal(this);
 
             string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
+            Console.WriteLine("GL Version " + glVersion);
             if (float.Parse(glVersion, NumberStyles.Float, Utils.EN_US) < Utils.MIN_GL_VERSION)
             {
+                glInitFailed = true;
                 Console.WriteLine("GL 1.5 not supported.");
                 return false;
             }
@@ -179,10 +184,10 @@ namespace RaahnSimulation
 			Gl.glBufferData(Gl.GL_ELEMENT_ARRAY_BUFFER, (IntPtr)(sizeof(ushort) * indices.Length), indices, Gl.GL_STATIC_DRAW);
 
 	        Gl.glEnableClientState(Gl.GL_VERTEX_ARRAY);
-            Gl.glVertexPointer(3, Gl.GL_FLOAT, Utils.Vertex.Size, IntPtr.Zero);
+            Gl.glVertexPointer(3, Gl.GL_FLOAT, Utils.VertexSize, IntPtr.Zero);
 
 	        Gl.glEnableClientState(Gl.GL_TEXTURE_COORD_ARRAY);
-            Gl.glTexCoordPointer(2, Gl.GL_FLOAT, Utils.Vertex.Size, (IntPtr)(sizeof(float) * 3));
+            Gl.glTexCoordPointer(2, Gl.GL_FLOAT, Utils.VertexSize, (IntPtr)(sizeof(float) * 3));
 
 	        Gl.glViewport(0, 0, (int)windowWidth, (int)windowHeight);
 
@@ -191,6 +196,8 @@ namespace RaahnSimulation
 
 	    private void MainLoop()
 	    {
+            stopwatch.Start();
+
 	        while (running)
 	        {
 				simWindow.DispatchEvents();
@@ -213,8 +220,12 @@ namespace RaahnSimulation
 
 	    private void Update()
 	    {
+            curTime = stopwatch.ElapsedMilliseconds;
+            deltaTime = (float)(curTime - lastTime) / 1000.0f;
+            lastTime = curTime;
+
             //Update with events.
-            Event e = new Event();
+            Event e;
             while (eventQueue.Count > 0)
             {
                 e = eventQueue.Peek();
@@ -243,10 +254,6 @@ namespace RaahnSimulation
 
 	    private void RenderFrame()
 	    {
-	        curTime = clock.ElapsedTime.AsMilliseconds();
-	        deltaTime = (float)(curTime - lastTime) / 1000.0f;
-	        lastTime = curTime;
-
 	        Gl.glClear(Gl.GL_COLOR_BUFFER_BIT);
 
 	        Gl.glMatrixMode(Gl.GL_PROJECTION);
@@ -346,7 +353,8 @@ namespace RaahnSimulation
 
 	    private void Clean()
 	    {
-            simWindow.Close();
+            stopwatch.Stop();
+
 	        while (states.Count > 0)
 	        {
 	            states[states.Count - 1].Clean();
@@ -354,8 +362,17 @@ namespace RaahnSimulation
 	        }
 	        while (eventQueue.Count > 0)
 	            eventQueue.Dequeue();
-            Gl.glDeleteBuffers(1, ref ib);
-            Gl.glDeleteBuffers(1, ref vb);
+
+            //Deletes textures if loaded.
+            texMan.DeleteTextures();
+
+            if (!glInitFailed)
+            {
+                Gl.glDeleteBuffers(1, ref ib);
+                Gl.glDeleteBuffers(1, ref vb);
+            }
+
+            simWindow.Close();
 	    }
 
 		static void OnResized(Object sender, SizeEventArgs ea)
@@ -368,6 +385,7 @@ namespace RaahnSimulation
 			Simulator s = Simulator.Instance();
 			s.SetWindowWidth(ea.Width);
 			s.SetWindowHeight(ea.Height);
+
 			Gl.glViewport(0, 0, (int)s.GetWindowWidth(), (int)s.GetWindowHeight());
 		}
 
@@ -460,14 +478,17 @@ namespace RaahnSimulation
 		{
 			return camera;
 		}
+
 		public TextureManager GetTexMan()
 		{
 			return texMan;
 		}
-        public Clock GetClock()
+
+        public Stopwatch GetStopwatch()
         {
-            return clock;
+            return stopwatch;
         }
+
 		public uint GetWindowWidth()
 		{
 			return windowWidth;

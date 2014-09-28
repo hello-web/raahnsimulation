@@ -74,9 +74,9 @@ namespace RaahnSimulation
         {
             initialText.Update();
 
-            if (Keyboard.IsKeyPressed(Keyboard.Key.BackSpace))
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Back))
             {
-                currentTime = context.GetClock().ElapsedTime.AsMilliseconds();
+                currentTime = context.GetStopwatch().Elapsed.Milliseconds;
                 if (currentTime - lastTime > backspaceDelay)
                 {
                     lines.ToArray()[lines.Count - 1].RemoveCharacter();

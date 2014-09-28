@@ -32,7 +32,6 @@ namespace RaahnSimulation
         {
             public Vector3 xyz;
             public Vector2 uv;
-            public static readonly int Size = Marshal.SizeOf(default(Vertex));
             public Vertex(Vector3 vecPos, Vector2 texVec)
             {
                 xyz = vecPos;
@@ -59,6 +58,7 @@ namespace RaahnSimulation
             }
         }
 
+        public const int VertexSize = sizeof(float) * 5;
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
 		public const int INDEX_COUNT = 6;
@@ -73,7 +73,7 @@ namespace RaahnSimulation
 		public const float DISCARD_Z_POS = 0.0f;
 		public const float DISCARD_Z_SCALE = 1.0f;
 		public const float DEG_TO_RAD = (float)3.1415926535 / 180.0f;
-        public const float TEXTURE_CHAR_WIDTH = 1 / (float)CHARACTER_TEX_COLUMN_COUNT;
+        public const float TEXTURE_CHAR_WIDTH = 1.0f / (float)CHARACTER_TEX_COLUMN_COUNT;
         public const float TEXTURE_CHAR_HEIGHT = 1.0f / (float)CHARACTER_TEX_ROW_COUNT;
 
 		public const char FILE_COMMENT = '#';
@@ -82,7 +82,7 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.375";
+		public const string VERSION_STRING = "Version 1.4";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
 
