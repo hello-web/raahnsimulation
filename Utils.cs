@@ -72,6 +72,8 @@ namespace RaahnSimulation
 		public const float CHAR_HEIGHT_PERCENTAGE = 0.0625f;
 		public const float DISCARD_Z_POS = 0.0f;
 		public const float DISCARD_Z_SCALE = 1.0f;
+        //Color value of background in common GTK apps.
+        public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
 		public const float DEG_TO_RAD = (float)3.1415926535 / 180.0f;
         public const float TEXTURE_CHAR_WIDTH = 1.0f / (float)CHARACTER_TEX_COLUMN_COUNT;
         public const float TEXTURE_CHAR_HEIGHT = 1.0f / (float)CHARACTER_TEX_ROW_COUNT;
@@ -82,11 +84,12 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.4";
+		public const string VERSION_STRING = "Version 1.425";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
+        public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
 
-        //My computer uses es-CO, but our files use points for decimals, hard code culture for now.
+        //My computer uses es-CO, but our files uses points for decimals, hard code culture for now.
         public static readonly CultureInfo EN_US = CultureInfo.CreateSpecificCulture("en-US");
 
 		public static float DegToRad(float deg)

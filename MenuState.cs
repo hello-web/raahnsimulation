@@ -7,9 +7,9 @@ namespace RaahnSimulation
 	{
 	    private static MenuState menuState = new MenuState();
 		private Text title;
-		private Text startSim;
-		private Text startMap;
-		private Text version;
+        private Text version;
+		private Button startSim;
+        private Button startMap;
 		private ClickableEntity.OnClickType startSimOnClick;
 		private ClickableEntity.OnClickType startMapOnClick;
 
@@ -29,29 +29,29 @@ namespace RaahnSimulation
 	        title = new Text(context, Utils.WINDOW_TITLE);
 	        title.SetWindowAsDrawingVec(true);
 	        title.SetCharBounds((float)context.GetWindowWidth() / 2.0f, (float)context.GetWindowHeight() - charHeight, charWidth, charHeight, true);
-            title.aabb.SetSize(title.GetWidth(), title.GetHeight());
 
-	        startSim = new Text(context, Utils.START_SIM);
+            version = new Text(context, Utils.VERSION_STRING);
+            version.SetWindowAsDrawingVec(true);
+            version.SetCharBounds(0.0f, 0.0f, charWidth, charHeight, false);
+
+            float startSimWidth = charWidth * Utils.START_SIM.Length;
+
+	        startSim = new Button(context, Utils.START_SIM);
 	        startSim.SetWindowAsDrawingVec(true);
-	        startSim.SetCharBounds((float)context.GetWindowWidth() / 2.0f, title.windowPos.y - 2.0f * charHeight, charWidth, charHeight, true);
+	        startSim.SetBounds((float)context.GetWindowWidth() / 2.0f, title.windowPos.y - (2.0f * charHeight), startSimWidth, charHeight, true);
             startSim.SetOnClickListener(startSimOnClick);
-            startSim.aabb.SetSize(startSim.GetWidth(), startSim.GetHeight());
 
-	        startMap = new Text(context, Utils.START_MAP);
+            float startMapWidth = charWidth * Utils.START_MAP.Length;
+
+	        startMap = new Button(context, Utils.START_MAP);
 	        startMap.SetWindowAsDrawingVec(true);
-	        startMap.SetCharBounds((float)context.GetWindowWidth() / 2.0f, startSim.windowPos.y - 2.0f * charHeight, charWidth, charHeight, true);
+	        startMap.SetBounds((float)context.GetWindowWidth() / 2.0f, startSim.windowPos.y - (2.0f * charHeight), startMapWidth, charHeight, true);
 	        startMap.SetOnClickListener(startMapOnClick);
-            startMap.aabb.SetSize(startMap.GetWidth(), startMap.GetHeight());
-
-	        version = new Text(context, Utils.VERSION_STRING);
-	        version.SetWindowAsDrawingVec(true);
-	        version.SetCharBounds(0.0f, 0.0f, charWidth, charHeight, false);
-            version.aabb.SetSize(version.GetWidth(), version.GetHeight());
 
 	        entityList.Add(title);
+            entityList.Add(version);
 	        entityList.Add(startSim);
 	        entityList.Add(startMap);
-	        entityList.Add(version);
 	    }
 
 	    public override void Update()

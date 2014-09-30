@@ -22,6 +22,7 @@ namespace RaahnSimulation
 
 		public bool running;
         public bool debugging;
+        //Events are copied.
 		public Queue<Event> eventQueue;
         private bool glInitFailed;
 		private bool headLess;
@@ -36,7 +37,6 @@ namespace RaahnSimulation
 		private long curTime;
         private float deltaTime;
 		private List<State> states;
-		//Events are copied.
 		private Window simWindow;
         private Stopwatch stopwatch;
         private Keyboard.Key terminalKey;
@@ -113,6 +113,17 @@ namespace RaahnSimulation
 
 	        Vector2i windowPos = new Vector2i((int)((monitor.Width / 2) - (windowWidth / 2)), (int)((monitor.Height / 2) - (windowHeight / 2)));
 	        simWindow.Position = windowPos;
+
+            //Check to make sure OpenGL 1.5 is supported.
+            string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
+            Console.WriteLine("GL Version " + glVersion);
+            if (float.Parse(glVersion, NumberStyles.Float, Utils.EN_US) < Utils.MIN_GL_VERSION)
+            {
+                glInitFailed = true;
+                Console.WriteLine(Utils.GL_VERSION_UNSUPPORTED);
+                return false;
+            }
+
 	        /*Disable multiple keydown events from
 	        occuring when a key is held down.*/
 	        simWindow.SetKeyRepeatEnabled(false);
@@ -122,6 +133,7 @@ namespace RaahnSimulation
 			simWindow.KeyReleased += new EventHandler<KeyEventArgs>(OnKeyReleased);
 			simWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
 			simWindow.MouseButtonReleased += new EventHandler<MouseButtonEventArgs>(OnMouseButtonReleased);
+            simWindow.MouseMoved += new EventHandler<MouseMoveEventArgs>(OnMouseMoved);
             simWindow.TextEntered += new EventHandler<TextEventArgs>(OnTextEntered);
 			simWindow.GainedFocus += new EventHandler(OnGainnedFocus);
 			simWindow.LostFocus += new EventHandler(OnLostFocus);
@@ -131,16 +143,8 @@ namespace RaahnSimulation
 
             terminal = new Terminal(this);
 
-            string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
-            Console.WriteLine("GL Version " + glVersion);
-            if (float.Parse(glVersion, NumberStyles.Float, Utils.EN_US) < Utils.MIN_GL_VERSION)
-            {
-                glInitFailed = true;
-                Console.WriteLine("GL 1.5 not supported.");
-                return false;
-            }
+            Gl.glClearColor(Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, 0.0f);
 
-	        Gl.glClearColor(0.0f, 0.5f, 0.0f, 0.0f);
 	        //Enable blending for alpha values.
 	        Gl.glEnable(Gl.GL_BLEND);
 	        Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
@@ -375,7 +379,7 @@ namespace RaahnSimulation
             simWindow.Close();
 	    }
 
-		static void OnResized(Object sender, SizeEventArgs ea)
+		public static void OnResized(Object sender, SizeEventArgs ea)
 		{
 			Event e = new Event();
 			e.Type = EventType.Resized;
@@ -389,7 +393,7 @@ namespace RaahnSimulation
 			Gl.glViewport(0, 0, (int)s.GetWindowWidth(), (int)s.GetWindowHeight());
 		}
 
-		static void OnKeyPressed(Object sender, KeyEventArgs kea)
+		public static void OnKeyPressed(Object sender, KeyEventArgs kea)
 		{
 			Event e = new Event();
 			e.Type = EventType.KeyPressed;
@@ -399,7 +403,7 @@ namespace RaahnSimulation
 				Simulator.Instance().running = false;
 		}
 
-		static void OnKeyReleased(Object sender, KeyEventArgs kea)
+		public static void OnKeyReleased(Object sender, KeyEventArgs kea)
 		{
 			Event e = new Event();
 			e.Type = EventType.KeyReleased;
@@ -407,7 +411,7 @@ namespace RaahnSimulation
 			SaveEvent(e);
 		}
 
-		static void OnMouseButtonPressed(Object sender, MouseButtonEventArgs mbea)
+		public static void OnMouseButtonPressed(Object sender, MouseButtonEventArgs mbea)
 		{
 			Event e = new Event();
 			e.Type = EventType.MouseButtonPressed;
@@ -415,7 +419,7 @@ namespace RaahnSimulation
 			SaveEvent(e);
 		}
 
-		static void OnMouseButtonReleased(Object sender, MouseButtonEventArgs mbea)
+		public static void OnMouseButtonReleased(Object sender, MouseButtonEventArgs mbea)
 		{
 			Event e = new Event();
 			e.Type = EventType.MouseButtonReleased;
@@ -423,7 +427,16 @@ namespace RaahnSimulation
 			SaveEvent(e);
 		}
 
-        static void OnTextEntered(Object sender, TextEventArgs tea)
+        public static void OnMouseMoved(object sender, MouseMoveEventArgs mmea)
+        {
+            Event e = new Event();
+            e.Type = EventType.MouseMoved;
+            e.MouseMove.X = mmea.X;
+            e.MouseMove.Y = mmea.Y;
+            SaveEvent(e);
+        }
+
+        public static void OnTextEntered(Object sender, TextEventArgs tea)
         {
             Event e = new Event();
             e.Type = EventType.TextEntered;
@@ -431,7 +444,7 @@ namespace RaahnSimulation
             SaveEvent(e);
         }
 
-		static void OnGainnedFocus(Object sender, EventArgs ea)
+		public static void OnGainnedFocus(Object sender, EventArgs ea)
 		{
 			Event e = new Event();
 			e.Type = EventType.GainedFocus;
@@ -440,7 +453,7 @@ namespace RaahnSimulation
 			s.SetWindowHasFocus(true);
 		}
 
-		static void OnLostFocus(Object sender, EventArgs ea)
+		public static void OnLostFocus(Object sender, EventArgs ea)
 		{
 			Event e = new Event();
 			e.Type = EventType.LostFocus;
@@ -449,7 +462,7 @@ namespace RaahnSimulation
 			s.SetWindowHasFocus(false);
 		}
 
-		static void OnClosed(Object sender, EventArgs ea)
+		public static void OnClosed(Object sender, EventArgs ea)
 		{
 			Event e = new Event();
 			e.Type = EventType.Closed;

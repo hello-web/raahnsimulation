@@ -57,7 +57,7 @@ namespace RaahnSimulation
 
                     Gl.glDisable(Gl.GL_TEXTURE_2D);
 
-                    Gl.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+                    Gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 
                     // Disable camera transformation.
                     if (entityList[i].drawingVec == entityList[i].windowPos)

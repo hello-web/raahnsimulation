@@ -19,7 +19,7 @@ namespace RaahnSimulation
 			CHAR_MAP = 5,
 			FLAG = 6,
             TRASH = 7,
-			CONE = 8
+            BUTTON = 8,
 		};
 
 		public const int ROAD_INDEX_OFFSET = 1;
@@ -28,7 +28,7 @@ namespace RaahnSimulation
 		{
 			"Data/Textures/TopViewCar.png", "Data/Textures/Road0.png", "Data/Textures/Road1.png",
 			"Data/Textures/Cursor0.png", "Data/Textures/Cursor1.png", "Data/Textures/CharMap.png",
-			"Data/Textures/raahn.png", "Data/Textures/Trash.png", "Data/Textures/Cone.png"
+			"Data/Textures/raahn.png", "Data/Textures/Trash.png", "Data/Textures/Button.png"
 		};
 
 		private const int TEXTURE_COUNT = 9;

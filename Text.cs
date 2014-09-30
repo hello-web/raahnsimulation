@@ -6,6 +6,7 @@ namespace RaahnSimulation
 {
 	public class Text : ClickableEntity
 	{
+        public const float SPACING_WIDTH_PERCENTAGE = 0.8f;
 		private const int ASCII_OFFSET = 32;
 
 		protected string text;
@@ -27,7 +28,7 @@ namespace RaahnSimulation
 	        texture = TextureManager.TextureType.CHAR_MAP;
             charTexPos = new Utils.Vector2(0.0f, 0.0f);
             charCenter = new Utils.Vector2(0.0f, 0.0f);
-            color = new Utils.Vector3(1.0f, 1.0f, 1.0f);
+            color = new Utils.Vector3(0.0f, 0.0f, 0.0f);
 	    }
 
 	    ~Text()
@@ -108,8 +109,13 @@ namespace RaahnSimulation
 	    {
 	        charWidth = cWidth;
 	        height = cHeight;
-	        spacing = charWidth * 0.8f;
-	        width = spacing * text.Length;
+	        spacing = charWidth * SPACING_WIDTH_PERCENTAGE;
+
+            //To get the entire width, we need the complete width of the last char.
+	        width = (spacing * text.Length) + charWidth * 0.2f;
+
+            aabb.SetSize(width, height);
+
 	        if (fromCenter)
 	        {
 	            drawingVec.x = x - (width / 2.0f);

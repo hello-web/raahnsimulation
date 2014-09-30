@@ -5,6 +5,31 @@ Description
 ===========
 RAAHN Simulation is a simulator for testing, developing, and displaying the Real-Time Autoencoder Augmented Hebbian Network algorithm. The simulation consists of a car driving along a road, and learning through the principles of reinforcement learning (through hebbian learning) and an autoencoder.
 
+Hot Keys
+========
+Globally
+
+Esc - Close the application.
+F1 - Open the application terminal.
+
+Simulation state
+
+Up - Move the car foward in the direction of its velocity
+Down - Move the car backward in the direction of its velocity.
+Left - Rotate the car left.
+Right - Rotate the car right.
+
+Map builder state
+
+Up - Rotate a map piece left.
+Down - Rotate a map piece right.
+Space - Place the starting point for the car represented by a flag.
+
+Terminal Commands
+=================
+exit - Close the application.
+debug - Draws debugging information (currently only AABBs).
+
 Building
 ========
 To be added soon.

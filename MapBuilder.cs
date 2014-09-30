@@ -9,7 +9,7 @@ namespace RaahnSimulation
 	{
 		private const uint PANEL_OPTION_COUNT = 2;
         private const uint SNAPPING_ANGLES_COUNT = 4;
-        private const uint UNIQUE_entities = 1;
+        private const uint UNIQUE_ENTITIES = 1;
 
 		private const float FLAG_WIDTH_PERCENTAGE = 0.05f;
 		private const float FLAG_HEIGHT_PERCENTAGE = 0.1f;
@@ -47,7 +47,7 @@ namespace RaahnSimulation
 	        roadPool = new RoadPool(context);
             entitySnappingDist = new Utils.Vector2(0.0f, 0.0f);
             entities = new List<List<Entity>>();
-            for (uint i = 0; i < UNIQUE_entities; i++)
+            for (uint i = 0; i < UNIQUE_ENTITIES; i++)
                 entities.Add(new List<Entity>());
 
 	        float charWidth = (float)context.GetWindowWidth() * Utils.CHAR_WIDTH_PERCENTAGE;
@@ -322,6 +322,7 @@ namespace RaahnSimulation
                 entityFloating = newRoad;
                 entitySnappingDist.x = newRoad.GetWidth() / 4.0f;
                 entitySnappingDist.y = newRoad.GetHeight() / 4.0f;
+                newRoad.angle = 0.0f;
                 floatingExactAngle = newRoad.angle;
             }
         }

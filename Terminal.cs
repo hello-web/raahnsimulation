@@ -45,19 +45,23 @@ namespace RaahnSimulation
             context = sim;
             transparency = 0.8f;
 
-            initialText = new Text(sim, INITIAL_TEXT);
-            initialText.SetWindowAsDrawingVec(true);
-            currentTextPos = new Utils.Vector2(0.0f, 0.0f);
-            lines = new Queue<Text>();
             charWidth = TEXT_WIDTH_PERCENTAGE * (float)context.GetWindowWidth();
             charHeight = TEXT_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight();
-            lastTime = 0.0f;
-            currentTime = 0.0f;
-            backspaceDelay = BACKSPACE_DELAY;
-            command = Command.NO_COMMAND;
 
+            initialText = new Text(sim, INITIAL_TEXT);
+            initialText.SetWindowAsDrawingVec(true);
+            initialText.SetColor(1.0f, 1.0f, 1.0f);
             initialText.SetCharBounds(0.0f, (float)context.GetWindowHeight() / 2.0f, charWidth, charHeight, false);
             initialText.Update();
+
+            currentTextPos = new Utils.Vector2(0.0f, 0.0f);
+            lines = new Queue<Text>();
+
+            lastTime = 0.0f;
+            currentTime = 0.0f;
+
+            backspaceDelay = BACKSPACE_DELAY;
+            command = Command.NO_COMMAND;
 
             currentTextPos.x = initialText.windowPos.x + initialText.GetWidth();
             currentTextPos.y = initialText.windowPos.y;
@@ -65,6 +69,7 @@ namespace RaahnSimulation
             textPool = new TextPool(sim);
 
             Text firstText = textPool.Alloc();
+            firstText.SetColor(1.0f, 1.0f, 1.0f);
             firstText.SetWindowAsDrawingVec(true);
             firstText.SetCharBounds(currentTextPos.x, currentTextPos.y, charWidth, charHeight, false);
             lines.Enqueue(firstText);
@@ -76,7 +81,7 @@ namespace RaahnSimulation
 
             if (Keyboard.IsKeyPressed(Keyboard.Key.Back))
             {
-                currentTime = context.GetStopwatch().Elapsed.Milliseconds;
+                currentTime = context.GetStopwatch().ElapsedMilliseconds;
                 if (currentTime - lastTime > backspaceDelay)
                 {
                     lines.ToArray()[lines.Count - 1].RemoveCharacter();
@@ -123,6 +128,7 @@ namespace RaahnSimulation
                 if (!textPool.Empty())
                 {
                     Text newText = textPool.Alloc();
+                    newText.SetColor(1.0f, 1.0f, 1.0f);
                     newText.SetWindowAsDrawingVec(true);
                     newText.SetCharBounds(currentTextPos.x, currentTextPos.y, charWidth, charHeight, false);
                     lines.Enqueue(newText);
