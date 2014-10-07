@@ -5,26 +5,60 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public class EntityPanel : Entity
+	public class EntityPanel : Updateable
 	{
+        private const uint PANEL_OPTION_COUNT = 2;
+
+        private const float PANEL_ITEM_OFFSET_X_PERCENTAGE = 0.075f;
+        private const float PANEL_ITEM_OFFSET_Y_PERCENTAGE = 0.025f;
 		private const float PANEL_SPACING_PERCENTAGE = 0.05f;
+        private const float PANEL_HEIGHT_SPACE_PERCENTAGE = 0.075f;
+        private const float TRASH_WIDTH_PERCENTAGE = 0.08f;
+        private const float TRASH_HEIGHT_PERCENTAGE = 0.16f;
+
+        private const string P0 = "Roads";
+        private const string P1 = "Obstacles";
+
+        private static readonly string[] PANEL_OPTIONS = { P0, P1 };
 
 		private bool[] intersections;
 		private List<Road> items;
+        private Simulator context;
+        private State currentState;
 		private Cursor cursor;
+        private ToggleText panelOption;
+        private Graphic background;
+        private Graphic trash;
 
-	    public EntityPanel(Simulator sim, Cursor c) : base(sim)
+	    public EntityPanel(Simulator sim, Cursor c, int layerIndex)
 	    {
+            context = sim;
 	        cursor = c;
+            currentState = context.GetState();
+
             items = new List<Road>();
 			intersections = new bool[RoadMap.UNIQUE_ROAD_COUNT];
+
+            background = new Graphic(context);
+            background.SetWindowAsDrawingVec(true);
+            background.SetTexture(TextureManager.TextureType.PANEL);
+            background.windowPos.x = 0.0f;
+            background.worldPos.y = 0.0f;
+
 	        Road road;
 	        float winWidth = (float)context.GetWindowWidth();
+            float greatestHeight = 0.0f;
+
 	        for (int i = 0; i < RoadMap.UNIQUE_ROAD_COUNT; i++)
 	        {
 	            road = new Road(context);
 				road.SetWidth(winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[i]);
-				road.SetHeight((float)context.GetWindowHeight() * RoadMap.ROAD_HEIGHT_PERCENTAGES[i]);
+
+                float height = (float)context.GetWindowHeight() * RoadMap.ROAD_HEIGHT_PERCENTAGES[i];
+                if (greatestHeight < height)
+                    greatestHeight = height;
+
+				road.SetHeight(height);
                 road.aabb.SetSize(road.GetWidth(), road.GetHeight());
 	            road.SetWindowAsDrawingVec(true);
 
@@ -32,12 +66,48 @@ namespace RaahnSimulation
                 if (i > 0)
                     roadIndex = (uint)(i - 1);
 
-				road.windowPos.x = i * (winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[roadIndex] + PANEL_SPACING_PERCENTAGE * winWidth);
-	            road.windowPos.y = 0.0f;
+                float xOffset = PANEL_ITEM_OFFSET_X_PERCENTAGE * (float)context.GetWindowWidth();
+                float yOffset = PANEL_ITEM_OFFSET_Y_PERCENTAGE * (float)context.GetWindowHeight();
+				road.windowPos.x = xOffset + (i * (winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[roadIndex] + PANEL_SPACING_PERCENTAGE * winWidth));
+	            road.windowPos.y = yOffset;
 				road.SetTexture((TextureManager.TextureType)(TextureManager.ROAD_INDEX_OFFSET + i));
 	            items.Add(road);
 	            intersections[i] = false;
 	        }
+
+            background.SetWidth((float)context.GetWindowWidth());
+            background.SetHeight(greatestHeight + (float)context.GetWindowHeight() * PANEL_HEIGHT_SPACE_PERCENTAGE);
+
+            float charWidth = (float)context.GetWindowWidth() * Utils.CHAR_WIDTH_PERCENTAGE;
+            float charHeight = (float)context.GetWindowHeight() * Utils.CHAR_HEIGHT_PERCENTAGE;
+
+            panelOption = new ToggleText(context, PANEL_OPTIONS[0]);
+            panelOption.SetWindowAsDrawingVec(true);
+            panelOption.SetCharBounds(items[0].windowPos.x, items[0].windowPos.y + items[0].GetHeight(), charWidth, charHeight, false);
+            panelOption.aabb.SetSize(panelOption.GetWidth(), panelOption.GetHeight());
+
+            for (uint i = 1; i < PANEL_OPTION_COUNT; i++)
+                panelOption.AddString(PANEL_OPTIONS[i]);
+            panelOption.Update();
+
+            trash = new Graphic(context);
+            trash.SetWindowAsDrawingVec(true);
+            trash.SetTexture(TextureManager.TextureType.TRASH);
+            trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+            trash.SetWidth(TRASH_WIDTH_PERCENTAGE * (float)context.GetWindowWidth());
+            trash.SetHeight(TRASH_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight());
+
+            float xBorderOffset = trash.GetWidth() * 0.2f;
+            float yBorderOffset = trash.GetHeight() * 0.1f;
+
+            trash.windowPos.x = (float)context.GetWindowWidth() - trash.GetWidth() - xBorderOffset;
+            trash.windowPos.y = yBorderOffset;
+
+            currentState.AddEntity(background, 1);
+            for (int i = 0; i < RoadMap.UNIQUE_ROAD_COUNT; i++)
+                currentState.AddEntity(items[i], layerIndex);
+            currentState.AddEntity(panelOption, layerIndex);
+            currentState.AddEntity(trash, layerIndex);
 	    }
 
 	    ~EntityPanel()
@@ -48,81 +118,48 @@ namespace RaahnSimulation
 	        }
 	    }
 
-	    public override void Update()
+	    public void Update()
 	    {
-	        for (int i = 0; i < items.Count; i++)
-	        {
-	            items[i].Update();
-	            intersections[i] = items[i].Intersects(cursor.aabb.GetBounds());
-	        }
-	    }
-
-        public override void UpdateEvent(Event e)
-        {
-            base.UpdateEvent(e);
-            for (int i = 0; i < items.Count; i++)
-                items[i].UpdateEvent(e);
-        }
-
-	    public override void Draw()
-	    {
-	        for (int i = 0; i < items.Count; i++)
-	        {
-	            if (intersections[i])
-	                Gl.glColor4f(0.0f, 0.0f, 1.0f, 0.85f);
-
-	            Gl.glPushMatrix();
-
-                // Disable camera transformation.
-	            Gl.glLoadIdentity();
-
-	            items[i].Draw();
-
-	            Gl.glPopMatrix();
-
-	            if (intersections[i])
-	                Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	        }
-	    }
-
-        public override void DebugDraw()
-        {
             for (int i = 0; i < items.Count; i++)
             {
-                Gl.glPushMatrix();
-
-                // Disable camera transformation.
-                Gl.glLoadIdentity();
-
-                items[i].DebugDraw();
-
-                Gl.glPopMatrix();
+                intersections[i] = items[i].Intersects(cursor.aabb.GetBounds());
+                if (intersections[i])
+                    items[i].SetColor(0.0f, 0.0f, 1.0f, 0.85f);
+                else
+                    items[i].SetColor(1.0f, 1.0f, 1.0f, 1.0f);
             }
+	    }
+
+        public void UpdateEvent(Event e)
+        {
+
         }
 
-	    public override bool Intersects(float x, float y)
+	    public bool Intersects(float x, float y)
 	    {
-	        for (int i = 0; i < items.Count; i++)
-	        {
-                if (x > items[i].aabb.GetBounds().left && x < items[i].aabb.GetBounds().right)
-	            {
-                    if (y > items[i].aabb.GetBounds().bottom && y < items[i].aabb.GetBounds().top)
-	                    return true;
-	            }
-	        }
+            if (x > background.aabb.GetBounds().left && x < background.aabb.GetBounds().right)
+            {
+                if (y > background.aabb.GetBounds().bottom && y < background.aabb.GetBounds().top)
+                    return true;
+            }
 	        return false;
 	    }
 
-        public override bool Intersects(Utils.Rect bounds)
+        public bool Intersects(Utils.Rect bounds)
 	    {
 	        for (int i = 0; i < items.Count; i++)
 	        {
-                if (!(items[i].aabb.GetBounds().left > bounds.right || items[i].aabb.GetBounds().right < bounds.left
-                || items[i].aabb.GetBounds().bottom > bounds.top || items[i].aabb.GetBounds().top < bounds.bottom))
+                if (!(background.aabb.GetBounds().left > bounds.right || background.aabb.GetBounds().right < bounds.left
+                || background.aabb.GetBounds().bottom > bounds.top || background.aabb.GetBounds().top < bounds.bottom))
 	                return true;
 	        }
 	        return false;
 	    }
+
+        public Graphic GetTrash()
+        {
+            return trash;
+        }
 
 		public int GetSelectedEntity()
 		{

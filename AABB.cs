@@ -41,6 +41,19 @@ namespace RaahnSimulation
             return pos;
         }
 
+        public Utils.Vector2 GetCenter()
+        {
+            return center;
+        }
+
+        public void Copy(AABB aabb)
+        {
+            angle = aabb.GetAngle();
+            pos.Copy(aabb.GetPos());
+            center.Copy(aabb.GetCenter());
+            bounds.Copy(aabb.GetBounds());
+        }
+
         public void SetSize(float w, float h)
         {
             float currentAngle = angle;

@@ -48,10 +48,10 @@ namespace RaahnSimulation
 	        startMap.SetBounds((float)context.GetWindowWidth() / 2.0f, startSim.windowPos.y - (2.0f * charHeight), startMapWidth, charHeight, true);
 	        startMap.SetOnClickListener(startMapOnClick);
 
-	        entityList.Add(title);
-            entityList.Add(version);
-	        entityList.Add(startSim);
-	        entityList.Add(startMap);
+	        AddEntity(title, 0);
+            AddEntity(version, 0);
+            AddEntity(startSim, 0);
+            AddEntity(startMap, 0);
 	    }
 
 	    public override void Update()

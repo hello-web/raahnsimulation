@@ -30,6 +30,61 @@ Terminal Commands
 exit - Close the application.
 debug - Draws debugging information (currently only AABBs).
 
-Building
-========
-To be added soon.
+Building and Running
+====================
+
+RAAHN Simulation depends on several libraries (arrows represent their dependencies):
+
+Tao.OpenGl -> libGL and libGLU (More than likely already installed).
+sfmlnet-window-2 -> libcsfml-window-2
+sfmlnet-graphics-2 -> libcsfml-graphics-2
+
+Tao can be obtainned here: http://sourceforge.net/projects/taoframework/files/
+SFML can be obtainned here: http://www.sfml-dev.org/download/sfml.net/
+
+The csproj file will attempt to build assuming
+these libraries are in the GAC (Global Assembly Cache).
+
+If they are not and cannot be added, relative paths are fine too.
+Just edit the references within the csproj file. Change:
+
+<Reference Include="Tao.OpenGl" />
+
+To
+
+<Reference Include="Tao.OpenGl">
+      <HintPath>RELATIVE\PATH\TO\FILE\Tao.OpenGl.dll</HintPath>
+</Reference>
+
+Or use an IDE to set the correct paths. An IDE can be used for the entire build process as well.
+
+When the binary is built, make sure to copy the Data folder to the directory of the binary as well.
+
+Building with Mono
+==================
+
+From the root of the source tree type:
+
+xbuild
+
+In order to run the compiled binary, config files are needed for each
+library because they all have dependencies on C/C++ libraries.
+
+If xbuild does not add them for you they follow this convention:
+
+<configuration>
+     <dllmap dll="csfml-window-2" target="libcsfml-window.so"/>
+</configuration>
+
+Add one for each library.
+
+Building with Windows
+=====================
+
+From the root of the source tree type:
+
+msbuild
+
+If the SFML C# libraries and C libraries are not in the GAC,
+to run the binary these libraries will have to be included
+within the same directory.

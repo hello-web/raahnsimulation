@@ -4,10 +4,11 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public abstract class Entity
+	public abstract class Entity : Updateable
 	{
 		public const float ROTATE_SPEED = 90.0f;
 
+        public bool visible;
 		public float angle;
 		public Utils.Vector2 worldPos;
 		public Utils.Vector2 windowPos;
@@ -15,9 +16,11 @@ namespace RaahnSimulation
         public AABB aabb;
         protected float width;
         protected float height;
+        protected float transparency;
 		protected Simulator context;
 		protected Utils.Vector2 velocity;
 		protected Utils.Vector2 speed;
+        protected Utils.Vector3 color;
 		protected TextureManager.TextureType texture;
         private float previousAngle;
 		private Utils.Vector2 center;
@@ -30,12 +33,16 @@ namespace RaahnSimulation
 
 	    protected Entity(Simulator sim)
 	    {
+            visible = true;
+
 	        texture = TextureManager.TextureType.NONE;
 	        context = sim;
 	        width = 1.0f;
 	        height = 1.0f;
 	        angle = 0.0f;
             previousAngle = 0.0f;
+            //Initially opaque.
+            transparency = 1.0f;
 
             aabb = new AABB();
             aabb.SetSize(width, height);
@@ -45,6 +52,8 @@ namespace RaahnSimulation
             speed = new Utils.Vector2(0.0f, 0.0f);
             center = new Utils.Vector2(0.0f, 0.0f);
             previousPos = new Utils.Vector2(0.0f, 0.0f);
+            //Initially no change on color.
+            color = new Utils.Vector3(1.0f, 1.0f, 1.0f);
 
 	        //Default drawing vector is worldPos.
 	        drawingVec = worldPos;
@@ -159,6 +168,16 @@ namespace RaahnSimulation
         public float GetHeight()
         {
             return height;
+        }
+
+        public float GetTransparency()
+        {
+            return transparency;
+        }
+
+        public Utils.Vector3 GetColor()
+        {
+            return color;
         }
 
         public void SetWidth(float w)

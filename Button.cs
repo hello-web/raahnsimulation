@@ -9,7 +9,6 @@ namespace RaahnSimulation
         //The width is set to the height, so only height is needed.
         private const float CHAR_HEIGHT_PERCENTAGE = 0.8f;
 
-        private float transparency;
         private Text label;
 
         public Button(Simulator sim, string text) : base(sim)

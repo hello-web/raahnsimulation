@@ -5,81 +5,53 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public class MapBuilder : Entity
+	public class MapBuilder : Updateable
 	{
-		private const uint PANEL_OPTION_COUNT = 2;
         private const uint SNAPPING_ANGLES_COUNT = 4;
         private const uint UNIQUE_ENTITIES = 1;
 
 		private const float FLAG_WIDTH_PERCENTAGE = 0.05f;
 		private const float FLAG_HEIGHT_PERCENTAGE = 0.1f;
-        private const float TRASH_WIDTH_PERCENTAGE = 0.08f;
-        private const float TRASH_HEIGHT_PERCENTAGE = 0.16f;
         private const float SNAPPING_ANGLE_BOUNDS = 7.5f;
 
         private readonly float[] SNAPPING_ANGLES = { 0.0f, 90.0f, 180.0f, 270.0f };
-		
-        private const string P0 = "Roads";
-		private const string P1 = "Obstacles";
 
-		private static readonly string[] PANEL_OPTIONS = { P0, P1 };
-
-		private bool flagVisible;
+        private int layer;
         private bool trashHovering;
         private float floatingExactAngle;
-		private List<List<Entity>> entities;
+		private List<LinkedList<ColorableEntity>> entities;
+        private Simulator context;
+        private State currentState;
 		private RoadPool roadPool;
 		private Cursor cursor;
 		private Camera cam;
 		private EntityPanel entityPanel;
-		private Entity entityFloating;
+		private ColorableEntity entityFloating;
 		private Graphic flag;
-        private Graphic trash;
-		private ToggleText panelOption;
 		private Utils.Vector2 dist;
         private Utils.Vector2 entitySnappingDist;
 
-        public MapBuilder(Simulator sim, Cursor c, Camera camera, EntityPanel panel) : base(sim)
+        public MapBuilder(Simulator sim, Cursor c, Camera camera, EntityPanel panel, int stateLayer)
 	    {
-	        flagVisible = false;
+            context = sim;
+            currentState = context.GetState();
             trashHovering = false;
+
+            layer = stateLayer;
 
 	        roadPool = new RoadPool(context);
             entitySnappingDist = new Utils.Vector2(0.0f, 0.0f);
-            entities = new List<List<Entity>>();
+
+            entities = new List<LinkedList<ColorableEntity>>();
+
             for (uint i = 0; i < UNIQUE_ENTITIES; i++)
-                entities.Add(new List<Entity>());
-
-	        float charWidth = (float)context.GetWindowWidth() * Utils.CHAR_WIDTH_PERCENTAGE;
-	        float charHeight = (float)context.GetWindowHeight() * Utils.CHAR_HEIGHT_PERCENTAGE;
-
-	        panelOption = new ToggleText(context, PANEL_OPTIONS[0]);
-	        panelOption.SetWindowAsDrawingVec(true);
-	        panelOption.SetCharBounds(0.0f, RoadMap.ROAD_HEIGHT_PERCENTAGES[0] * (float)context.GetWindowHeight(), charWidth, charHeight, false);
-            panelOption.aabb.SetSize(panelOption.GetWidth(), panelOption.GetHeight());
-
-            for (uint i = 1; i < PANEL_OPTION_COUNT; i++)
-	            panelOption.AddString(PANEL_OPTIONS[i]);
-	        panelOption.Update();
+                entities.Add(new LinkedList<ColorableEntity>());
 
 	        flag = new Graphic(context);
+            flag.visible = false;
 	        flag.SetTexture(TextureManager.TextureType.FLAG);
 	        flag.SetWidth(FLAG_WIDTH_PERCENTAGE * (float)context.GetWindowWidth());
 	        flag.SetHeight(FLAG_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight());
-
-            trash = new Graphic(context);
-            trash.SetTexture(TextureManager.TextureType.TRASH);
-            //Default to black.
-            trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-            trash.SetWidth(TRASH_WIDTH_PERCENTAGE * (float)context.GetWindowWidth());
-            trash.SetHeight(TRASH_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight());
-            trash.SetWindowAsDrawingVec(true);
-
-            float xBorderOffset = trash.GetWidth() * 0.2f;
-            float yBorderOffset = trash.GetHeight() * 0.1f;
-
-            trash.windowPos.x = (float)context.GetWindowWidth() - trash.GetWidth() - xBorderOffset;
-            trash.windowPos.y = yBorderOffset;
 
 	        cursor = c;
 	        cam = camera;
@@ -88,6 +60,8 @@ namespace RaahnSimulation
 
             floatingExactAngle = 0.0f;
             dist = new Utils.Vector2(0.0f, 0.0f);
+
+            currentState.AddEntity(flag, currentState.GetTopLayerIndex());
 	    }
 
 	    ~MapBuilder()
@@ -95,43 +69,48 @@ namespace RaahnSimulation
 	        while (entities[0].Count > 0)
 	        {
                 int lastListIndex = entities.Count - 1;
-                roadPool.Free((Road)entities[lastListIndex][entities[lastListIndex].Count - 1]);
-                entities[0].RemoveAt(entities.Count - 1);
+                roadPool.Free((Road)entities[lastListIndex].Last.Value);
+                entities[0].RemoveLast();
 	        }
 	    }
 
-	    public override void Update()
+	    public void Update()
 	    {
 	        if (entityFloating != null)
 	            UpdateEntityFloating();
 	        else if (!MapState.Instance().GetPanning())
 	        {
-	            int selectedEntity = entityPanel.GetSelectedEntity();
+	            /*int selectedEntity = entityPanel.GetSelectedEntity();
 	            if (selectedEntity != -1)
 	            {
 	                AddEntity(selectedEntity);
 	                dist = entityPanel.GetDist(cursor.worldPos.x, cursor.worldPos.y);
 	                UpdateEntityFloating();
-	            }
-	            else
+	            }*/
+	            /*else
 	            {
 	                /*Iterate backwards to find the element drawn
 	                on top, elements are drawn in ascending order.*/
-                    bool shouldBreak = false;
+                    /*bool shouldBreak = false;
 	                for (int x = entities.Count - 1; x >= 0; x--)
 	                {
-                        for (int y = entities[x].Count - 1; y >= 0; y--)
+                        foreach (ColorableEntity curEntity in entities[x])
                         {
                             //The cursor's bounds are in window coordinates, we need world coordinates.
                             Utils.Rect comparisonRect;
                             comparisonRect = Entity.WindowToWorld(cursor.aabb.GetBounds(), cam);
 
-                            if (entities[x][y].Intersects(comparisonRect) && Mouse.IsButtonPressed(Mouse.Button.Left))
+                            if (curEntity.Intersects(comparisonRect) && Mouse.IsButtonPressed(Mouse.Button.Left))
                             {
-                                entityFloating = entities[x][y];
-                                dist.x = cursor.worldPos.x - entities[x][y].worldPos.x;
-                                dist.y = cursor.worldPos.y - entities[x][y].worldPos.y;
+                                entityFloating = curEntity;
+                                entityFloating.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
+                                currentState.ChangeLayer(entityFloating, currentState.GetTopLayerIndex() - 1);
+
+                                dist.x = cursor.worldPos.x - curEntity.worldPos.x;
+                                dist.y = cursor.worldPos.y - curEntity.worldPos.y;
+
                                 floatingExactAngle = entityFloating.angle;
+
                                 UpdateEntityFloating();
                                 shouldBreak = true;
                             }
@@ -141,47 +120,35 @@ namespace RaahnSimulation
                         if (shouldBreak)
                             break;
 	                }
-	            }
+	            }*/
 	        }
 
             if (entityFloating != null)
             {
-                if (entityFloating.Intersects(Entity.WindowToWorld(trash.aabb.GetBounds(), cam)))
+                if (entityFloating.Intersects(Entity.WindowToWorld(entityPanel.GetTrash().aabb.GetBounds(), cam)))
                 {
                     if (!trashHovering)
                     {
                         //Turn the trash red when hovering.
-                        trash.SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+                        entityPanel.GetTrash().SetColor(1.0f, 0.0f, 0.0f, 1.0f);
                         trashHovering = true;
                     }
                 }
                 else
                 {
-                    trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    //Set the trash can back to black.
+                    entityPanel.GetTrash().SetColor(0.0f, 0.0f, 0.0f, 1.0f);
                     trashHovering = false;
                 }
             }
-
-            for (int x = 0; x < entities.Count; x++)
-            {
-                for (int y = 0; y < entities[x].Count; y++)
-                    entities[x][y].Update();
-            }
-
-	        flag.Update();
-	        panelOption.Update();
-            trash.Update();
-	        base.Update();
 	    }
 
-        public override void UpdateEvent(Event e)
+        public void UpdateEvent(Event e)
         {
-            base.UpdateEvent(e);
-
             if (e.Type == EventType.KeyPressed && e.Key.Code == Keyboard.Key.Space)
             {
-                if (flagVisible)
-                    flagVisible = false;
+                if (flag.visible)
+                    flag.visible = false;
                 else
                 {
                     Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
@@ -194,119 +161,80 @@ namespace RaahnSimulation
 
                     flag.worldPos.x = transform.x;
                     flag.worldPos.y = transform.y;
-                    flagVisible = true;
+                    flag.visible = true;
                 }
             }
 
-            if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
+            if (!((MapState)currentState).GetPanning())
             {
-                if (trashHovering)
+                if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
                 {
-                    entities[0].Remove(entityFloating);
-                    roadPool.Free((Road)entityFloating);
-                    trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-                    trashHovering = false;
+                    //Check for new intersections.
+                    entityPanel.Update();
+
+                    int selectedEntity = entityPanel.GetSelectedEntity();
+                    if (selectedEntity != -1)
+                    {
+                        AddEntity(selectedEntity);
+                        dist = entityPanel.GetDist(cursor.worldPos.x, cursor.worldPos.y);
+                        UpdateEntityFloating();
+                    }
+                    else
+                    {
+                        bool shouldBreak = false;
+
+                        for (int x = entities.Count - 1; x >= 0; x--)
+                        {
+                            foreach (ColorableEntity curEntity in entities[x])
+                            {
+                                //The cursor's bounds are in window coordinates, we need world coordinates.
+                                Utils.Rect comparisonRect;
+                                comparisonRect = Entity.WindowToWorld(cursor.aabb.GetBounds(), cam);
+
+                                if (curEntity.Intersects(comparisonRect) && Mouse.IsButtonPressed(Mouse.Button.Left))
+                                {
+                                    entityFloating = curEntity;
+                                    entityFloating.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
+                                    currentState.ChangeLayer(entityFloating, currentState.GetTopLayerIndex() - 1);
+
+                                    dist.x = cursor.worldPos.x - curEntity.worldPos.x;
+                                    dist.y = cursor.worldPos.y - curEntity.worldPos.y;
+
+                                    floatingExactAngle = entityFloating.angle;
+
+                                    UpdateEntityFloating();
+                                    shouldBreak = true;
+                                }
+                                if (shouldBreak)
+                                    break;
+                            }
+                            if (shouldBreak)
+                                break;
+                        }
+                    }
                 }
-                entityFloating = null;
             }
 
-            //Update entities with the event.
-            for (int x = 0; x < entities.Count; x++)
+            if (entityFloating != null)
             {
-                for (int y = 0; y < entities[x].Count; y++)
-                    entities[x][y].UpdateEvent(e);
-            }
-            flag.UpdateEvent(e);
-            panelOption.UpdateEvent(e);
-            trash.UpdateEvent(e);
-        }
-
-	    public override void Draw()
-	    {
-            Gl.glPushMatrix();
-
-            Gl.glLoadIdentity();
-
-            trash.Draw();
-
-            Gl.glPopMatrix();
-
-	        for (int x = 0; x < entities.Count; x++)
-	        {
-                for (int y = 0; y < entities[x].Count; y++)
+                if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
                 {
-                    if (entities[x][y] == entityFloating)
-                        Gl.glColor4f(0.0f, 0.0f, 1.0f, 0.85f);
-
-                    Gl.glPushMatrix();
-
-                    entities[x][y].Draw();
-
-                    Gl.glPopMatrix();
-
-                    if (entities[x][y] == entityFloating)
-                        Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                }
-	        }
-	        if (flagVisible)
-	        {
-	            Gl.glPushMatrix();
-
-	            flag.Draw();
-
-	            Gl.glPopMatrix();
-	        }
-	        Gl.glPushMatrix();
-
-	        Gl.glLoadIdentity();
-
-	        panelOption.Draw();
-
-	        Gl.glPopMatrix();
-	    }
-
-        public override void DebugDraw()
-        {
-            Gl.glPushMatrix();
-
-            Gl.glLoadIdentity();
-
-            trash.DebugDraw();
-
-            Gl.glPopMatrix();
-
-            for (int x = 0; x < entities.Count; x++)
-            {
-                for (int y = 0; y < entities[x].Count; y++)
-                {
-                    Gl.glPushMatrix();
-
-                    // Disable camera transformation.
-                    if (entities[x][y].drawingVec == entities[x][y].windowPos)
-                        Gl.glLoadIdentity();
-
-                    entities[x][y].DebugDraw();
-
-                    Gl.glPopMatrix();
+                    if (trashHovering)
+                    {
+                        RemoveEntityFromList(entityFloating, 0);
+                        roadPool.Free((Road)entityFloating);
+                        entityPanel.GetTrash().SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+                        trashHovering = false;
+                    }
+                    else
+                    {
+                        //Change the entitiy's color back to its original upon dropping it.
+                        entityFloating.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+                        currentState.ChangeLayer(entityFloating, layer);
+                    }
+                    entityFloating = null;
                 }
             }
-            if (flagVisible)
-            {
-                Gl.glPushMatrix();
-
-                flag.DebugDraw();
-
-                Gl.glPopMatrix();
-            }
-
-            Gl.glPushMatrix();
-
-            //panelOption's drawing vector should always be windowPos, disable camera transformations.
-            Gl.glLoadIdentity();
-
-            panelOption.DebugDraw();
-
-            Gl.glPopMatrix();
         }
 
         private void AddEntity(int itemIndex)
@@ -318,7 +246,10 @@ namespace RaahnSimulation
                 newRoad.SetWidth(RoadMap.ROAD_WIDTH_PERCENTAGES[itemIndex] * (float)context.GetWindowWidth());
                 newRoad.SetHeight(RoadMap.ROAD_HEIGHT_PERCENTAGES[itemIndex] * (float)context.GetWindowHeight());
                 newRoad.aabb.SetSize(newRoad.GetWidth(), newRoad.GetHeight());
-                entities[0].Add(newRoad);
+                newRoad.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
+
+                AddEntityToList(newRoad, 0);
+
                 entityFloating = newRoad;
                 entitySnappingDist.x = newRoad.GetWidth() / 4.0f;
                 entitySnappingDist.y = newRoad.GetHeight() / 4.0f;
@@ -327,9 +258,20 @@ namespace RaahnSimulation
             }
         }
 
+        private void AddEntityToList(ColorableEntity entity, int listIndex)
+        {
+            entities[listIndex].AddLast(entity);
+            currentState.AddEntity(entity, currentState.GetTopLayerIndex() - 1);
+        }
+
+        private void RemoveEntityFromList(ColorableEntity entity, int listIndex)
+        {
+            entities[listIndex].Remove(entity);
+            currentState.RemoveEntity(entity);
+        }
+
         private void UpdateEntityFloating()
         {
-            //TODO consider using layers instead.
             Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
             float x = (float)(mousePosi.X) - (cursor.GetWidth() / 2.0f) - dist.x;
             float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.GetHeight() - dist.y;
@@ -347,29 +289,31 @@ namespace RaahnSimulation
 
             int boundsUsageX = 0;
             int boundsUsageY = 0;
-            int[] closetEntityIndexX = { 0, 0 };
-            int[] closetEntityIndexY = { 0, 0 };
+            //Iniitialized to the first entity to make sure they are never null.
+            Entity closestEntityX = entities[0].First.Value;
+            Entity closestEntityY = entities[0].First.Value;
 
             Utils.Vector2 shortestXYDist = new Utils.Vector2(entitySnappingDist.x, entitySnappingDist.y);
             List<float> xDistances = new List<float>();
             List<float> yDistances = new List<float>();
 
+            //Look for the closest entity horizontally and vertically.
             for (int x = 0; x < entities.Count; x++)
             {
-                for (int y = 0; y < entities[x].Count; y++)
+                foreach (Entity curEntity in entities[x])
                 {
-                    if (entityFloating == entities[x][y])
+                    if (entityFloating == curEntity)
                         continue;
 
-                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().left - entities[x][y].aabb.GetBounds().left));
-                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().left - entities[x][y].aabb.GetBounds().right));
-                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().right - entities[x][y].aabb.GetBounds().left));
-                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().right - entities[x][y].aabb.GetBounds().right));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().left - curEntity.aabb.GetBounds().left));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().left - curEntity.aabb.GetBounds().right));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().right - curEntity.aabb.GetBounds().left));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().right - curEntity.aabb.GetBounds().right));
 
-                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().bottom - entities[x][y].aabb.GetBounds().bottom));
-                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().bottom - entities[x][y].aabb.GetBounds().top));
-                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().top - entities[x][y].aabb.GetBounds().bottom));
-                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().top - entities[x][y].aabb.GetBounds().top));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().bottom - curEntity.aabb.GetBounds().bottom));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().bottom - curEntity.aabb.GetBounds().top));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().top - curEntity.aabb.GetBounds().bottom));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().top - curEntity.aabb.GetBounds().top));
 
                     //Find the shortest distance to the current entity and use it if it is shorter than shortest.
                     for (int i = 0; i < xDistances.Count; i++)
@@ -377,8 +321,7 @@ namespace RaahnSimulation
                         if (xDistances[i] < shortestXYDist.x)
                         {
                             shortestXYDist.x = xDistances[i];
-                            closetEntityIndexX[0] = x;
-                            closetEntityIndexX[1] = y;
+                            closestEntityX = curEntity;
                             boundsUsageX = i;
                         }
                     }
@@ -388,8 +331,7 @@ namespace RaahnSimulation
                         if (yDistances[i] < shortestXYDist.y)
                         {
                             shortestXYDist.y = yDistances[i];
-                            closetEntityIndexY[0] = x;
-                            closetEntityIndexY[1] = y;
+                            closestEntityY = curEntity;
                             boundsUsageY = i;
                         }
                     }
@@ -402,7 +344,7 @@ namespace RaahnSimulation
             if (shortestXYDist.x < entitySnappingDist.x && shortestXYDist.y < entitySnappingDist.y)
             {
                 Utils.Rect floatingBounds = entityFloating.aabb.GetBounds();
-                Utils.Rect iteratingEntityBounds = entities[closetEntityIndexX[0]][closetEntityIndexX[1]].aabb.GetBounds();
+                Utils.Rect entitySnappingBounds = closestEntityX.aabb.GetBounds();
                 float distanceToBound = 0.0f;
 
                 switch (boundsUsageX)
@@ -411,31 +353,33 @@ namespace RaahnSimulation
                     case 0:
                     {
                         distanceToBound = entityFloating.worldPos.x - floatingBounds.left;
-                        entityFloating.worldPos.x = iteratingEntityBounds.left + distanceToBound;
+                        entityFloating.worldPos.x = entitySnappingBounds.left + distanceToBound;
                         break;
                     }
                     //Snap left aabb to right aabb.
                     case 1:
                     {
                         distanceToBound = entityFloating.worldPos.x - floatingBounds.left;
-                        entityFloating.worldPos.x = iteratingEntityBounds.right + distanceToBound;
+                        entityFloating.worldPos.x = entitySnappingBounds.right + distanceToBound;
                         break;
                     }
                     //Snap right aabb to left aabb.
                     case 2:
                     {
                         distanceToBound = floatingBounds.right - entityFloating.worldPos.x;
-                        entityFloating.worldPos.x = iteratingEntityBounds.left - distanceToBound;
+                        entityFloating.worldPos.x = entitySnappingBounds.left - distanceToBound;
                         break;
                     }
                     //Snap right aabb to right aabb.
                     case 3:
                     {
                         distanceToBound = floatingBounds.right - entityFloating.worldPos.x;
-                        entityFloating.worldPos.x = iteratingEntityBounds.right - distanceToBound;
+                        entityFloating.worldPos.x = entitySnappingBounds.right - distanceToBound;
                         break;
                     }
                 }
+
+                entitySnappingBounds = closestEntityY.aabb.GetBounds();
 
                 switch (boundsUsageY)
                 {
@@ -443,28 +387,28 @@ namespace RaahnSimulation
                     case 0:
                     {
                         distanceToBound = entityFloating.worldPos.y - floatingBounds.bottom;
-                        entityFloating.worldPos.y = iteratingEntityBounds.bottom + distanceToBound;
+                        entityFloating.worldPos.y = entitySnappingBounds.bottom + distanceToBound;
                         break;
                     }
                     //Snap bottom aabb to top aabb.
                     case 1:
                     {
                         distanceToBound = entityFloating.worldPos.y - floatingBounds.bottom;
-                        entityFloating.worldPos.y = iteratingEntityBounds.top + distanceToBound;
+                        entityFloating.worldPos.y = entitySnappingBounds.top + distanceToBound;
                         break;
                     }
                     //Snap top aabb to bottom aabb.
                     case 2:
                     {
                         distanceToBound = floatingBounds.top - entityFloating.worldPos.y;
-                        entityFloating.worldPos.y = iteratingEntityBounds.bottom - distanceToBound;
+                        entityFloating.worldPos.y = entitySnappingBounds.bottom - distanceToBound;
                         break;
                     }
                     //Snap top aabb to top aabb.
                     case 3:
                     {
                         distanceToBound = floatingBounds.top - entityFloating.worldPos.y;
-                        entityFloating.worldPos.y = iteratingEntityBounds.top - distanceToBound;
+                        entityFloating.worldPos.y = entitySnappingBounds.top - distanceToBound;
                         break;
                     }
                 }
@@ -474,9 +418,9 @@ namespace RaahnSimulation
         private void UpdateAngle()
         {
             if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
-                floatingExactAngle += ROTATE_SPEED * context.GetDeltaTime();
+                floatingExactAngle += Entity.ROTATE_SPEED * context.GetDeltaTime();
             if (Keyboard.IsKeyPressed(Keyboard.Key.Down))
-                floatingExactAngle -= ROTATE_SPEED * context.GetDeltaTime();
+                floatingExactAngle -= Entity.ROTATE_SPEED * context.GetDeltaTime();
 
             if (floatingExactAngle >= 360.0f)
                 floatingExactAngle -= 360.0f;
@@ -498,15 +442,15 @@ namespace RaahnSimulation
                 entityFloating.angle = floatingExactAngle;
         }
 
-		public override bool Intersects(float x, float y)
+		public bool Intersects(float x, float y)
 		{
 			for (int i = 0; i < entities.Count; i++)
 			{
-                for (int j = 0; j < entities[i].Count; j++)
+                foreach (Entity curEntity in entities[i])
                 {
-    				if (x > entities[i][j].aabb.GetBounds().left && x < entities[i][j].aabb.GetBounds().right)
+                    if (x > curEntity.aabb.GetBounds().left && x < curEntity.aabb.GetBounds().right)
     				{
-    					if (y > entities[i][j].aabb.GetBounds().bottom && y < entities[i][j].aabb.GetBounds().top)
+                        if (y > curEntity.aabb.GetBounds().bottom && y < curEntity.aabb.GetBounds().top)
     						return true;
     				}
                 }
@@ -514,21 +458,21 @@ namespace RaahnSimulation
 			return false;
 		}
 
-        public override bool Intersects(Utils.Rect bounds)
+        public bool Intersects(Utils.Rect bounds)
 		{
 			for (int x = 0; x < entities.Count; x++)
 			{
-                for (int y = 0; y < entities[x].Count; y++)
+                foreach (Entity curEntity in entities[x])
                 {
-                    if (!(entities[x][y].aabb.GetBounds().left > bounds.right || entities[x][y].aabb.GetBounds().right < bounds.left
-                    || entities[x][y].aabb.GetBounds().bottom > bounds.top || entities[x][y].aabb.GetBounds().top < bounds.bottom))
+                    if (!(curEntity.aabb.GetBounds().left > bounds.right || curEntity.aabb.GetBounds().right < bounds.left
+                    || curEntity.aabb.GetBounds().bottom > bounds.top || curEntity.aabb.GetBounds().top < bounds.bottom))
                         return true;
                 }
 			}
 			return false;
 		}
 
-		public bool GetFloating()
+		public bool Floating()
 		{
 			if (entityFloating != null)
 				return true;

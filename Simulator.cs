@@ -135,6 +135,7 @@ namespace RaahnSimulation
 			simWindow.MouseButtonReleased += new EventHandler<MouseButtonEventArgs>(OnMouseButtonReleased);
             simWindow.MouseMoved += new EventHandler<MouseMoveEventArgs>(OnMouseMoved);
             simWindow.TextEntered += new EventHandler<TextEventArgs>(OnTextEntered);
+            simWindow.MouseWheelMoved += new EventHandler<MouseWheelEventArgs>(OnMouseWheelMoved);
 			simWindow.GainedFocus += new EventHandler(OnGainnedFocus);
 			simWindow.LostFocus += new EventHandler(OnLostFocus);
 			simWindow.Closed += new EventHandler(OnClosed);
@@ -270,7 +271,7 @@ namespace RaahnSimulation
 
 	        Gl.glLoadIdentity();
 
-	        camera.Render();
+	        camera.Transform();
 
 	        states[states.Count - 1].Draw();
 
@@ -444,6 +445,16 @@ namespace RaahnSimulation
             SaveEvent(e);
         }
 
+        public static void OnMouseWheelMoved(Object sender, MouseWheelEventArgs mwea)
+        {
+            Event e = new Event();
+            e.Type = EventType.MouseWheelMoved;
+            e.MouseWheel.Delta = mwea.Delta;
+            e.MouseWheel.X = mwea.X;
+            e.MouseWheel.Y = mwea.Y;
+            SaveEvent(e);
+        }
+
 		public static void OnGainnedFocus(Object sender, EventArgs ea)
 		{
 			Event e = new Event();
@@ -479,15 +490,42 @@ namespace RaahnSimulation
 			s.eventQueue.Enqueue(e);
 		}
 
+        public bool GetHeadLess()
+        {
+            return headLess;
+        }
+
+        public bool GetWindowHasFocus()
+        {
+            return windowHasFocus;
+        }
+
+        public uint GetWindowWidth()
+        {
+            return windowWidth;
+        }
+
+        public uint GetWindowHeight()
+        {
+            return windowHeight;
+        }
+
         public float GetDeltaTime()
         {
             return deltaTime;
         }
+
+        public State GetState()
+        {
+            return states[states.Count - 1];
+        }
+
 		public Window GetWindow()
 		{
 			return simWindow;
 		}
-		public Camera GetCamera()
+		
+        public Camera GetCamera()
 		{
 			return camera;
 		}
@@ -502,30 +540,16 @@ namespace RaahnSimulation
             return stopwatch;
         }
 
-		public uint GetWindowWidth()
-		{
-			return windowWidth;
-		}
 		public void SetWindowWidth(uint width)
 		{
 			windowWidth = width;
 		}
-		public uint GetWindowHeight()
-		{
-			return windowHeight;
-		}
+
 		public void SetWindowHeight(uint height)
 		{
 			windowHeight = height;
 		}
-		public bool GetHeadLess()
-		{
-			return headLess;
-		}
-		public bool GetWindowHasFocus()
-		{
-			return windowHasFocus;
-		}
+
 		public void SetWindowHasFocus(bool focus)
 		{
 			windowHasFocus = focus;

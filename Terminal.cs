@@ -5,7 +5,7 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-    public class Terminal
+    public class Terminal : Updateable
     {
         private const uint COMMAND_COUNT = 2;
 

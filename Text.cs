@@ -14,7 +14,6 @@ namespace RaahnSimulation
 		private float charWidth;
 		private Utils.Vector2 charTexPos;
 		private Utils.Vector2 charCenter;
-        private Utils.Vector3 color;
 
 		public Text()
 		{
@@ -28,7 +27,8 @@ namespace RaahnSimulation
 	        texture = TextureManager.TextureType.CHAR_MAP;
             charTexPos = new Utils.Vector2(0.0f, 0.0f);
             charCenter = new Utils.Vector2(0.0f, 0.0f);
-            color = new Utils.Vector3(0.0f, 0.0f, 0.0f);
+            //Initially black.
+            SetColor(0.0f, 0.0f, 0.0f);
 	    }
 
 	    ~Text()

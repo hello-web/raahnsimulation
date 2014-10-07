@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{263F2BCA-3373-44D3-AF09-E73AFF944351}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>RAAHN_Test</RootNamespace>
+    <AssemblyName>RAAHN_Test</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DebugForx86|x86' ">
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x86\DebugForx86</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="Camera.cs" />
+    <Compile Include="Car.cs" />
+    <Compile Include="ClickableEntity.cs" />
+    <Compile Include="Cursor.cs" />
+    <Compile Include="Entity.cs" />
+    <Compile Include="EntityPanel.cs" />
+    <Compile Include="Graphic.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="MapBuilder.cs" />
+    <Compile Include="MapState.cs" />
+    <Compile Include="MenuState.cs" />
+    <Compile Include="Road.cs" />
+    <Compile Include="RoadMap.cs" />
+    <Compile Include="RoadPool.cs" />
+    <Compile Include="SimState.cs" />
+    <Compile Include="Simulator.cs" />
+    <Compile Include="State.cs" />
+    <Compile Include="Text.cs" />
+    <Compile Include="TextureManager.cs" />
+    <Compile Include="ToggleText.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="EntityPool.cs" />
+    <Compile Include="Terminal.cs" />
+    <Compile Include="TextPool.cs" />
+    <Compile Include="AABB.cs" />
+    <Compile Include="Button.cs" />
+    <Compile Include="ColorableEntity.cs" />
+    <Compile Include="Updateable.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Tao.OpenGl" />
+    <Reference Include="sfmlnet-window-2" />
+    <Reference Include="sfmlnet-graphics-2" />
+  </ItemGroup>
+</Project>

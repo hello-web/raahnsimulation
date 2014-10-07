@@ -10,21 +10,36 @@ namespace RaahnSimulation
         public class Vector2
         {
             public float x, y;
+
             public Vector2(float _x, float _y)
             {
                 x = _x;
                 y = _y;
+            }
+
+            public void Copy(Utils.Vector2 copyVec)
+            {
+                x = copyVec.x;
+                y = copyVec.y;
             }
         }
 
         public class Vector3
         {
             public float x, y, z;
+
             public Vector3(float _x, float _y, float _z)
             {
                 x = _x;
                 y = _y;
                 z = _z;
+            }
+
+            public void Copy(Utils.Vector3 copyVec)
+            {
+                x = copyVec.x;
+                y = copyVec.y;
+                z = copyVec.z;
             }
         }
 
@@ -32,6 +47,7 @@ namespace RaahnSimulation
         {
             public Vector3 xyz;
             public Vector2 uv;
+
             public Vertex(Vector3 vecPos, Vector2 texVec)
             {
                 xyz = vecPos;
@@ -41,9 +57,10 @@ namespace RaahnSimulation
 
         public class Rect
         {
-            public float top, bottom, left, right;
+            public float left, right, bottom, top;
             public float width, height;
             public Vector2 ll, lr, ul, ur;
+
             public Rect()
             {
                 ll = new Vector2(0.0f, 0.0f);
@@ -55,6 +72,22 @@ namespace RaahnSimulation
                 bottom = 0.0f;
                 left = 0.0f;
                 right = 0.0f;
+            }
+
+            public void Copy(Utils.Rect copyRect)
+            {
+                left = copyRect.left;
+                right = copyRect.right;
+                bottom = copyRect.bottom;
+                top = copyRect.top;
+
+                width = copyRect.width;
+                height = copyRect.height;
+
+                ll.Copy(copyRect.ll);
+                lr.Copy(copyRect.lr);
+                ul.Copy(copyRect.ul);
+                ur.Copy(copyRect.ur);
             }
         }
 
@@ -84,7 +117,7 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.425";
+		public const string VERSION_STRING = "Version 1.5";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";

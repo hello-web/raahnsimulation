@@ -7,7 +7,7 @@ namespace RaahnSimulation
 	{
 	    private static MapState mapState = new MapState();
 		private bool panning;
-		private Camera cam;
+		private Camera camera;
 		private Cursor cursor;
 		private EntityPanel entityPanel;
 		private MapBuilder mapBuilder;
@@ -15,7 +15,7 @@ namespace RaahnSimulation
 	    public MapState()
 	    {
 	        panning = false;
-	        cam = null;
+            camera = null;
 	        entityPanel = null;
 	        mapBuilder = null;
 	    }
@@ -24,40 +24,50 @@ namespace RaahnSimulation
 	    {
 	        base.Init(sim);
 
-	        cam = context.GetCamera();
+	        camera = context.GetCamera();
 
 	        context.GetWindow().SetMouseCursorVisible(false);
 
 	        cursor = new Cursor(context);
 
-	        entityPanel = new EntityPanel(context, cursor);
+	        entityPanel = new EntityPanel(context, cursor, 1);
 
-	        mapBuilder = new MapBuilder(context, cursor, cam, entityPanel);
+	        mapBuilder = new MapBuilder(context, cursor, camera, entityPanel, 0);
 
-	        entityList.Add(entityPanel);
-	        entityList.Add(mapBuilder);
-	        entityList.Add(cursor);
+            AddEntity(cursor, 2);
 	    }
 
 	    public override void Update()
 	    {
+            if (entityPanel.Intersects(cursor.aabb.GetBounds()))
+                panning = false;
 	        if (panning)
 	        {
 	            Utils.Vector2 deltaPos = cursor.GetDeltaPosition();
-	            cam.IncrementPosition(new Utils.Vector2(-deltaPos.x, -deltaPos.y));
+	            camera.IncrementPosition(new Utils.Vector2(-deltaPos.x, -deltaPos.y));
 	        }
-	        //Perform camera transformations before updating positions.
-	        base.Update();
 
-	        if (!Mouse.IsButtonPressed(Mouse.Button.Left))
-	            panning = false;
-	        if (Mouse.IsButtonPressed(Mouse.Button.Left) && !entityPanel.Intersects(cursor.aabb.GetBounds())
-	        && !mapBuilder.GetFloating() && context.GetWindowHasFocus())
-	            panning = true;
+	        //Perform camera transformations before updating positions.
+            entityPanel.Update();
+            mapBuilder.Update();
+	        base.Update();
 	    }
 
         public override void UpdateEvent(Event e)
         {
+            //Update mapBuilder before checking whether or not to pan.
+            mapBuilder.UpdateEvent(e);
+            if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
+            {
+                if (!entityPanel.Intersects(cursor.aabb.GetBounds())
+                && !mapBuilder.Floating() && context.GetWindowHasFocus())
+                panning = true;
+            }
+
+            if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
+                panning = false;
+
+            entityPanel.UpdateEvent(e);
             base.UpdateEvent(e);
         }
 

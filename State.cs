@@ -7,69 +7,167 @@ namespace RaahnSimulation
 {
 	public class State
 	{
-		protected List<Entity> entityList;
 		protected Simulator context;
+        //The top most layer is the last layer, layer 2 would be drawn over layer 1.
+        private List<LinkedList<Entity>> layers;
 
 	    protected State()
 	    {
 	        context = null;
-			entityList = new List<Entity>();
+			layers = new List<LinkedList<Entity>>();
+            //Start off with only one layer.
+            layers.Add(new LinkedList<Entity>());
 	    }
 
-	    ~State()
-	    {
-	    }
+        public void AddEntity(Entity entity, int layerIndex)
+        {
+            int layer = layerIndex + 1;
+            if (layer > layers.Count)
+            {
+                for (int i = 0; i < layer; i++)
+                    layers.Add(new LinkedList<Entity>());
+            }
+            layers[layerIndex].AddLast(entity);
+        }
+
+        public void ChangeLayer(Entity entity, int newLayerIndex)
+        {
+            bool shouldBreak = false;
+            bool removed = false;
+
+            for (int i = 0; i < layers.Count; i++)
+            {
+                foreach (Entity curEntity in layers[i])
+                {
+                    if (curEntity == entity)
+                    {
+                        //If the new layer is the same as the old, skip it.
+                        if (i != newLayerIndex)
+                        {
+                            layers[i].Remove(entity);
+                            removed = true;
+                        }
+                        shouldBreak = true;
+                        break;
+                    }
+                }
+                if (shouldBreak)
+                {
+                    /*If the layer has no more entities remove it, unless it is
+                    the first layer because we always want at least one layer.*/
+                    if (layers[i].Count == 0 && i != 0)
+                        layers.RemoveAt(i);
+                    break;
+                }
+            }
+            if (removed)
+                AddEntity(entity, newLayerIndex);
+        }
+
+        public void RemoveEntity(Entity entity)
+        {
+            bool shouldBreak = false;
+
+            for (int i = 0; i < layers.Count; i++)
+            {
+                foreach (Entity curEntity in layers[i])
+                {
+                    if (curEntity == entity)
+                    {
+                        layers[i].Remove(entity);
+                        shouldBreak = true;
+                        break;
+                    }
+                }
+                if (shouldBreak)
+                {
+                    //If the layer has no more entities remove it.
+                    if (layers[i].Count == 0)
+                        layers.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        public int GetTopLayerIndex()
+        {
+            return layers.Count - 1;
+        }
 
 	    public virtual void Init(Simulator sim)
 	    {
 	        context = sim;
 	    }
 
-	    /*This method should be called at the
-	    beginning of the subclass's update method.
-	    Make sure to avoid event handling if
-	    currentEvent is null*/
+	    /*This method should be called to update
+        all entities within the state.*/
 	    public virtual void Update()
 	    {
-	        for (int i = 0; i < entityList.Count; i++)
-	            entityList[i].Update();
+            for (int i = 0; i < layers.Count; i++)
+            {
+                foreach (Entity curEntity in layers[i])
+                    curEntity.Update();
+            }
 	    }
 
+        /*This method should be called to update all
+        entities within the state with an event that just occured.*/
         public virtual void UpdateEvent(Event e)
         {
-            for (int i = 0; i < entityList.Count; i++)
-                entityList[i].UpdateEvent(e);
+            for (int i = 0; i < layers.Count; i++)
+            {
+                foreach (Entity curEntity in layers[i])
+                    curEntity.UpdateEvent(e);
+            }
         }
 
+        /*This method should be called to draw all entities
+        within the state. and debugging information for them.*/
 	    public virtual void Draw()
 	    {
-	        for (int i = 0; i < entityList.Count; i++)
+	        for (int i = 0; i < layers.Count; i++)
 	        {
-	            Gl.glPushMatrix();
-
-	            entityList[i].Draw();
-
-	            Gl.glPopMatrix();
-
-                if (context.debugging)
+                foreach (Entity curEntity in layers[i])
                 {
-                    Gl.glPushMatrix();
+                    if (curEntity.visible)
+                    {
+                        Gl.glPushMatrix();
 
-                    Gl.glDisable(Gl.GL_TEXTURE_2D);
+                        Utils.Vector3 color = curEntity.GetColor();
 
-                    Gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+                        Gl.glColor4f(color.x, color.y, color.z, curEntity.GetTransparency());
 
-                    // Disable camera transformation.
-                    if (entityList[i].drawingVec == entityList[i].windowPos)
-                        Gl.glLoadIdentity();
+                        // Disable camera transformation.
+                        if (curEntity.drawingVec == curEntity.windowPos)
+                            Gl.glLoadIdentity();
 
-                    entityList[i].DebugDraw();
+                        curEntity.Draw();
 
-                    Gl.glPopMatrix();
+                        Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-                    Gl.glEnable(Gl.GL_TEXTURE_2D);
+                        Gl.glPopMatrix();
 
-                    Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                        if (context.debugging)
+                        {
+                            Gl.glPushMatrix();
+
+                            Gl.glDisable(Gl.GL_TEXTURE_2D);
+
+                            Gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+
+                            // Disable camera transformation.
+                            if (curEntity.drawingVec == curEntity.windowPos)
+                                Gl.glLoadIdentity();
+
+                            curEntity.DebugDraw();
+
+                            Gl.glPopMatrix();
+
+                            Gl.glEnable(Gl.GL_TEXTURE_2D);
+
+                            Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                        }
+                    }
                 }
 	        }
 	    }
@@ -84,7 +182,9 @@ namespace RaahnSimulation
 
 	    public virtual void Clean()
 	    {
-	        entityList.Clear();
+            for (int i = 0; i < layers.Count; i++)
+                layers[i].Clear();
+            layers.Clear();
 	    }
 	}
 }

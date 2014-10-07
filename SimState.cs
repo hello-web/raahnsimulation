@@ -29,8 +29,8 @@ namespace RaahnSimulation
 	        raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
 	        raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
 
-	        entityList.Add(roadMap);
-	        entityList.Add(raahnCar);
+            AddEntity(roadMap, 0);
+            AddEntity(raahnCar, 0);
 	    }
 
 	    public override void Update()
