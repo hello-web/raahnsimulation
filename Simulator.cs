@@ -57,7 +57,8 @@ namespace RaahnSimulation
 	        headLess = false;
             terminalOpen = false;
             debugging = false;
-	        windowHasFocus = false;
+            //Upon initial creation of the window, some OSes will not raise a GainnedFocus event.
+	        windowHasFocus = true;
 	        stateChangeRequested = false;
 
             terminalKey = Keyboard.Key.F1;

@@ -103,7 +103,7 @@ namespace RaahnSimulation
             trash.windowPos.x = (float)context.GetWindowWidth() - trash.GetWidth() - xBorderOffset;
             trash.windowPos.y = yBorderOffset;
 
-            currentState.AddEntity(background, 1);
+            currentState.AddEntity(background, layerIndex);
             for (int i = 0; i < RoadMap.UNIQUE_ROAD_COUNT; i++)
                 currentState.AddEntity(items[i], layerIndex);
             currentState.AddEntity(panelOption, layerIndex);

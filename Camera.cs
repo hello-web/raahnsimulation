@@ -32,9 +32,9 @@ namespace RaahnSimulation
 	    {
 	        Gl.glTranslatef(-vecPos.x, -vecPos.y, Utils.DISCARD_Z_POS);
 
-            Gl.glTranslatef(zoomPoint.x, zoomPoint.y, Utils.DISCARD_Z_POS);
+            Gl.glTranslatef(zoomPoint.x, zoomPoint.y, Utils.DISCARD_Z_SCALE);
             Gl.glScalef(zoom, zoom, Utils.DISCARD_Z_SCALE);
-            Gl.glTranslatef(-zoomPoint.x, -zoomPoint.y, -Utils.DISCARD_Z_POS);
+            Gl.glTranslatef(-zoomPoint.x, -zoomPoint.y, -Utils.DISCARD_Z_SCALE);
 	    }
 
 	    public void SetPosition(Utils.Vector2 pos)

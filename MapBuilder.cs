@@ -61,7 +61,7 @@ namespace RaahnSimulation
             floatingExactAngle = 0.0f;
             dist = new Utils.Vector2(0.0f, 0.0f);
 
-            currentState.AddEntity(flag, currentState.GetTopLayerIndex());
+            currentState.AddEntity(flag, stateLayer + 1);
 	    }
 
 	    ~MapBuilder()
@@ -78,50 +78,6 @@ namespace RaahnSimulation
 	    {
 	        if (entityFloating != null)
 	            UpdateEntityFloating();
-	        else if (!MapState.Instance().GetPanning())
-	        {
-	            /*int selectedEntity = entityPanel.GetSelectedEntity();
-	            if (selectedEntity != -1)
-	            {
-	                AddEntity(selectedEntity);
-	                dist = entityPanel.GetDist(cursor.worldPos.x, cursor.worldPos.y);
-	                UpdateEntityFloating();
-	            }*/
-	            /*else
-	            {
-	                /*Iterate backwards to find the element drawn
-	                on top, elements are drawn in ascending order.*/
-                    /*bool shouldBreak = false;
-	                for (int x = entities.Count - 1; x >= 0; x--)
-	                {
-                        foreach (ColorableEntity curEntity in entities[x])
-                        {
-                            //The cursor's bounds are in window coordinates, we need world coordinates.
-                            Utils.Rect comparisonRect;
-                            comparisonRect = Entity.WindowToWorld(cursor.aabb.GetBounds(), cam);
-
-                            if (curEntity.Intersects(comparisonRect) && Mouse.IsButtonPressed(Mouse.Button.Left))
-                            {
-                                entityFloating = curEntity;
-                                entityFloating.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
-                                currentState.ChangeLayer(entityFloating, currentState.GetTopLayerIndex() - 1);
-
-                                dist.x = cursor.worldPos.x - curEntity.worldPos.x;
-                                dist.y = cursor.worldPos.y - curEntity.worldPos.y;
-
-                                floatingExactAngle = entityFloating.angle;
-
-                                UpdateEntityFloating();
-                                shouldBreak = true;
-                            }
-                            if (shouldBreak)
-                                break;
-                        }
-                        if (shouldBreak)
-                            break;
-	                }
-	            }*/
-	        }
 
             if (entityFloating != null)
             {
@@ -273,6 +229,18 @@ namespace RaahnSimulation
         private void UpdateEntityFloating()
         {
             Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
+
+            //Make sure the mouse is in bounds.
+            if (mousePosi.X < 0 || mousePosi.Y < 0
+            || mousePosi.X > context.GetWindowWidth() || mousePosi.Y > context.GetWindowHeight())
+            {
+                //Change the entitiy's color back to its original upon dropping it.
+                entityFloating.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+                currentState.ChangeLayer(entityFloating, layer);
+                entityFloating = null;
+                return;
+            }
+
             float x = (float)(mousePosi.X) - (cursor.GetWidth() / 2.0f) - dist.x;
             float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.GetHeight() - dist.y;
             Utils.Vector2 mousePosf = new Utils.Vector2(x, y);

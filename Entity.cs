@@ -120,6 +120,18 @@ namespace RaahnSimulation
 	            context.GetTexMan().SetTexture(texture);
 	    }
 
+        public static Utils.Vector2 WorldToWindow(float worldX, float worldY, Camera cam)
+        {
+            Utils.Vector2 camPos = cam.GetPosition();
+            return new Utils.Vector2(worldX - camPos.x, worldY - camPos.y);
+        }
+
+        public static Utils.Vector2 WindowToWorld(float windowX, float windowY, Camera cam)
+        {
+            Utils.Vector2 camPos = cam.GetPosition();
+            return new Utils.Vector2(windowX + camPos.x, windowY + camPos.y);
+        }
+
 		public static Utils.Vector2 WorldToWindow(Utils.Vector2 world, Camera cam)
 		{
 			Utils.Vector2 camPos = cam.GetPosition();

@@ -30,18 +30,25 @@ namespace RaahnSimulation
 
 	        cursor = new Cursor(context);
 
-	        entityPanel = new EntityPanel(context, cursor, 1);
+	        entityPanel = new EntityPanel(context, cursor, 2);
 
 	        mapBuilder = new MapBuilder(context, cursor, camera, entityPanel, 0);
 
-            AddEntity(cursor, 2);
+            AddEntity(cursor, 3);
 	    }
 
 	    public override void Update()
 	    {
-            if (entityPanel.Intersects(cursor.aabb.GetBounds()))
+            bool mouseOutOfBounds = false;
+            Vector2i mouseWindowPos = Mouse.GetPosition(context.GetWindow());
+            if (mouseWindowPos.X < 0 || mouseWindowPos.Y < 0)
+                mouseOutOfBounds = true;
+            else if (mouseWindowPos.X > context.GetWindowWidth() || mouseWindowPos.Y > context.GetWindowHeight())
+                mouseOutOfBounds = true;
+
+            if (entityPanel.Intersects(cursor.aabb.GetBounds()) || mouseOutOfBounds)
                 panning = false;
-	        if (panning)
+	        else if (panning) //If we just set panning to false, no need to pan. else if is better.
 	        {
 	            Utils.Vector2 deltaPos = cursor.GetDeltaPosition();
 	            camera.IncrementPosition(new Utils.Vector2(-deltaPos.x, -deltaPos.y));
@@ -57,11 +64,12 @@ namespace RaahnSimulation
         {
             //Update mapBuilder before checking whether or not to pan.
             mapBuilder.UpdateEvent(e);
+
             if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
             {
                 if (!entityPanel.Intersects(cursor.aabb.GetBounds())
                 && !mapBuilder.Floating() && context.GetWindowHasFocus())
-                panning = true;
+                    panning = true;
             }
 
             if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
