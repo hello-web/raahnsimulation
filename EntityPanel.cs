@@ -174,14 +174,18 @@ namespace RaahnSimulation
 			}
 			return -1;
 		}
-		public Utils.Vector2 GetDist(float x, float y)
+		public Utils.Vector2 GetDist(float x, float y, Camera cam)
 		{
 			int index = GetSelectedEntity();
 			if (index == -1)
 				return new Utils.Vector2(0.0f, 0.0f);
-			float distX = x - items[index].worldPos.x;
-			float distY = y - items[index].worldPos.y;
-			return new Utils.Vector2(distX, distY);
+
+            float zoom = cam.GetZoom();
+
+            float distX = (x - items[index].worldPos.x) * zoom;
+			float distY = (y - items[index].worldPos.y) * zoom;
+
+            return new Utils.Vector2(distX, distY);
 		}
 	}
 }

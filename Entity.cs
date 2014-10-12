@@ -73,13 +73,13 @@ namespace RaahnSimulation
 	        Camera cam = context.GetCamera();
             if (drawingVec == windowPos)
             {
-                Utils.Vector2 transform = Entity.WindowToWorld(windowPos, cam);
+                Utils.Vector2 transform = cam.WindowToWorld(windowPos);
                 worldPos.x = transform.x;
                 worldPos.y = transform.y;
             }
             else
             {
-                Utils.Vector2 transform = Entity.WorldToWindow(worldPos, cam);
+                Utils.Vector2 transform = cam.WorldToWindow(worldPos);
                 windowPos.x = transform.x;
                 windowPos.y = transform.y;
             }
@@ -111,7 +111,7 @@ namespace RaahnSimulation
 
         public virtual void UpdateEvent(Event e)
         {
-            Update();
+
         }
 
 	    public virtual void Draw()
@@ -119,58 +119,6 @@ namespace RaahnSimulation
 	        if (context.GetTexMan().GetCurrentTexture() != texture)
 	            context.GetTexMan().SetTexture(texture);
 	    }
-
-        public static Utils.Vector2 WorldToWindow(float worldX, float worldY, Camera cam)
-        {
-            Utils.Vector2 camPos = cam.GetPosition();
-            return new Utils.Vector2(worldX - camPos.x, worldY - camPos.y);
-        }
-
-        public static Utils.Vector2 WindowToWorld(float windowX, float windowY, Camera cam)
-        {
-            Utils.Vector2 camPos = cam.GetPosition();
-            return new Utils.Vector2(windowX + camPos.x, windowY + camPos.y);
-        }
-
-		public static Utils.Vector2 WorldToWindow(Utils.Vector2 world, Camera cam)
-		{
-			Utils.Vector2 camPos = cam.GetPosition();
-            return new Utils.Vector2(world.x - camPos.x, world.y - camPos.y);
-		}
-
-		public static Utils.Vector2 WindowToWorld(Utils.Vector2 window, Camera cam)
-		{
-			Utils.Vector2 camPos = cam.GetPosition();
-            return new Utils.Vector2(window.x + camPos.x, window.y + camPos.y);
-		}
-
-        //Only transforms bounding properties.
-        public static Utils.Rect WorldToWindow(Utils.Rect world, Camera cam)
-        {
-            Utils.Vector2 camPos = cam.GetPosition();
-            Utils.Rect transform = new Utils.Rect();
-
-            transform.left = world.left - camPos.x;
-            transform.right = world.right - camPos.x;
-            transform.bottom = world.bottom - camPos.y;
-            transform.top = world.top - camPos.y;
-
-            return transform;
-        }
-
-        //Only transforms bounding properties.
-        public static Utils.Rect WindowToWorld(Utils.Rect window, Camera cam)
-        {
-            Utils.Vector2 camPos = cam.GetPosition();
-            Utils.Rect transform = new Utils.Rect();
-
-            transform.left = window.left + camPos.x;
-            transform.right = window.right + camPos.x;
-            transform.bottom = window.bottom + camPos.y;
-            transform.top = window.top + camPos.y;
-
-            return transform;
-        }
 
         public float GetWidth()
         {

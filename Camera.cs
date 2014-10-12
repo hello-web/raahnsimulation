@@ -4,16 +4,14 @@ namespace RaahnSimulation
 {
 	public class Camera
 	{
-        public const float MOUSE_SCROLL_ZOOM = 0.25f;
+        public const float MOUSE_SCROLL_ZOOM = 1.25f;
 
         private float zoom;
 		private Utils.Vector2 vecPos;
-        private Utils.Vector2 zoomPoint;
 
 	    public Camera()
 	    {
 	        vecPos = new Utils.Vector2(0.0f, 0.0f);
-            zoomPoint = new Utils.Vector2(0.0f, 0.0f);
             Reset();
 	    }
 
@@ -23,46 +21,96 @@ namespace RaahnSimulation
 
             vecPos.x = 0.0f;
             vecPos.y = 0.0f;
-
-            zoomPoint.x = 0.0f;
-            zoomPoint.y = 0.0f;
         }
 
 	    public void Transform()
 	    {
-	        Gl.glTranslatef(-vecPos.x, -vecPos.y, Utils.DISCARD_Z_POS);
-
-            Gl.glTranslatef(zoomPoint.x, zoomPoint.y, Utils.DISCARD_Z_SCALE);
             Gl.glScalef(zoom, zoom, Utils.DISCARD_Z_SCALE);
-            Gl.glTranslatef(-zoomPoint.x, -zoomPoint.y, -Utils.DISCARD_Z_SCALE);
+            Gl.glTranslatef(-vecPos.x, -vecPos.y, Utils.DISCARD_Z_POS);
 	    }
 
-	    public void SetPosition(Utils.Vector2 pos)
+	    public void Pan(float dx, float dy)
 	    {
-	        vecPos.x = pos.x;
-	        vecPos.y = pos.y;
+	        vecPos.x += dx / zoom;
+	        vecPos.y += dy / zoom;
 	    }
 
-	    public void IncrementPosition(Utils.Vector2 pos)
-	    {
-	        vecPos.x += pos.x;
-	        vecPos.y += pos.y;
-	    }
-
-        public void SetZoom(float newZoom)
+        public void Zoom(float zoomFactor)
         {
-            zoom = newZoom;
+            zoom *= zoomFactor;
         }
 
-        public void SetZoomPoint(float x, float y)
+        public void ZoomTo(float x, float y, float zoomFactor)
         {
-            zoomPoint.x = x;
-            zoomPoint.y = y;
+            Pan(x, y);
+            Zoom(zoomFactor);
+            Pan(-x, -y);
         }
 
-        public void IncrementZoom(float zoomChange)
+        public Utils.Vector2 WorldToWindow(float worldX, float worldY)
         {
-            zoom += zoomChange;
+            //float x = (worldX - ((zoomPoint.x - worldX) * (zoom - 1.0f))) - vecPos.x;
+            //float y = (worldY - ((zoomPoint.y - worldY) * (zoom - 1.0f))) - vecPos.y;
+            //float x = (worldX * zoom) - vecPos.x;
+            //float y = (worldY * zoom) - vecPos.y;
+            float x = (worldX - vecPos.x) * zoom;
+            float y = (worldY - vecPos.y) * zoom;
+            return new Utils.Vector2(x, y);
+        }
+
+        public Utils.Vector2 WindowToWorld(float windowX, float windowY)
+        {
+            //Utils.Vector2 zoomPointWindow = WorldToWindow(zoomPoint);
+            //float x = (windowX + vecPos.x) + ((zoomPointWindow.x - windowX) * (zoom - 1.0f));
+            //float y = (windowY + vecPos.y) + ((zoomPointWindow.y - windowY) * (zoom - 1.0f));
+            //float x = (zoomPoint.x + ((windowX - zoomPoint.x) / zoom)) + vecPos.x;
+            //float y = (zoomPoint.y + ((windowY - zoomPoint.y) / zoom)) + vecPos.y;
+            //float x = (windowX + vecPos.x) / zoom;
+            //float y = (windowY + vecPos.y) / zoom;
+            float x = (windowX / zoom) + vecPos.x;
+            float y = (windowY / zoom) + vecPos.y;
+            return new Utils.Vector2(x, y);
+        }
+
+        public Utils.Vector2 WorldToWindow(Utils.Vector2 world)
+        {
+            return WorldToWindow(world.x, world.y);
+        }
+
+        public Utils.Vector2 WindowToWorld(Utils.Vector2 window)
+        {
+            return WindowToWorld(window.x, window.y);
+        }
+
+        //Only transforms bounding properties.
+        public Utils.Rect WorldToWindow(Utils.Rect world)
+        {
+            Utils.Rect transform = new Utils.Rect();
+
+            transform.left = (world.left - vecPos.x) * zoom;
+            transform.right = (world.right - vecPos.x) * zoom;
+            transform.bottom = (world.bottom - vecPos.y) * zoom;
+            transform.top = (world.top - vecPos.y) * zoom;
+
+            return transform;
+        }
+
+        //Only transforms bounding properties.
+        public Utils.Rect WindowToWorld(Utils.Rect window)
+        {
+            Utils.Rect transform = new Utils.Rect();
+
+            transform.left = (window.left / zoom) + vecPos.x;
+            transform.right = (window.right / zoom) + vecPos.x;
+            transform.bottom = (window.bottom / zoom) + vecPos.y;
+            transform.top = (window.top / zoom) + vecPos.y;
+
+            return transform;
+        }
+
+        public float GetZoom()
+        {
+            return zoom;
         }
 
 		public Utils.Vector2 GetPosition()

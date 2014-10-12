@@ -81,7 +81,7 @@ namespace RaahnSimulation
 
             if (entityFloating != null)
             {
-                if (entityFloating.Intersects(Entity.WindowToWorld(entityPanel.GetTrash().aabb.GetBounds(), cam)))
+                if (entityFloating.Intersects(cam.WindowToWorld(entityPanel.GetTrash().aabb.GetBounds())))
                 {
                     if (!trashHovering)
                     {
@@ -113,7 +113,7 @@ namespace RaahnSimulation
                     float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.GetHeight();
 
                     Utils.Vector2 mousePosf = new Utils.Vector2(x, y);
-                    Utils.Vector2 transform = Entity.WindowToWorld(mousePosf, cam);
+                    Utils.Vector2 transform = cam.WindowToWorld(mousePosf);
 
                     flag.worldPos.x = transform.x;
                     flag.worldPos.y = transform.y;
@@ -132,7 +132,7 @@ namespace RaahnSimulation
                     if (selectedEntity != -1)
                     {
                         AddEntity(selectedEntity);
-                        dist = entityPanel.GetDist(cursor.worldPos.x, cursor.worldPos.y);
+                        dist = entityPanel.GetDist(cursor.worldPos.x, cursor.worldPos.y, cam);
                         UpdateEntityFloating();
                     }
                     else
@@ -145,13 +145,15 @@ namespace RaahnSimulation
                             {
                                 //The cursor's bounds are in window coordinates, we need world coordinates.
                                 Utils.Rect comparisonRect;
-                                comparisonRect = Entity.WindowToWorld(cursor.aabb.GetBounds(), cam);
+                                comparisonRect = cam.WindowToWorld(cursor.aabb.GetBounds());
 
                                 if (curEntity.Intersects(comparisonRect) && Mouse.IsButtonPressed(Mouse.Button.Left))
                                 {
                                     entityFloating = curEntity;
                                     entityFloating.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
                                     currentState.ChangeLayer(entityFloating, currentState.GetTopLayerIndex() - 1);
+
+                                    cursor.Update();
 
                                     dist.x = cursor.worldPos.x - curEntity.worldPos.x;
                                     dist.y = cursor.worldPos.y - curEntity.worldPos.y;
@@ -228,11 +230,9 @@ namespace RaahnSimulation
 
         private void UpdateEntityFloating()
         {
-            Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
-
             //Make sure the mouse is in bounds.
-            if (mousePosi.X < 0 || mousePosi.Y < 0
-            || mousePosi.X > context.GetWindowWidth() || mousePosi.Y > context.GetWindowHeight())
+            if (cursor.windowPos.x < 0 || cursor.windowPos.y < 0
+            || cursor.windowPos.x > context.GetWindowWidth() || cursor.windowPos.y > context.GetWindowHeight())
             {
                 //Change the entitiy's color back to its original upon dropping it.
                 entityFloating.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -241,10 +241,8 @@ namespace RaahnSimulation
                 return;
             }
 
-            float x = (float)(mousePosi.X) - (cursor.GetWidth() / 2.0f) - dist.x;
-            float y = (float)(context.GetWindowHeight() - mousePosi.Y) - cursor.GetHeight() - dist.y;
-            Utils.Vector2 mousePosf = new Utils.Vector2(x, y);
-            UpdatePosition(Entity.WindowToWorld(mousePosf, cam));
+            Utils.Vector2 mousePosf = new Utils.Vector2(cursor.worldPos.x - dist.x, cursor.worldPos.y - dist.y);
+            UpdatePosition(mousePosf);
 
             UpdateAngle();
         }

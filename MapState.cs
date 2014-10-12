@@ -51,7 +51,7 @@ namespace RaahnSimulation
 	        else if (panning) //If we just set panning to false, no need to pan. else if is better.
 	        {
 	            Utils.Vector2 deltaPos = cursor.GetDeltaPosition();
-	            camera.IncrementPosition(new Utils.Vector2(-deltaPos.x, -deltaPos.y));
+	            camera.Pan(-deltaPos.x, -deltaPos.y);
 	        }
 
 	        //Perform camera transformations before updating positions.
@@ -62,6 +62,14 @@ namespace RaahnSimulation
 
         public override void UpdateEvent(Event e)
         {
+            if (e.Type == EventType.MouseWheelMoved)
+            {
+                if (e.MouseWheel.Delta > 0)
+                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (float)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
+                else
+                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (float)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
+            }
+
             //Update mapBuilder before checking whether or not to pan.
             mapBuilder.UpdateEvent(e);
 

@@ -25,8 +25,6 @@ namespace RaahnSimulation
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Right))
 	            angle -= CAR_ROTATE_SPEED * context.GetDeltaTime();
 
-	        base.Update();
-
 	        if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
 	        {
 	            worldPos.x += velocity.x * context.GetDeltaTime();
@@ -37,6 +35,8 @@ namespace RaahnSimulation
 	            worldPos.x -= velocity.x * context.GetDeltaTime();
 	            worldPos.y -= velocity.y * context.GetDeltaTime();
 	        }
+
+            base.Update();
 	    }
 
         public override void UpdateEvent(Event e)
@@ -47,8 +47,6 @@ namespace RaahnSimulation
 		public override void Draw()
 	    {
 	        base.Draw();
-
-	        Gl.glLoadIdentity();
 
 	        RotateAroundCenter();
 

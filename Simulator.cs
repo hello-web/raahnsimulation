@@ -266,7 +266,7 @@ namespace RaahnSimulation
 
 	        Gl.glLoadIdentity();
 
-	        Gl.glOrtho(0.0, windowWidth, 0.0, windowHeight, -1.0, 1.0);
+	        Gl.glOrtho(0.0, (double)windowWidth, 0.0, (double)windowHeight, -1.0, 1.0);
 
 	        Gl.glMatrixMode(Gl.GL_MODELVIEW);
 

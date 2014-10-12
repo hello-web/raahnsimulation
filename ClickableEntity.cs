@@ -42,7 +42,7 @@ namespace RaahnSimulation
             if (drawingVec == windowPos)
                 comparisonVec = mousePosWindowf;
             else
-                comparisonVec = Entity.WindowToWorld(mousePosWindowf, context.GetCamera());
+                comparisonVec = context.GetCamera().WindowToWorld(mousePosWindowf);
 
 	        if (Intersects(comparisonVec.x, comparisonVec.y))
 	        {
