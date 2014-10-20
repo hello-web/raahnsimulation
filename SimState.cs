@@ -9,6 +9,8 @@ namespace RaahnSimulation
 		private const float CAR_HEIGHT_SCALE = 0.1f;
 
 	    private static SimState simState = new SimState();
+
+        private QuadTree quadTree;
         private Camera camera;
 		private Car raahnCar;
 		private RoadMap roadMap;
@@ -24,21 +26,27 @@ namespace RaahnSimulation
 
             camera = context.GetCamera();
 
-	        roadMap = new RoadMap(context, Utils.ROAD_FILE);
+            quadTree = new QuadTree(new AABB((float)context.GetWindowWidth(), (float)context.GetWindowHeight()));
+
+	        roadMap = new RoadMap(context, 0, quadTree, Utils.ROAD_FILE);
 
 	        raahnCar = new Car(context);
 	        raahnCar.SetWidth((float)context.GetWindowWidth() * CAR_WIDTH_SCALE);
 	        raahnCar.SetHeight((float)context.GetWindowHeight() * CAR_HEIGHT_SCALE);
 	        raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
 	        raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
+            raahnCar.Update();
 
-            AddEntity(roadMap, 0);
             AddEntity(raahnCar, 0);
+
+            quadTree.AddEntity(raahnCar);
 	    }
 
 	    public override void Update()
 	    {
 	        base.Update();
+            roadMap.Update();
+            quadTree.Update();
 	    }
 
         public override void UpdateEvent(Event e)
@@ -54,12 +62,18 @@ namespace RaahnSimulation
                     camera.ZoomTo(mouseX, mouseY, (float)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
             }
 
+            roadMap.UpdateEvent(e);
+
             base.UpdateEvent(e);
         }
 
 	    public override void Draw()
 	    {
 	        base.Draw();
+            if (context.debugging)
+            {
+                quadTree.DebugDraw();
+            }
 	    }
 
 	    public override void Clean()

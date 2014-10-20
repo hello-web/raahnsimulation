@@ -7,7 +7,7 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public class RoadMap : Entity
+	public class RoadMap : Updateable
 	{
 		public static readonly float[] ROAD_WIDTH_PERCENTAGES = { RWP0, RWP1 };
 		public static readonly float[] ROAD_HEIGHT_PERCENTAGES = { RHP0, RHP1 };
@@ -23,23 +23,55 @@ namespace RaahnSimulation
         private const float RHP0 = 0.205925926f * 0.8f;
         private const float RHP1 = 0.293333333f * 0.8f;
 
+        private int layer;
 		private List<Road> roads;
 		private StreamReader fileStr;
+        private Simulator context;
+        private State currentState;
+        private QuadTree quadTree;
 
-	    public RoadMap(Simulator sim) : base(sim)
+	    public RoadMap(Simulator sim, int layerIndex)
 	    {
-            Construct();
+            Construct(sim, layerIndex);
 	    }
 
-	    public RoadMap(Simulator sim, string fileName) : base(sim)
+	    public RoadMap(Simulator sim, int layerIndex, QuadTree tree, string fileName)
 	    {
-            Construct();
+            Construct(sim, layerIndex);
+
+            quadTree = tree;
+
 	        InitFromFile(fileName);
 	    }
 
-        private void Construct()
+        public void SetQuadTree(QuadTree tree)
+        {
+            quadTree = tree;
+        }
+
+        public bool Load(string fileName)
+        {
+            if (!InitFromFile(fileName))
+                return false;
+            return true;
+        }
+
+        public void Update()
+        {
+
+        }
+
+        public void UpdateEvent(Event e)
+        {
+
+        }
+
+        private void Construct(Simulator sim, int layerIndex)
         {
             roads = new List<Road>();
+            context = sim;
+            currentState = context.GetState();
+            layer = layerIndex;
         }
 
 	    ~RoadMap()
@@ -50,19 +82,12 @@ namespace RaahnSimulation
 	        }
 	    }
 
-	    public bool Load(string fileName)
-	    {
-	        if (!InitFromFile(fileName))
-	            return false;
-	        return true;
-	    }
-
 	    private bool InitFromFile(string fileName)
 	    {
 	        Road newRoad;
 	        string buffer;
 
-			if (!File.Exists (fileName))
+			if (!File.Exists(fileName))
 				return false;
 
 			fileStr = null;
@@ -124,7 +149,12 @@ namespace RaahnSimulation
 		            newRoad.angle = angle;
 		            newRoad.SetWidth((float)context.GetWindowWidth() * ROAD_WIDTH_PERCENTAGES[road]);
 		            newRoad.SetHeight((float)context.GetWindowHeight() * ROAD_HEIGHT_PERCENTAGES[road]);
+                    newRoad.Update();
 		            roads.Add(newRoad);
+
+                    currentState.AddEntity(newRoad, layer);
+                    if (quadTree != null)
+                        quadTree.AddEntity(newRoad);
 		        }
 			}
 			finally 
@@ -133,46 +163,5 @@ namespace RaahnSimulation
 			}
 	        return true;
 	    }
-
-	    public override void Update()
-	    {
-	        for (int i = 0; i < roads.Count; i++)
-	            roads[i].Update();
-	    }
-
-        public override void UpdateEvent(Event e)
-        {
-            base.UpdateEvent(e);
-            for (int i = 0; i < roads.Count; i++)
-                roads[i].UpdateEvent(e);
-        }
-
-	    public override void Draw()
-	    {
-	        for (int i = 0; i < roads.Count; i++)
-	        {
-	            Gl.glPushMatrix();
-
-	            roads[i].Draw();
-
-	            Gl.glPopMatrix();
-	        }
-	    }
-
-        public override void DebugDraw()
-        {
-            for (int i = 0; i < roads.Count; i++)
-            {
-                Gl.glPushMatrix();
-
-                // Disable camera transformation.
-                if (roads[i].drawingVec == roads[i].windowPos)
-                    Gl.glLoadIdentity();
-
-                roads[i].DebugDraw();
-
-                Gl.glPopMatrix();
-            }
-        }
 	}
 }

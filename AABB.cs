@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Tao.OpenGl;
 
 namespace RaahnSimulation
 {
@@ -10,6 +11,7 @@ namespace RaahnSimulation
         private Utils.Vector2 pos;
         private Utils.Vector2 center;
         private Utils.Rect bounds;
+        private Mesh mesh;
 
         public AABB()
         {
@@ -24,6 +26,25 @@ namespace RaahnSimulation
             bounds.ll.y = 0.0f;
 
             SetSize(w, h);
+        }
+
+        public bool Contains(Utils.Rect rect)
+        {
+            if (bounds.left < rect.left && bounds.right > rect.right)
+            {
+                if (bounds.bottom < rect.bottom && bounds.top > rect.top)
+                    return true;
+            }
+            return false;
+        }
+
+        public bool Intersects(Utils.Rect r)
+        {
+            if (r.left >= bounds.right || r.right <= bounds.left
+            || r.bottom >= bounds.top || r.top <= bounds.bottom)
+                return false;
+            else
+                return true;
         }
 
         public Utils.Rect GetBounds()
@@ -52,6 +73,11 @@ namespace RaahnSimulation
             pos.Copy(aabb.GetPos());
             center.Copy(aabb.GetCenter());
             bounds.Copy(aabb.GetBounds());
+        }
+
+        public void SetMesh(Mesh newMesh)
+        {
+            mesh = newMesh;
         }
 
         public void SetSize(float w, float h)
@@ -124,6 +150,17 @@ namespace RaahnSimulation
             Update();
         }
 
+        public void DebugDraw()
+        {
+            if (!mesh.IsCurrent())
+                mesh.MakeCurrent();
+
+            Gl.glTranslatef(bounds.left, bounds.bottom, Utils.DISCARD_Z_POS);
+            Gl.glScalef(bounds.width, bounds.height, Utils.DISCARD_Z_SCALE);
+
+            Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+        }
+
         private void Construct()
         {
             angle = 0.0f;
@@ -131,6 +168,9 @@ namespace RaahnSimulation
             pos = new Utils.Vector2(0.0f, 0.0f);
             center = new Utils.Vector2(0.0f, 0.0f);
             bounds = new Utils.Rect();
+
+            //Default to quad.
+            mesh = Simulator.quad;
         }
 
         private void RotateVector2(Utils.Vector2 vec, float angle)

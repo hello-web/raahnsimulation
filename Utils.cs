@@ -91,10 +91,9 @@ namespace RaahnSimulation
             }
         }
 
-        public const int VertexSize = sizeof(float) * 5;
+        public const int VertexSize = sizeof(float) * 4;
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
-		public const int INDEX_COUNT = 6;
         public const uint CHARACTER_TEX_COLUMN_COUNT = 11;
         public const uint CHARACTER_TEX_ROW_COUNT = 9;
 
@@ -107,7 +106,7 @@ namespace RaahnSimulation
 		public const float DISCARD_Z_SCALE = 1.0f;
         //Color value of background in common GTK apps.
         public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
-		public const float DEG_TO_RAD = (float)3.1415926535 / 180.0f;
+		public const float DEG_TO_RAD = (float)3.1415926535f / 180.0f;
         public const float TEXTURE_CHAR_WIDTH = 1.0f / (float)CHARACTER_TEX_COLUMN_COUNT;
         public const float TEXTURE_CHAR_HEIGHT = 1.0f / (float)CHARACTER_TEX_ROW_COUNT;
 
@@ -117,7 +116,7 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.6";
+		public const string VERSION_STRING = "Version 1.65";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";

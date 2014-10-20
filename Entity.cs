@@ -22,6 +22,8 @@ namespace RaahnSimulation
 		protected Utils.Vector2 speed;
         protected Utils.Vector3 color;
 		protected TextureManager.TextureType texture;
+        protected Mesh mesh;
+        private bool moved;
         private float previousAngle;
 		private Utils.Vector2 center;
         private Utils.Vector2 previousPos;
@@ -36,10 +38,13 @@ namespace RaahnSimulation
             visible = true;
 
 	        texture = TextureManager.TextureType.NONE;
+            //Default to quad mesh.
+            mesh = Simulator.quad;
 	        context = sim;
 	        width = 1.0f;
 	        height = 1.0f;
 	        angle = 0.0f;
+            moved = false;
             previousAngle = 0.0f;
             //Initially opaque.
             transparency = 1.0f;
@@ -100,7 +105,10 @@ namespace RaahnSimulation
                 aabb.Translate(deltaX, deltaY);
                 previousPos.x = drawingVec.x;
                 previousPos.y = drawingVec.y;
+                moved = true;
             }
+            else
+                moved = false;
 
 	        center.x = drawingVec.x + (width / 2.0f);
 	        center.y = drawingVec.y + (height / 2.0f);
@@ -118,7 +126,15 @@ namespace RaahnSimulation
 	    {
 	        if (context.GetTexMan().GetCurrentTexture() != texture)
 	            context.GetTexMan().SetTexture(texture);
+
+            if (!mesh.IsCurrent())
+                mesh.MakeCurrent();
 	    }
+
+        public bool Moved()
+        {
+            return moved;
+        }
 
         public float GetWidth()
         {
@@ -157,6 +173,11 @@ namespace RaahnSimulation
 			texture = t;
 		}
 
+        public void SetMesh(Mesh newMesh)
+        {
+            mesh = newMesh;
+        }
+
 		public void SetWindowAsDrawingVec(bool window)
 		{
 			if (window)
@@ -167,20 +188,18 @@ namespace RaahnSimulation
 
 		public virtual bool Intersects(float x, float y)
 		{
-			if (x > aabb.GetBounds().left && x < aabb.GetBounds().right)
+			if (x >= aabb.GetBounds().left && x <= aabb.GetBounds().right)
 			{
-				if (y > aabb.GetBounds().bottom && y < aabb.GetBounds().top)
+				if (y >= aabb.GetBounds().bottom && y <= aabb.GetBounds().top)
 					return true;
-				else
-					return false;
 			}
-			else
-				return false;
+			return false;
 		}
 
 		public virtual bool Intersects(Utils.Rect r)
 		{
-			if (r.left > aabb.GetBounds().right || r.right < aabb.GetBounds().left || r.bottom > aabb.GetBounds().top || r.top < aabb.GetBounds().bottom)
+			if (r.left >= aabb.GetBounds().right || r.right <= aabb.GetBounds().left
+            || r.bottom >= aabb.GetBounds().top || r.top <= aabb.GetBounds().bottom)
 				return false;
 			else
 				return true;
@@ -189,7 +208,9 @@ namespace RaahnSimulation
         public virtual void DebugDraw()
         {
             //Handle all generic debug drawing here.
-            DrawAABB();
+            Simulator.lineSquare.MakeCurrent();
+            aabb.DebugDraw();
+            Simulator.quad.MakeCurrent();
         }
 
 	    protected void RotateAroundCenter()
@@ -198,15 +219,5 @@ namespace RaahnSimulation
 	        Gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
 	        Gl.glTranslatef(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 	    }
-
-        private void DrawAABB()
-        {
-            Utils.Rect bounds = aabb.GetBounds();
-
-            Gl.glTranslatef(bounds.left, bounds.bottom, Utils.DISCARD_Z_POS);
-            Gl.glScalef(bounds.width, bounds.height, Utils.DISCARD_Z_SCALE);
-
-            Gl.glDrawElements(Gl.GL_TRIANGLES, Utils.INDEX_COUNT, Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
-        }
 	}
 }

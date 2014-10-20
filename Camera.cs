@@ -49,10 +49,6 @@ namespace RaahnSimulation
 
         public Utils.Vector2 WorldToWindow(float worldX, float worldY)
         {
-            //float x = (worldX - ((zoomPoint.x - worldX) * (zoom - 1.0f))) - vecPos.x;
-            //float y = (worldY - ((zoomPoint.y - worldY) * (zoom - 1.0f))) - vecPos.y;
-            //float x = (worldX * zoom) - vecPos.x;
-            //float y = (worldY * zoom) - vecPos.y;
             float x = (worldX - vecPos.x) * zoom;
             float y = (worldY - vecPos.y) * zoom;
             return new Utils.Vector2(x, y);
@@ -60,13 +56,6 @@ namespace RaahnSimulation
 
         public Utils.Vector2 WindowToWorld(float windowX, float windowY)
         {
-            //Utils.Vector2 zoomPointWindow = WorldToWindow(zoomPoint);
-            //float x = (windowX + vecPos.x) + ((zoomPointWindow.x - windowX) * (zoom - 1.0f));
-            //float y = (windowY + vecPos.y) + ((zoomPointWindow.y - windowY) * (zoom - 1.0f));
-            //float x = (zoomPoint.x + ((windowX - zoomPoint.x) / zoom)) + vecPos.x;
-            //float y = (zoomPoint.y + ((windowY - zoomPoint.y) / zoom)) + vecPos.y;
-            //float x = (windowX + vecPos.x) / zoom;
-            //float y = (windowY + vecPos.y) / zoom;
             float x = (windowX / zoom) + vecPos.x;
             float y = (windowY / zoom) + vecPos.y;
             return new Utils.Vector2(x, y);

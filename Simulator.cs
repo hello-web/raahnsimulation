@@ -18,6 +18,9 @@ namespace RaahnSimulation
 			CHANGE = 2
 		}
 
+        //Shared mesh resources.
+        public static Mesh lineSquare;
+        public static Mesh quad;
 		private static Simulator simulator = new Simulator();
 
 		public bool running;
@@ -31,8 +34,6 @@ namespace RaahnSimulation
 		private bool stateChangeRequested;
 		private uint windowWidth;
 		private uint windowHeight;
-        private uint vb;
-        private uint ib;
 		private long lastTime;
 		private long curTime;
         private float deltaTime;
@@ -143,8 +144,6 @@ namespace RaahnSimulation
 
 			simWindow.SetActive();
 
-            terminal = new Terminal(this);
-
             Gl.glClearColor(Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, 0.0f);
 
 	        //Enable blending for alpha values.
@@ -157,22 +156,39 @@ namespace RaahnSimulation
                 return false;
             }
 
-	        //Allocate verticies and indicies
-            //Can't get struct elements to be placed sequentially, using an array for now.
-	        /*Utils.Vertex[] vertices = new Utils.Vertex[]
-	        {
-	            new Utils.Vertex(new Utils.Vector3(0.0f, 0.0f, 0.0f), new Utils.Vector2(0.0f, 0.0f)),
-	            new Utils.Vertex(new Utils.Vector3(1.0f, 0.0f, 0.0f), new Utils.Vector2(1.0f, 0.0f)),
-	            new Utils.Vertex(new Utils.Vector3(0.0f, 1.0f, 0.0f), new Utils.Vector2(0.0f, 1.0f)),
-	            new Utils.Vertex(new Utils.Vector3(1.0f, 1.0f, 0.0f), new Utils.Vector2(1.0f, 1.0f))
-	        };*/
+            Gl.glEnableClientState(Gl.GL_VERTEX_ARRAY);
+            Gl.glEnableClientState(Gl.GL_TEXTURE_COORD_ARRAY);
 
-            float[] vertices = new float[]
+            lineSquare = new Mesh(2, Gl.GL_LINES);
+
+            float[] lsVertices = new float[]
             {
-                0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                1.0f, 1.0f, 0.0f, 1.0f, 1.0f
+                0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 1.0f
+            };
+
+            ushort[] lsIndices =
+            {
+                0, 1,
+                1, 3,
+                3, 2,
+                2, 0
+            };
+
+            lineSquare.SetVerticesWithUV(lsVertices);
+            lineSquare.SetIndices(lsIndices);
+            lineSquare.Allocate();
+
+            quad = new Mesh(2, Gl.GL_TRIANGLES);
+
+            float[] quadVertices = new float[]
+            {
+                0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 1.0f
             };
 
 	        ushort[] indices =
@@ -181,19 +197,13 @@ namespace RaahnSimulation
 	            2, 3, 1
 	        };
 
-	        Gl.glGenBuffers(1, out vb);
-	        Gl.glBindBuffer(Gl.GL_ARRAY_BUFFER, vb);
-	        Gl.glBufferData(Gl.GL_ARRAY_BUFFER, (IntPtr)(sizeof(float) * vertices.Length), vertices, Gl.GL_STATIC_DRAW);
+            quad.SetVerticesWithUV(quadVertices);
+            quad.SetIndices(indices);
+            //Also makes quad's vertex buffer current.
+            quad.Allocate();
+            quad.MakeCurrent();
 
-	        Gl.glGenBuffers(1, out ib);
-	        Gl.glBindBuffer(Gl.GL_ELEMENT_ARRAY_BUFFER, ib);
-			Gl.glBufferData(Gl.GL_ELEMENT_ARRAY_BUFFER, (IntPtr)(sizeof(ushort) * indices.Length), indices, Gl.GL_STATIC_DRAW);
-
-	        Gl.glEnableClientState(Gl.GL_VERTEX_ARRAY);
-            Gl.glVertexPointer(3, Gl.GL_FLOAT, Utils.VertexSize, IntPtr.Zero);
-
-	        Gl.glEnableClientState(Gl.GL_TEXTURE_COORD_ARRAY);
-            Gl.glTexCoordPointer(2, Gl.GL_FLOAT, Utils.VertexSize, (IntPtr)(sizeof(float) * 3));
+            terminal = new Terminal(this);
 
 	        Gl.glViewport(0, 0, (int)windowWidth, (int)windowHeight);
 
@@ -374,8 +384,9 @@ namespace RaahnSimulation
 
             if (!glInitFailed)
             {
-                Gl.glDeleteBuffers(1, ref ib);
-                Gl.glDeleteBuffers(1, ref vb);
+                //Gl.glDeleteBuffers(1, ref ib);
+                //Gl.glDeleteBuffers(1, ref vb);
+                quad.Free();
             }
 
             simWindow.Close();

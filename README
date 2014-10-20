@@ -29,7 +29,7 @@ Space - Place the starting point for the car represented by a flag.
 Terminal Commands
 =================
 exit - Close the application.
-debug - Draws debugging information (currently only AABBs).
+debug - Draws debugging information.
 
 Building and Running
 ====================

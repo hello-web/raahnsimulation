@@ -39,6 +39,7 @@ namespace RaahnSimulation
         private TextPool textPool;
         private Queue<Text> lines;
         private Utils.Vector2 currentTextPos;
+        private Mesh mesh;
 
         public Terminal(Simulator sim)
         {
@@ -65,6 +66,8 @@ namespace RaahnSimulation
 
             currentTextPos.x = initialText.windowPos.x + initialText.GetWidth();
             currentTextPos.y = initialText.windowPos.y;
+
+            mesh = Simulator.quad;
 
             textPool = new TextPool(sim);
 
@@ -140,6 +143,9 @@ namespace RaahnSimulation
 
         public void Draw()
         {
+            if (!mesh.IsCurrent())
+                mesh.MakeCurrent();
+
             //Draw terminal background.
             Gl.glDisable(Gl.GL_TEXTURE_2D);
 
@@ -152,7 +158,7 @@ namespace RaahnSimulation
             Gl.glTranslatef(0.0f, (float)context.GetWindowHeight() / 2.0f, Utils.DISCARD_Z_POS);
             Gl.glScalef((float)context.GetWindowWidth(), (float)context.GetWindowHeight() / 2.0f, Utils.DISCARD_Z_SCALE);
 
-            Gl.glDrawElements(Gl.GL_TRIANGLES, Utils.INDEX_COUNT, Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+            Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
             Gl.glPopMatrix();
 

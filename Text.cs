@@ -86,7 +86,7 @@ namespace RaahnSimulation
 
 	            Gl.glTranslatef(drawingVec.x + (i * spacing), drawingVec.y, Utils.DISCARD_Z_POS);
 	            Gl.glScalef(charWidth, height, Utils.DISCARD_Z_SCALE);
-	            Gl.glDrawElements(Gl.GL_TRIANGLES, Utils.INDEX_COUNT, Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+	            Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
 	            Gl.glPopMatrix();
 	        }

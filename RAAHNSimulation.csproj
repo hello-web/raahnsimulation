@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{263F2BCA-3373-44D3-AF09-E73AFF944351}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>RAAHN_Test</RootNamespace>
-    <AssemblyName>RAAHN_Test</AssemblyName>
+    <RootNamespace>RaahnSimulation</RootNamespace>
+    <AssemblyName>RaahnSimulation</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -52,6 +52,9 @@
     <Compile Include="Button.cs" />
     <Compile Include="ColorableEntity.cs" />
     <Compile Include="Updateable.cs" />
+    <Compile Include="QuadTree.cs" />
+    <Compile Include="QuadTreeNode.cs" />
+    <Compile Include="Mesh.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
