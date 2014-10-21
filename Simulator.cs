@@ -384,8 +384,7 @@ namespace RaahnSimulation
 
             if (!glInitFailed)
             {
-                //Gl.glDeleteBuffers(1, ref ib);
-                //Gl.glDeleteBuffers(1, ref vb);
+                lineSquare.Free();
                 quad.Free();
             }
 

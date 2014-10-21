@@ -116,7 +116,7 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.7";
+		public const string VERSION_STRING = "Version 1.71";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
