@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Tao.OpenGl;
 using SFML.Window;
 
@@ -11,11 +12,15 @@ namespace RaahnSimulation
 		//120 degrees per second.
 		private const float CAR_ROTATE_SPEED = 120.0f;
 
+        public List<Entity> entitiesHovering;
+
 	    public Car(Simulator sim) : base(sim)
 	    {
 	        texture = TextureManager.TextureType.CAR;
 	        speed.x = (float)context.GetWindowWidth() * CAR_SPEED_X_PERCENTAGE;
 	        speed.y = (float)context.GetWindowHeight() * CAR_SPEED_Y_PERCENTAGE;
+
+            entitiesHovering = new List<Entity>();
 	    }
 
 	    public override void Update()

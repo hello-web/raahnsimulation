@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using SFML.Window;
 
 namespace RaahnSimulation
@@ -7,13 +7,17 @@ namespace RaahnSimulation
 	{
 		private const float CAR_WIDTH_SCALE = 0.1f;
 		private const float CAR_HEIGHT_SCALE = 0.1f;
+        private const float HIGHLIGHT_R = 0.0f;
+        private const float HIGHLIGHT_G = 1.0f;
+        private const float HIGHLIGHT_B = 0.0f;
+        private const float HIGHLIGHT_T = 1.0f;
 
 	    private static SimState simState = new SimState();
 
         private QuadTree quadTree;
         private Camera camera;
 		private Car raahnCar;
-		private RoadMap roadMap;
+		private EntityMap EntityMap;
 
 	    public SimState()
 	    {
@@ -28,7 +32,7 @@ namespace RaahnSimulation
 
             quadTree = new QuadTree(new AABB((float)context.GetWindowWidth(), (float)context.GetWindowHeight()));
 
-	        roadMap = new RoadMap(context, 0, quadTree, Utils.ROAD_FILE);
+	        EntityMap = new EntityMap(context, 0, quadTree, Utils.ROAD_FILE);
 
 	        raahnCar = new Car(context);
 	        raahnCar.SetWidth((float)context.GetWindowWidth() * CAR_WIDTH_SCALE);
@@ -44,9 +48,40 @@ namespace RaahnSimulation
 
 	    public override void Update()
 	    {
-	        base.Update();
-            roadMap.Update();
+            base.Update();
+            EntityMap.Update();
             quadTree.Update();
+
+            Utils.Vector2 lowerLeft = camera.WindowToWorld(0.0f, 0.0f);
+            Utils.Vector2 upperRight = camera.WindowToWorld((float)context.GetWindowWidth(), (float)context.GetWindowHeight());
+
+            AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
+            viewBounds.Translate(lowerLeft.x, lowerLeft.y);
+
+            List<Entity> entitiesInBounds = quadTree.Query(viewBounds);
+
+            //We want to check if raahnCar intersects anything,
+            //but we should not check if it intersects itself.
+            if (entitiesInBounds.Contains(raahnCar))
+                entitiesInBounds.Remove(raahnCar);
+
+            //Reset the list of entities raahnCar collides with.
+            raahnCar.entitiesHovering.Clear();
+
+            for (int i = 0; i < entitiesInBounds.Count; i++)
+            {
+                //Only colorable entities are added to the quad tree,
+                //so we can cast it to a colorable entity.
+                ColorableEntity curEntity = (ColorableEntity)entitiesInBounds[i];
+
+                if (raahnCar.Intersects(curEntity.aabb.GetBounds()))
+                {
+                    raahnCar.entitiesHovering.Add(curEntity);
+                    curEntity.SetColor(HIGHLIGHT_R, HIGHLIGHT_G, HIGHLIGHT_B, HIGHLIGHT_T);
+                }
+                else if (curEntity.Modified())
+                    curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
+            }
 	    }
 
         public override void UpdateEvent(Event e)
@@ -62,7 +97,7 @@ namespace RaahnSimulation
                     camera.ZoomTo(mouseX, mouseY, (float)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
             }
 
-            roadMap.UpdateEvent(e);
+            EntityMap.UpdateEvent(e);
 
             base.UpdateEvent(e);
         }

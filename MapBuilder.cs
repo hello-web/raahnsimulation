@@ -201,9 +201,6 @@ namespace RaahnSimulation
             {
                 Road newRoad = roadPool.Alloc();
                 newRoad.SetTexture((TextureManager.TextureType)(itemIndex + TextureManager.ROAD_INDEX_OFFSET));
-                newRoad.SetWidth(RoadMap.ROAD_WIDTH_PERCENTAGES[itemIndex] * (float)context.GetWindowWidth());
-                newRoad.SetHeight(RoadMap.ROAD_HEIGHT_PERCENTAGES[itemIndex] * (float)context.GetWindowHeight());
-                newRoad.aabb.SetSize(newRoad.GetWidth(), newRoad.GetHeight());
                 newRoad.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
 
                 AddEntityToList(newRoad, 0);

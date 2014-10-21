@@ -6,7 +6,18 @@ namespace RaahnSimulation
 {
 	public abstract class Entity : Updateable
 	{
+        public enum EntityType
+        {
+            NONE = -1,
+            GENERIC = 0,
+            ROAD = 1
+        };
+
 		public const float ROTATE_SPEED = 90.0f;
+        public const float DEFAULT_COLOR_R = 1.0f;
+        public const float DEFAULT_COLOR_G = 1.0f;
+        public const float DEFAULT_COLOR_B = 1.0f;
+        public const float DEFAULT_COLOR_T = 1.0f;
 
         public bool visible;
 		public float angle;
@@ -21,6 +32,7 @@ namespace RaahnSimulation
 		protected Utils.Vector2 velocity;
 		protected Utils.Vector2 speed;
         protected Utils.Vector3 color;
+        protected EntityType type;
 		protected TextureManager.TextureType texture;
         protected Mesh mesh;
         private bool moved;
@@ -37,6 +49,7 @@ namespace RaahnSimulation
 	    {
             visible = true;
 
+            type = EntityType.GENERIC;
 	        texture = TextureManager.TextureType.NONE;
             //Default to quad mesh.
             mesh = Simulator.quad;
@@ -47,7 +60,7 @@ namespace RaahnSimulation
             moved = false;
             previousAngle = 0.0f;
             //Initially opaque.
-            transparency = 1.0f;
+            transparency = DEFAULT_COLOR_T;
 
             aabb = new AABB();
             aabb.SetSize(width, height);
@@ -58,7 +71,7 @@ namespace RaahnSimulation
             center = new Utils.Vector2(0.0f, 0.0f);
             previousPos = new Utils.Vector2(0.0f, 0.0f);
             //Initially no change on color.
-            color = new Utils.Vector3(1.0f, 1.0f, 1.0f);
+            color = new Utils.Vector3(DEFAULT_COLOR_R, DEFAULT_COLOR_G, DEFAULT_COLOR_B);
 
 	        //Default drawing vector is worldPos.
 	        drawingVec = worldPos;
@@ -154,6 +167,11 @@ namespace RaahnSimulation
         public Utils.Vector3 GetColor()
         {
             return color;
+        }
+
+        public EntityType GetEntityType()
+        {
+            return type;
         }
 
         public void SetWidth(float w)

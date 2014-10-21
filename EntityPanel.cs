@@ -37,7 +37,7 @@ namespace RaahnSimulation
             currentState = context.GetState();
 
             items = new List<Road>();
-			intersections = new bool[RoadMap.UNIQUE_ROAD_COUNT];
+			intersections = new bool[EntityMap.UNIQUE_ROAD_COUNT];
 
             background = new Graphic(context);
             background.SetWindowAsDrawingVec(true);
@@ -47,36 +47,22 @@ namespace RaahnSimulation
 
 	        Road road;
 	        float winWidth = (float)context.GetWindowWidth();
-            float greatestHeight = 0.0f;
+            float roadWidth = winWidth * Road.ROAD_DIMENSION_PERCENTAGE;
 
-	        for (int i = 0; i < RoadMap.UNIQUE_ROAD_COUNT; i++)
+	        for (int i = 0; i < EntityMap.UNIQUE_ROAD_COUNT; i++)
 	        {
 	            road = new Road(context);
-				road.SetWidth(winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[i]);
-
-                float height = (float)context.GetWindowHeight() * RoadMap.ROAD_HEIGHT_PERCENTAGES[i];
-                if (greatestHeight < height)
-                    greatestHeight = height;
-
-				road.SetHeight(height);
-                road.aabb.SetSize(road.GetWidth(), road.GetHeight());
+    
 	            road.SetWindowAsDrawingVec(true);
 
-                uint roadIndex = 0;
-                if (i > 0)
-                    roadIndex = (uint)(i - 1);
-
-                float xOffset = PANEL_ITEM_OFFSET_X_PERCENTAGE * (float)context.GetWindowWidth();
+                float xOffset = PANEL_ITEM_OFFSET_X_PERCENTAGE * winWidth;
                 float yOffset = PANEL_ITEM_OFFSET_Y_PERCENTAGE * (float)context.GetWindowHeight();
-				road.windowPos.x = xOffset + (i * (winWidth * RoadMap.ROAD_WIDTH_PERCENTAGES[roadIndex] + PANEL_SPACING_PERCENTAGE * winWidth));
+				road.windowPos.x = xOffset + (i * (roadWidth + PANEL_SPACING_PERCENTAGE * winWidth));
 	            road.windowPos.y = yOffset;
 				road.SetTexture((TextureManager.TextureType)(TextureManager.ROAD_INDEX_OFFSET + i));
 	            items.Add(road);
 	            intersections[i] = false;
 	        }
-
-            background.SetWidth((float)context.GetWindowWidth());
-            background.SetHeight(greatestHeight + (float)context.GetWindowHeight() * PANEL_HEIGHT_SPACE_PERCENTAGE);
 
             float charWidth = (float)context.GetWindowWidth() * Utils.CHAR_WIDTH_PERCENTAGE;
             float charHeight = (float)context.GetWindowHeight() * Utils.CHAR_HEIGHT_PERCENTAGE;
@@ -89,6 +75,11 @@ namespace RaahnSimulation
             for (uint i = 1; i < PANEL_OPTION_COUNT; i++)
                 panelOption.AddString(PANEL_OPTIONS[i]);
             panelOption.Update();
+
+            float panelSpacing = (float)context.GetWindowHeight() * PANEL_HEIGHT_SPACE_PERCENTAGE;
+
+            background.SetWidth((float)context.GetWindowWidth());
+            background.SetHeight(roadWidth + panelOption.GetHeight() + panelSpacing);
 
             trash = new Graphic(context);
             trash.SetWindowAsDrawingVec(true);
@@ -104,7 +95,7 @@ namespace RaahnSimulation
             trash.windowPos.y = yBorderOffset;
 
             currentState.AddEntity(background, layerIndex);
-            for (int i = 0; i < RoadMap.UNIQUE_ROAD_COUNT; i++)
+            for (int i = 0; i < EntityMap.UNIQUE_ROAD_COUNT; i++)
                 currentState.AddEntity(items[i], layerIndex);
             currentState.AddEntity(panelOption, layerIndex);
             currentState.AddEntity(trash, layerIndex);
@@ -166,7 +157,7 @@ namespace RaahnSimulation
 			//Return -1 for no selected item.
 			if (Mouse.IsButtonPressed(Mouse.Button.Left))
 			{
-				for (int i = 0; i < RoadMap.UNIQUE_ROAD_COUNT; i++)
+				for (int i = 0; i < EntityMap.UNIQUE_ROAD_COUNT; i++)
 				{
 					if (intersections[i])
 						return i;

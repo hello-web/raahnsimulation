@@ -36,7 +36,6 @@
     <Compile Include="MapState.cs" />
     <Compile Include="MenuState.cs" />
     <Compile Include="Road.cs" />
-    <Compile Include="RoadMap.cs" />
     <Compile Include="RoadPool.cs" />
     <Compile Include="SimState.cs" />
     <Compile Include="Simulator.cs" />
@@ -55,6 +54,7 @@
     <Compile Include="QuadTree.cs" />
     <Compile Include="QuadTreeNode.cs" />
     <Compile Include="Mesh.cs" />
+    <Compile Include="EntityMap.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

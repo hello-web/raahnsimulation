@@ -7,35 +7,27 @@ using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public class RoadMap : Updateable
+	public class EntityMap : Updateable
 	{
-		public static readonly float[] ROAD_WIDTH_PERCENTAGES = { RWP0, RWP1 };
-		public static readonly float[] ROAD_HEIGHT_PERCENTAGES = { RHP0, RHP1 };
-
 		public const int UNIQUE_ROAD_COUNT = 2;
 
 		//Textures
 		private const int STRAIGHT = 0;
 		private const int TURN = 1;
 
-        private const float RWP0 = 0.266666667f * 0.8f;
-        private const float RWP1 = 0.20625f * 0.8f;
-        private const float RHP0 = 0.205925926f * 0.8f;
-        private const float RHP1 = 0.293333333f * 0.8f;
-
         private int layer;
-		private List<Road> roads;
+		private List<ColorableEntity> entities;
 		private StreamReader fileStr;
         private Simulator context;
         private State currentState;
         private QuadTree quadTree;
 
-	    public RoadMap(Simulator sim, int layerIndex)
+	    public EntityMap(Simulator sim, int layerIndex)
 	    {
             Construct(sim, layerIndex);
 	    }
 
-	    public RoadMap(Simulator sim, int layerIndex, QuadTree tree, string fileName)
+	    public EntityMap(Simulator sim, int layerIndex, QuadTree tree, string fileName)
 	    {
             Construct(sim, layerIndex);
 
@@ -68,23 +60,25 @@ namespace RaahnSimulation
 
         private void Construct(Simulator sim, int layerIndex)
         {
-            roads = new List<Road>();
+            entities = new List<ColorableEntity>();
+
             context = sim;
+
             currentState = context.GetState();
             layer = layerIndex;
         }
 
-	    ~RoadMap()
+	    ~EntityMap()
 	    {
-	        while (roads.Count > 0)
+	        while (entities.Count > 0)
 	        {
-	            roads.RemoveAt(roads.Count - 1);
+	            entities.RemoveAt(entities.Count - 1);
 	        }
 	    }
 
 	    private bool InitFromFile(string fileName)
 	    {
-	        Road newRoad;
+	        Road newEntity;
 	        string buffer;
 
 			if (!File.Exists(fileName))
@@ -94,16 +88,19 @@ namespace RaahnSimulation
 			try
 			{
 				fileStr = new StreamReader(fileName);
+
 		        while ((buffer = fileStr.ReadLine()) != null)
 		        {
 		            if (buffer.Length < 1)
 		                return false;
+
 		            int stringPos = 0;
 		            int sepsFound = 0;
-		            int road = 0;
+		            int entityVariation = 0;
 		            float x = 0.0f;
 		            float y = 0.0f;
 		            float angle = 0.0f;
+
 		            for (int i = 0; i < buffer.Length; i++)
 		            {
 		                if (buffer[i] == Utils.FILE_COMMENT)
@@ -129,7 +126,7 @@ namespace RaahnSimulation
 		                        }
 		                        case 3:
 		                        {
-                                    int.TryParse(buffer.Substring(stringPos, i - stringPos), NumberStyles.Float, Utils.EN_US, out road);
+									int.TryParse(buffer.Substring(stringPos, i - stringPos), NumberStyles.Float, Utils.EN_US, out entityVariation);
 		                            break;
 		                        }
 		                    }
@@ -138,23 +135,24 @@ namespace RaahnSimulation
 		                }
 		            }
 
+					//Default to only using roads for now.
 		            //To account for out of range input from causing index out of bounds errors
-		            if (road + 1 > UNIQUE_ROAD_COUNT)
+					if (entityVariation + 1 > UNIQUE_ROAD_COUNT)
 		                return false;
 
-		            newRoad = new Road(context);
-		            newRoad.worldPos.x = (float)context.GetWindowWidth() * x;
-		            newRoad.worldPos.y = (float)context.GetWindowHeight() * y;
-		            newRoad.SetTexture((TextureManager.TextureType)(road + TextureManager.ROAD_INDEX_OFFSET));
-		            newRoad.angle = angle;
-		            newRoad.SetWidth((float)context.GetWindowWidth() * ROAD_WIDTH_PERCENTAGES[road]);
-		            newRoad.SetHeight((float)context.GetWindowHeight() * ROAD_HEIGHT_PERCENTAGES[road]);
-                    newRoad.Update();
-		            roads.Add(newRoad);
+		            newEntity = new Road(context);
+		            newEntity.worldPos.x = (float)context.GetWindowWidth() * x;
+		            newEntity.worldPos.y = (float)context.GetWindowHeight() * y;
+					newEntity.SetTexture((TextureManager.TextureType)(entityVariation + TextureManager.ROAD_INDEX_OFFSET));
+		            newEntity.angle = angle;
+                    newEntity.Update();
 
-                    currentState.AddEntity(newRoad, layer);
+		            entities.Add(newEntity);
+
+                    currentState.AddEntity(newEntity, layer);
+
                     if (quadTree != null)
-                        quadTree.AddEntity(newRoad);
+                        quadTree.AddEntity(newEntity);
 		        }
 			}
 			finally 
