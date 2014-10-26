@@ -26,8 +26,8 @@ namespace RaahnSimulation
         public override void Update()
         {
             base.Update();
-            /*Clicked should only be used by other
-            objects when updating with events.*/
+            //Clicked should only be used by other
+            //objects when updating with events.
             clicked = false;
         }
 
@@ -63,11 +63,7 @@ namespace RaahnSimulation
 	            pressed = false;
 	            hovering = false;
 	        }
-	        /*If the state is popped before this
-	        like in OptionState, then an invalid
-	        write of size 1 will occur, fix this
-	        with a state request function which
-	        changes the state after all updating.*/
+
             if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
 	            pressed = false;
 	    }

@@ -34,7 +34,7 @@ namespace RaahnSimulation
 
 	        EntityMap = new EntityMap(context, 0, quadTree, Utils.ROAD_FILE);
 
-	        raahnCar = new Car(context);
+	        raahnCar = new Car(context, quadTree);
 	        raahnCar.SetWidth((float)context.GetWindowWidth() * CAR_WIDTH_SCALE);
 	        raahnCar.SetHeight((float)context.GetWindowHeight() * CAR_HEIGHT_SCALE);
 	        raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;

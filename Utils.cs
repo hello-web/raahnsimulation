@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Globalization;
 using SFML.Window;
@@ -22,6 +23,11 @@ namespace RaahnSimulation
                 x = copyVec.x;
                 y = copyVec.y;
             }
+
+            public static Vector2 operator+(Vector2 u, Vector2 v)
+            {
+                return new Vector2(u.x + v.x, u.y + v.y);
+            }
         }
 
         public class Vector3
@@ -40,18 +46,6 @@ namespace RaahnSimulation
                 x = copyVec.x;
                 y = copyVec.y;
                 z = copyVec.z;
-            }
-        }
-
-        public struct Vertex
-        {
-            public Vector3 xyz;
-            public Vector2 uv;
-
-            public Vertex(Vector3 vecPos, Vector2 texVec)
-            {
-                xyz = vecPos;
-                uv = texVec;
             }
         }
 
@@ -91,6 +85,179 @@ namespace RaahnSimulation
             }
         }
 
+        //Points are structs, vectors are classes.
+        public struct Point2
+        {
+            public float x, y;
+            public Point2(float _x, float _y)
+            {
+                x = _x;
+                y = _y;
+            }
+        }
+
+        public struct Vertex
+        {
+            public Vector3 xyz;
+            public Vector2 uv;
+
+            public Vertex(Vector3 vecPos, Vector2 texVec)
+            {
+                xyz = vecPos;
+                uv = texVec;
+            }
+        }
+
+        public struct LineSegment
+        {
+            public bool vertical;
+            public float yIntercept;
+            public float slope;
+            public float lowerBoundX;
+            public float upperBoundX;
+            //Vertical lines need y bounds explicitly specified.
+            public float lowerBoundY;
+            public float upperBoundY;
+
+            public void SetUp(Point2 startPoint, Point2 endPoint)
+            {
+                float deltaX = endPoint.x - startPoint.x;
+
+                //If the change in x is 0, the slope is undefined.
+                if (deltaX == 0.0f)
+                {
+                    vertical = true;
+
+                    //If the line segment is just a point, it's x coordinate is stored in lowerBoundX.
+                    lowerBoundX = startPoint.x;
+
+                    if (endPoint.y > startPoint.y)
+                    {
+                        upperBoundY = endPoint.y;
+                        lowerBoundY = startPoint.y;
+                    }
+                    else
+                    {
+                        lowerBoundY = endPoint.y;
+                        upperBoundY = startPoint.y;
+                    }
+                }
+                else
+                {
+                    vertical = false;
+
+                    slope = (endPoint.y - startPoint.y) / deltaX;
+                    yIntercept = startPoint.y - (slope * startPoint.x);
+
+                    if (endPoint.x > startPoint.x)
+                    {
+                        upperBoundX = endPoint.x;
+                        lowerBoundX = startPoint.x;
+                    }
+                    else
+                    {
+                        lowerBoundX = endPoint.x;
+                        upperBoundX = startPoint.x;
+                    }
+                }
+            }
+
+            //Returns infinity if x or the computed y value is invalid.
+            public float GetY(float x)
+            {
+                //Make sure x is in bounds and the line is not vertical.
+                if (x >= lowerBoundX && x <= upperBoundX && !vertical)
+                    return (slope * x) + yIntercept;//y = mx + b
+                else
+                    return float.PositiveInfinity;
+            }
+
+            //Returns the point of intersection or bounds of intersection within two points.
+            public List<Point2> Intersects(LineSegment line)
+            {
+                List<Point2> intersection = new List<Point2>();
+
+                bool bothVertical = vertical && line.vertical;
+                bool parallel = slope == line.slope && !vertical && !line.vertical;
+
+                //Both lines are vertical
+                if (bothVertical || parallel)
+                {
+                    if ((bothVertical && lowerBoundX == line.lowerBoundX) || (parallel && yIntercept == line.yIntercept))
+                    {
+                        bool lowerInBounds = ValueInBounds(lowerBoundY, line.lowerBoundY, line.upperBoundY);
+                        bool upperInBounds = ValueInBounds(upperBoundY, line.lowerBoundY, line.upperBoundY);
+                        if (lowerInBounds && upperInBounds)
+                        {
+                            intersection.Add(new Point2(lowerBoundX, lowerBoundY));
+                            intersection.Add(new Point2(lowerBoundX, upperBoundY));
+                        }
+                        else if (lowerInBounds)
+                        {
+                            intersection.Add(new Point2(lowerBoundX, lowerBoundY));
+                            intersection.Add(new Point2(lowerBoundX, line.upperBoundY));
+                        }
+                        else if (upperInBounds)
+                        {
+                            intersection.Add(new Point2(lowerBoundX, line.lowerBoundY));
+                            intersection.Add(new Point2(lowerBoundX, upperBoundY));
+                        }
+                        else if (ValueInBounds(line.lowerBoundY, lowerBoundY, upperBoundY) && ValueInBounds(line.upperBoundY, lowerBoundY, upperBoundY))
+                        {
+                            intersection.Add(new Point2(lowerBoundX, line.lowerBoundY));
+                            intersection.Add(new Point2(lowerBoundX, line.upperBoundY));
+                        }
+                    }
+                    return intersection;
+                }
+                //If both are not vertical or parallel, there is a single point of intersection.
+                else if (vertical)
+                {
+                    float y = line.GetY(lowerBoundX);
+
+                    //Make sure the returned y is valid.
+                    //GetY not returning infinity makes sure that the point is in bounds of this line.
+                    if (float.IsInfinity(y) || !line.ValueInBounds(y, lowerBoundY, upperBoundY))
+                        return intersection;
+
+                    intersection.Add(new Point2(lowerBoundX, y));
+
+                    return intersection;
+                }
+                else if (line.vertical)
+                {
+                    float y = GetY(line.lowerBoundX);
+
+                    //Make sure the returned y is valid.
+                    //GetY not returning infinity makes sure that the point is in bounds of line.
+                    if (float.IsInfinity(y) || !ValueInBounds(y, line.lowerBoundY, line.upperBoundY))
+                        return intersection;
+
+                    intersection.Add(new Point2(line.lowerBoundX, y));
+
+                    return intersection;
+                }
+                else
+                {
+                    float intersectionX = (line.yIntercept - yIntercept) / (slope - line.slope);
+                    //If the value is within the x bounds of both lines, we don't have to check if GetY returns an invalid number.
+                    if (ValueInBounds(intersectionX, lowerBoundX, upperBoundX) && ValueInBounds(intersectionX, line.lowerBoundX, line.upperBoundX))
+                        intersection.Add(new Point2(intersectionX, GetY(intersectionX)));
+
+                    return intersection;
+                }
+            }
+
+            //Checks whether a value is in bounds of two other values.
+            public bool ValueInBounds(float value, float lowerBound, float upperBound)
+            {
+                if (value >= lowerBound && value <= upperBound)
+                    return true;
+                else
+                    return false;
+            }
+        }
+
         public const int VertexSize = sizeof(float) * 4;
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
@@ -116,7 +283,7 @@ namespace RaahnSimulation
 		public const string ROAD_FILE = "Data/Roads/default.rd";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.71";
+		public const string VERSION_STRING = "Version 1.8";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
@@ -128,5 +295,10 @@ namespace RaahnSimulation
 		{
 			return deg * DEG_TO_RAD;
 		}
+
+        public static float GetDist(Point2 point0, Point2 point1)
+        {
+            return (float)Math.Sqrt(Math.Pow(point1.y - point0.y, 2) + Math.Pow(point1.x - point0.x, 2));
+        }
     }
 }

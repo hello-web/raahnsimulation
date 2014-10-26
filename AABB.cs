@@ -47,6 +47,45 @@ namespace RaahnSimulation
                 return true;
         }
 
+        //Returns the x coordinates at which a line
+        //intersects this rectangle. Does not use
+        //the axis aligned version.
+        //If an interval is found to be the intersection,
+        //it returns the closest point to relative.
+        public List<Utils.Point2> IntersectsLineAccurate(Utils.LineSegment line, Utils.Point2 relative)
+        {
+            //4 lines in a rectangle.
+            Utils.LineSegment[] rectLines = new Utils.LineSegment[4];
+
+            rectLines[0].SetUp(new Utils.Point2(bounds.ll.x, bounds.ll.y), new Utils.Point2(bounds.lr.x, bounds.lr.y));
+            rectLines[1].SetUp(new Utils.Point2(bounds.lr.x, bounds.lr.y), new Utils.Point2(bounds.ur.x, bounds.ur.y));
+            rectLines[2].SetUp(new Utils.Point2(bounds.ul.x, bounds.ul.y), new Utils.Point2(bounds.ur.x, bounds.ur.y));
+            rectLines[3].SetUp(new Utils.Point2(bounds.ll.x, bounds.ll.y), new Utils.Point2(bounds.ul.x, bounds.ul.y));
+
+            List<Utils.Point2> intersections = new List<Utils.Point2>(4);
+
+            for (int i = 0; i < intersections.Capacity; i++)
+            {
+                List<Utils.Point2> currentIntersection = line.Intersects(rectLines[i]);
+
+                //There shouldn't be more than 2 points, but just in case.
+                if (currentIntersection.Count > 2)
+                {
+                    if (Utils.GetDist(currentIntersection[0], relative) <= Utils.GetDist(currentIntersection[1], relative))
+                        intersections.Add(currentIntersection[0]);
+                    else
+                        intersections.Add(currentIntersection[1]);
+                }
+                else
+                {
+                    for (int j = 0; j < currentIntersection.Count; j++)
+                        intersections.Add(currentIntersection[j]);
+                }
+            }
+
+            return intersections;
+        }
+
         public Utils.Rect GetBounds()
         {
             return bounds;

@@ -29,6 +29,7 @@ namespace RaahnSimulation
         protected float height;
         protected float transparency;
 		protected Simulator context;
+        protected Utils.Vector2 center;
 		protected Utils.Vector2 velocity;
 		protected Utils.Vector2 speed;
         protected Utils.Vector3 color;
@@ -37,7 +38,6 @@ namespace RaahnSimulation
         protected Mesh mesh;
         private bool moved;
         private float previousAngle;
-		private Utils.Vector2 center;
         private Utils.Vector2 previousPos;
 
 		protected Entity()
@@ -174,13 +174,13 @@ namespace RaahnSimulation
             return type;
         }
 
-        public void SetWidth(float w)
+        public virtual void SetWidth(float w)
         {
             width = w;
             aabb.SetSize(width, height);
         }
 
-        public void SetHeight(float h)
+        public virtual void SetHeight(float h)
         {
             height = h;
             aabb.SetSize(width, height);
@@ -229,6 +229,15 @@ namespace RaahnSimulation
             Simulator.lineSquare.MakeCurrent();
             aabb.DebugDraw();
             Simulator.quad.MakeCurrent();
+        }
+
+        //If any clean operations are needed,
+        //they can be added by overriding Clean()
+        //Not abstract to avoid being forced to
+        //Override Clean().
+        public virtual void Clean()
+        {
+
         }
 
 	    protected void RotateAroundCenter()

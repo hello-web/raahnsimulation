@@ -11,7 +11,7 @@ namespace RaahnSimulation
         //Pointer to current mesh.
         private static Mesh currentMesh = null;
 
-        //Size as in number of elements.
+        //vertexCoordCount refers to the number of coords in a single vertex.
         private int vertexCoordCount;
         private int uvOffset;
         private int renderMode;
@@ -21,6 +21,7 @@ namespace RaahnSimulation
         private float[] verticesWithUV;
         private ushort[] indices;
 
+        //coordCount refers to the number of coords in a single vertex.
         public Mesh(int coordCount, int mode)
         {
             vertexCoordCount = coordCount;
@@ -95,6 +96,12 @@ namespace RaahnSimulation
             Gl.glBufferData(Gl.GL_ELEMENT_ARRAY_BUFFER, (IntPtr)(sizeof(ushort) * indices.Length), indices, Gl.GL_STATIC_DRAW);
 
             allocated = true;
+
+            //Invalidate the mesh. It should
+            //probably never be equal to this
+            //if used properly.
+            if (currentMesh != this)
+                currentMesh = null;
 
             return true;
         }

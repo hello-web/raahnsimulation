@@ -53,8 +53,8 @@ namespace RaahnSimulation
                 }
                 if (shouldBreak)
                 {
-                    /*If the layer has no more entities remove it, unless it is
-                    the first layer because we always want at least one layer.*/
+                    //If the layer has no more entities remove it, unless it is
+                    //the first layer because we always want at least one layer.
                     if (layers[i].Count == 0 && i != 0)
                         layers.RemoveAt(i);
                     break;
@@ -99,8 +99,8 @@ namespace RaahnSimulation
 	        context = sim;
 	    }
 
-	    /*This method should be called to update
-        all entities within the state.*/
+	    //This method should be called to update
+        //all entities within the state.
 	    public virtual void Update()
 	    {
             for (int i = 0; i < layers.Count; i++)
@@ -110,8 +110,8 @@ namespace RaahnSimulation
             }
 	    }
 
-        /*This method should be called to update all
-        entities within the state with an event that just occured.*/
+        //This method should be called to update all
+        //entities within the state with an event that just occured.
         public virtual void UpdateEvent(Event e)
         {
             for (int i = 0; i < layers.Count; i++)
@@ -121,8 +121,8 @@ namespace RaahnSimulation
             }
         }
 
-        /*This method should be called to draw all entities
-        within the state. and debugging information for them.*/
+        //This method should be called to draw all entities
+        //within the state. and debugging information for them.
 	    public virtual void Draw()
 	    {
 	        for (int i = 0; i < layers.Count; i++)
@@ -183,7 +183,12 @@ namespace RaahnSimulation
 	    public virtual void Clean()
 	    {
             for (int i = 0; i < layers.Count; i++)
+            {
+                foreach (Entity entity in layers[i])
+                    entity.Clean();
                 layers[i].Clear();
+            }
+
             layers.Clear();
 	    }
 	}

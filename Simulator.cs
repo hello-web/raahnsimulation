@@ -126,8 +126,8 @@ namespace RaahnSimulation
                 return false;
             }
 
-	        /*Disable multiple keydown events from
-	        occuring when a key is held down.*/
+	        //Disable multiple keydown events from
+	        //occuring when a key is held down.
 	        simWindow.SetKeyRepeatEnabled(false);
 
 			simWindow.Resized += new EventHandler<SizeEventArgs>(OnResized);
@@ -496,8 +496,8 @@ namespace RaahnSimulation
 		static void SaveEvent(Event e)
 		{
 			Simulator s = Simulator.Instance();
-			/* Process all events but leave keep them in a queue
-	        to be processed by all entities.*/
+			//Process all events but leave keep them in a queue
+	        //to be processed by all entities.
 			s.eventQueue.Enqueue(e);
 		}
 
