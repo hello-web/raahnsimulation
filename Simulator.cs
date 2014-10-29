@@ -119,7 +119,7 @@ namespace RaahnSimulation
             //Check to make sure OpenGL 1.5 is supported.
             string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
             Console.WriteLine("GL Version " + glVersion);
-            if (float.Parse(glVersion, NumberStyles.Float, Utils.EN_US) < Utils.MIN_GL_VERSION)
+            if (float.Parse(glVersion) < Utils.MIN_GL_VERSION)
             {
                 glInitFailed = true;
                 Console.WriteLine(Utils.GL_VERSION_UNSUPPORTED);

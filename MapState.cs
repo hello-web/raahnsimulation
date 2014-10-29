@@ -30,7 +30,7 @@ namespace RaahnSimulation
 
 	        cursor = new Cursor(context);
 
-	        entityPanel = new EntityPanel(context, cursor, 2);
+	        entityPanel = new EntityPanel(context, cursor, camera, 2);
 
 	        mapBuilder = new MapBuilder(context, cursor, camera, entityPanel, 0);
 
@@ -94,6 +94,7 @@ namespace RaahnSimulation
 
 	    public override void Clean()
 	    {
+            mapBuilder.SaveMap();
 	        base.Clean();
 	    }
 

@@ -8,9 +8,9 @@ namespace RaahnSimulation
 	{
         public enum EntityType
         {
-            NONE = -1,
-            GENERIC = 0,
-            ROAD = 1
+            NONE = -2,
+            GENERIC = -1,
+            ROAD = 0
         };
 
 		public const float ROTATE_SPEED = 90.0f;
@@ -162,6 +162,11 @@ namespace RaahnSimulation
         public float GetTransparency()
         {
             return transparency;
+        }
+
+        public TextureManager.TextureType GetTexture()
+        {
+            return texture;
         }
 
         public Utils.Vector3 GetColor()

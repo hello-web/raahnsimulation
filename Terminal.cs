@@ -7,15 +7,13 @@ namespace RaahnSimulation
 {
     public class Terminal : Updateable
     {
-        private const uint COMMAND_COUNT = 2;
-
         private const float TEXT_WIDTH_PERCENTAGE = 0.025f;
         private const float TEXT_HEIGHT_PERCENTAGE = 0.05f;
         private const float BACKSPACE_DELAY = 75.0f;
 
         private const string INITIAL_TEXT = "$";
 
-        private readonly string[] COMMANDS =
+        private static readonly string[] COMMANDS =
         {
             "exit", "debug"
         };
@@ -176,7 +174,7 @@ namespace RaahnSimulation
         private void ProcessCommand(string commandString)
         {
             //Enumerate the command.
-            for (uint i = 0; i < COMMAND_COUNT; i++)
+            for (int i = 0; i < COMMANDS.Length; i++)
             {
                 if (commandString.Equals(COMMANDS[i]))
                 {

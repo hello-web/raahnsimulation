@@ -30,7 +30,7 @@ namespace RaahnSimulation
         private Graphic background;
         private Graphic trash;
 
-	    public EntityPanel(Simulator sim, Cursor c, int layerIndex)
+	    public EntityPanel(Simulator sim, Cursor c, Camera cam, int layerIndex)
 	    {
             context = sim;
 	        cursor = c;
@@ -80,6 +80,9 @@ namespace RaahnSimulation
 
             background.SetWidth((float)context.GetWindowWidth());
             background.SetHeight(roadWidth + panelOption.GetHeight() + panelSpacing);
+
+            //Make the bottom of the visible map equivalent to the bottom of the map in the simulation.
+            cam.Pan(0.0f, -background.GetHeight());
 
             trash = new Graphic(context);
             trash.SetWindowAsDrawingVec(true);

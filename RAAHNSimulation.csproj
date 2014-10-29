@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
     <Reference Include="Tao.OpenGl" />
     <Reference Include="sfmlnet-window-2" />
     <Reference Include="sfmlnet-graphics-2" />

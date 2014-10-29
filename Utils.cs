@@ -280,16 +280,17 @@ namespace RaahnSimulation
 		public const char FILE_COMMENT = '#';
 		public const char FILE_VALUE_SEPERATOR = ' ';
 		public const string WINDOW_TITLE = "RAAHN Simulation";
-		public const string ROAD_FILE = "Data/Roads/default.rd";
+        public const string ROAD_FILE = "Data/Maps/Default.xml";
+        public const string DEFAULT_SAVE_FILE = "Data/Maps/OutMap.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.8";
+		public const string VERSION_STRING = "Version 1.9";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
-
-        //My computer uses es-CO, but our files uses points for decimals, hard code culture for now.
-        public static readonly CultureInfo EN_US = CultureInfo.CreateSpecificCulture("en-US");
+        public const string MAP_ALREADY_LOADED = "Map already loaded.";
+        public const string FILE_NOT_FOUND = "File: {0} not found.";
+        public const string XML_READ_ERROR = "Error while reading XML. The map may not have been created correctly.";
 
 		public static float DegToRad(float deg)
 		{

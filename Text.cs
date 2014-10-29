@@ -112,7 +112,7 @@ namespace RaahnSimulation
 	        spacing = charWidth * SPACING_WIDTH_PERCENTAGE;
 
             //To get the entire width, we need the complete width of the last char.
-	        width = (spacing * text.Length) + charWidth * 0.2f;
+	        width = (spacing * text.Length) + charWidth * (1.0f - SPACING_WIDTH_PERCENTAGE);
 
             aabb.SetSize(width, height);
 

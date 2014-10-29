@@ -32,14 +32,14 @@ namespace RaahnSimulation
 
             quadTree = new QuadTree(new AABB((float)context.GetWindowWidth(), (float)context.GetWindowHeight()));
 
-	        EntityMap = new EntityMap(context, 0, quadTree, Utils.ROAD_FILE);
-
-	        raahnCar = new Car(context, quadTree);
-	        raahnCar.SetWidth((float)context.GetWindowWidth() * CAR_WIDTH_SCALE);
-	        raahnCar.SetHeight((float)context.GetWindowHeight() * CAR_HEIGHT_SCALE);
-	        raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
-	        raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
+            raahnCar = new Car(context, quadTree);
+            raahnCar.SetWidth((float)context.GetWindowWidth() * CAR_WIDTH_SCALE);
+            raahnCar.SetHeight((float)context.GetWindowHeight() * CAR_HEIGHT_SCALE);
+            raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
+            raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
             raahnCar.Update();
+
+	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, Utils.ROAD_FILE);
 
             AddEntity(raahnCar, 0);
 

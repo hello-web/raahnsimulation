@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Xml;
 using Tao.OpenGl;
 using SFML.Window;
 
@@ -9,12 +10,13 @@ namespace RaahnSimulation
 	{
         private const uint SNAPPING_ANGLES_COUNT = 4;
         private const uint UNIQUE_ENTITIES = 1;
+        private const int XML_INDENT_SPACE = 4;
 
 		private const float FLAG_WIDTH_PERCENTAGE = 0.05f;
 		private const float FLAG_HEIGHT_PERCENTAGE = 0.1f;
         private const float SNAPPING_ANGLE_BOUNDS = 7.5f;
 
-        private readonly float[] SNAPPING_ANGLES = { 0.0f, 90.0f, 180.0f, 270.0f };
+        private static readonly float[] SNAPPING_ANGLES = { 0.0f, 90.0f, 180.0f, 270.0f };
 
         private int layer;
         private bool trashHovering;
@@ -193,6 +195,114 @@ namespace RaahnSimulation
                     entityFloating = null;
                 }
             }
+        }
+
+        public void SaveMap()
+        {
+            XmlTextWriter writer = new XmlTextWriter(Utils.DEFAULT_SAVE_FILE, System.Text.Encoding.UTF8);
+
+            writer.WriteStartDocument(true);
+            writer.Indentation = XML_INDENT_SPACE;
+            writer.Formatting = Formatting.Indented;
+
+            //Write <Map>
+            writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.MAP]);
+
+            //Write <Robot> and its attributes
+            writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.ROBOT]);
+
+            writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.X]);
+            writer.WriteString(flag.worldPos.x.ToString());
+            writer.WriteEndElement();
+
+            writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.Y]);
+            writer.WriteString(flag.worldPos.y.ToString());
+            writer.WriteEndElement();
+
+            //Do not write angle because map builder currently does not have an angle value for the robot.
+
+            //End </Robot>
+            writer.WriteEndElement();
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                foreach (ColorableEntity entity in entities[i])
+                {
+                    //Write <Entity>
+                    writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.ENTITY]);
+
+                    writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.X]);
+                    writer.WriteString(entity.worldPos.x.ToString());
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.Y]);
+                    writer.WriteString(entity.worldPos.y.ToString());
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.ANGLE]);
+                    writer.WriteString(entity.angle.ToString());
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.TYPE]);
+                    writer.WriteString(EntityMap.ENTITY_TYPES[(int)entity.GetEntityType()]);
+                    writer.WriteEndElement();
+
+                    if (entity.GetEntityType() == Entity.EntityType.ROAD)
+                    {
+                        writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.TEXTURE]);
+                        int saveTexture = (int)(entity.GetTexture() - TextureManager.ROAD_INDEX_OFFSET);
+                        writer.WriteString(saveTexture.ToString());
+                        writer.WriteEndElement();
+                    }
+
+                    //End </Entity>
+                    writer.WriteEndElement();
+                }
+            }
+
+            writer.WriteEndElement();
+
+            writer.WriteEndDocument();
+
+            writer.Close();
+        }
+
+        public bool Intersects(float x, float y)
+        {
+            for (int i = 0; i < entities.Count; i++)
+            {
+                foreach (Entity curEntity in entities[i])
+                {
+                    if (x > curEntity.aabb.GetBounds().left && x < curEntity.aabb.GetBounds().right)
+                    {
+                        if (y > curEntity.aabb.GetBounds().bottom && y < curEntity.aabb.GetBounds().top)
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool Intersects(Utils.Rect bounds)
+        {
+            for (int x = 0; x < entities.Count; x++)
+            {
+                foreach (Entity curEntity in entities[x])
+                {
+                    if (!(curEntity.aabb.GetBounds().left > bounds.right || curEntity.aabb.GetBounds().right < bounds.left
+                          || curEntity.aabb.GetBounds().bottom > bounds.top || curEntity.aabb.GetBounds().top < bounds.bottom))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        public bool Floating()
+        {
+            if (entityFloating != null)
+                return true;
+            else
+                return false;
         }
 
         private void AddEntity(int itemIndex)
@@ -404,43 +514,5 @@ namespace RaahnSimulation
             if (!snaps)
                 entityFloating.angle = floatingExactAngle;
         }
-
-		public bool Intersects(float x, float y)
-		{
-			for (int i = 0; i < entities.Count; i++)
-			{
-                foreach (Entity curEntity in entities[i])
-                {
-                    if (x > curEntity.aabb.GetBounds().left && x < curEntity.aabb.GetBounds().right)
-    				{
-                        if (y > curEntity.aabb.GetBounds().bottom && y < curEntity.aabb.GetBounds().top)
-    						return true;
-    				}
-                }
-			}
-			return false;
-		}
-
-        public bool Intersects(Utils.Rect bounds)
-		{
-			for (int x = 0; x < entities.Count; x++)
-			{
-                foreach (Entity curEntity in entities[x])
-                {
-                    if (!(curEntity.aabb.GetBounds().left > bounds.right || curEntity.aabb.GetBounds().right < bounds.left
-                    || curEntity.aabb.GetBounds().bottom > bounds.top || curEntity.aabb.GetBounds().top < bounds.bottom))
-                        return true;
-                }
-			}
-			return false;
-		}
-
-		public bool Floating()
-		{
-			if (entityFloating != null)
-				return true;
-			else
-				return false;
-		}
 	}
 }
