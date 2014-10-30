@@ -124,7 +124,7 @@ namespace RaahnSimulation
                 float deltaX = endPoint.x - startPoint.x;
 
                 //If the change in x is 0, the slope is undefined.
-                if (deltaX == 0.0f)
+                if (Math.Abs(deltaX) <= EPSILON)
                 {
                     vertical = true;
 
@@ -276,6 +276,8 @@ namespace RaahnSimulation
 		public const float DEG_TO_RAD = (float)3.1415926535f / 180.0f;
         public const float TEXTURE_CHAR_WIDTH = 1.0f / (float)CHARACTER_TEX_COLUMN_COUNT;
         public const float TEXTURE_CHAR_HEIGHT = 1.0f / (float)CHARACTER_TEX_ROW_COUNT;
+        //Chosen as it works for slope calculations for line segments.
+        public const double EPSILON = 0.00009;
 
 		public const char FILE_COMMENT = '#';
 		public const char FILE_VALUE_SEPERATOR = ' ';
@@ -284,7 +286,7 @@ namespace RaahnSimulation
         public const string DEFAULT_SAVE_FILE = "Data/Maps/OutMap.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.9";
+		public const string VERSION_STRING = "Version 1.91";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
