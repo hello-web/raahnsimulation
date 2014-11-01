@@ -23,6 +23,8 @@ namespace RaahnSimulation
 		//120 degrees per second.
 		private const double CAR_ROTATE_SPEED = 120.0f;
 
+        private static Mesh line = null;
+
         public List<Entity> entitiesHovering;
         private double rangeFinderLength;
         private double[] rangeFinderLengths;
@@ -37,6 +39,27 @@ namespace RaahnSimulation
 
             quadTree = tree;
             camera = context.GetCamera();
+
+            //The first car to use line initializes it.
+            if (line == null)
+            {
+                line = new Mesh(2, Gl.GL_LINES);
+
+                float[] vertices = new float[]
+                {
+                    0.0f, 0.0f, 0.0f, 0.0f,
+                    1.0f, 0.0f, 1.0f, 0.0f
+                };
+
+                ushort[] indices =
+                {
+                    0, 1
+                };
+
+                line.SetVerticesWithUV(vertices);
+                line.SetIndices(indices);
+                line.Allocate();
+            }
 
             rangeFinderLengths = new double[RANGE_FINDER_COUNT];
             rangeFinderActivations = new double[RANGE_FINDER_COUNT];
@@ -165,6 +188,8 @@ namespace RaahnSimulation
 
 	        Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
+            line.MakeCurrent();
+
             Gl.glPopMatrix();
 
             Gl.glDisable(Gl.GL_TEXTURE_2D);
@@ -186,7 +211,7 @@ namespace RaahnSimulation
                 Gl.glTranslated(center.x, center.y, Utils.DISCARD_Z_POS);
                 Gl.glScaled(rangeFinderLengths[i], RANGE_FINDER_HEIGHT, Utils.DISCARD_Z_SCALE);
 
-                Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+                Gl.glDrawElements(line.GetRenderMode(), line.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
                 Gl.glPopMatrix();
             }
@@ -199,6 +224,11 @@ namespace RaahnSimulation
         public override void DebugDraw()
         {
             base.DebugDraw();
+        }
+
+        public override void Clean()
+        {
+            line.Free();
         }
 
         private Utils.Point2 GetNearestIntersection(List<Utils.Point2> intersections)
