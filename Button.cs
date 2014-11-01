@@ -7,7 +7,7 @@ namespace RaahnSimulation
     public class Button : ClickableEntity
     {
         //The width is set to the height, so only height is needed.
-        private const float CHAR_HEIGHT_PERCENTAGE = 0.8f;
+        private const double CHAR_HEIGHT_PERCENTAGE = 0.8f;
 
         private Text label;
 
@@ -16,13 +16,13 @@ namespace RaahnSimulation
             Construct(text);
         }
 
-        public Button(Simulator sim, string text, float width, float height, float x, float y) : base(sim)
+        public Button(Simulator sim, string text, double width, double height, double x, double y) : base(sim)
         {
             Construct(text);
             SetBounds(x, y, width, height, false);
         }
 
-        public void SetBounds(float x, float y, float Width, float Height, bool fromCenter)
+        public void SetBounds(double x, double y, double Width, double Height, bool fromCenter)
         {
             width = Width;
             height = Height;
@@ -40,7 +40,7 @@ namespace RaahnSimulation
                 drawingVec.y = y;
             }
 
-            float charHeight = Height * CHAR_HEIGHT_PERCENTAGE;
+            double charHeight = Height * CHAR_HEIGHT_PERCENTAGE;
 
             label.SetCharBounds(drawingVec.x + (width / 2.0f), drawingVec.y + (height / 2.0f), charHeight, charHeight, true);
         }
@@ -68,18 +68,18 @@ namespace RaahnSimulation
         {
             base.Draw();
 
-            Gl.glColor4f(1.0f, 1.0f, 1.0f, transparency);
+            Gl.glColor4d(1.0f, 1.0f, 1.0f, transparency);
 
             Gl.glPushMatrix();
 
-            Gl.glTranslatef(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
-            Gl.glScalef(width, height, Utils.DISCARD_Z_SCALE);
+            Gl.glTranslated(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+            Gl.glScaled(width, height, Utils.DISCARD_Z_SCALE);
 
             Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
             Gl.glPopMatrix();
 
-            Gl.glColor4f(1.0f, 1.0f, 1.0f, transparency);
+            Gl.glColor4d(1.0f, 1.0f, 1.0f, transparency);
 
             label.Draw();
         }

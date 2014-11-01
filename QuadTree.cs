@@ -64,7 +64,7 @@ namespace RaahnSimulation
         {
             Gl.glDisable(Gl.GL_TEXTURE_2D);
 
-            Gl.glColor4f(0.0f, 0.0f, 1.0f, 0.5f);
+            Gl.glColor4d(0.0f, 0.0f, 1.0f, 0.5f);
 
             Gl.glPushMatrix();
 
@@ -72,7 +72,7 @@ namespace RaahnSimulation
 
             Gl.glPopMatrix();
 
-            Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            Gl.glColor4d(1.0f, 1.0f, 1.0f, 1.0f);
 
             Gl.glEnable(Gl.GL_TEXTURE_2D);
         }

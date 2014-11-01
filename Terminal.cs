@@ -7,9 +7,9 @@ namespace RaahnSimulation
 {
     public class Terminal : Updateable
     {
-        private const float TEXT_WIDTH_PERCENTAGE = 0.025f;
-        private const float TEXT_HEIGHT_PERCENTAGE = 0.05f;
-        private const float BACKSPACE_DELAY = 75.0f;
+        private const double TEXT_WIDTH_PERCENTAGE = 0.025f;
+        private const double TEXT_HEIGHT_PERCENTAGE = 0.05f;
+        private const double BACKSPACE_DELAY = 75.0f;
 
         private const string INITIAL_TEXT = "$";
 
@@ -25,12 +25,12 @@ namespace RaahnSimulation
             DEBUG = 1
         };
 
-        private float transparency;
-        private float charWidth;
-        private float charHeight;
-        private float backspaceDelay;
-        private float lastTime;
-        private float currentTime;
+        private double transparency;
+        private double charWidth;
+        private double charHeight;
+        private double backspaceDelay;
+        private double lastTime;
+        private double currentTime;
         private Simulator context;
         private Command command;
         private Text initialText;
@@ -44,13 +44,13 @@ namespace RaahnSimulation
             context = sim;
             transparency = 0.8f;
 
-            charWidth = TEXT_WIDTH_PERCENTAGE * (float)context.GetWindowWidth();
-            charHeight = TEXT_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight();
+            charWidth = TEXT_WIDTH_PERCENTAGE * (double)context.GetWindowWidth();
+            charHeight = TEXT_HEIGHT_PERCENTAGE * (double)context.GetWindowHeight();
 
             initialText = new Text(sim, INITIAL_TEXT);
             initialText.SetWindowAsDrawingVec(true);
             initialText.SetColor(1.0f, 1.0f, 1.0f);
-            initialText.SetCharBounds(0.0f, (float)context.GetWindowHeight() / 2.0f, charWidth, charHeight, false);
+            initialText.SetCharBounds(0.0f, (double)context.GetWindowHeight() / 2.0f, charWidth, charHeight, false);
             initialText.Update();
 
             currentTextPos = new Utils.Vector2(0.0f, 0.0f);
@@ -117,7 +117,7 @@ namespace RaahnSimulation
                 lines.ToArray()[lines.Count - 1].windowPos.x -= initialText.GetWidth();
 
                 Text frontText = lines.Peek();
-                if (frontText.windowPos.y >= (float)context.GetWindowHeight())
+                if (frontText.windowPos.y >= (double)context.GetWindowHeight())
                 {
                     frontText.SetText("");
                     textPool.Free(frontText);
@@ -147,14 +147,14 @@ namespace RaahnSimulation
             //Draw terminal background.
             Gl.glDisable(Gl.GL_TEXTURE_2D);
 
-            Gl.glColor4f(0.0f, 0.0f, 0.0f, transparency);
+            Gl.glColor4d(0.0f, 0.0f, 0.0f, transparency);
 
             Gl.glLoadIdentity();
 
             Gl.glPushMatrix();
 
-            Gl.glTranslatef(0.0f, (float)context.GetWindowHeight() / 2.0f, Utils.DISCARD_Z_POS);
-            Gl.glScalef((float)context.GetWindowWidth(), (float)context.GetWindowHeight() / 2.0f, Utils.DISCARD_Z_SCALE);
+            Gl.glTranslated(0.0f, (double)context.GetWindowHeight() / 2.0f, Utils.DISCARD_Z_POS);
+            Gl.glScaled((double)context.GetWindowWidth(), (double)context.GetWindowHeight() / 2.0f, Utils.DISCARD_Z_SCALE);
 
             Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
@@ -168,7 +168,7 @@ namespace RaahnSimulation
             for (uint i = 0; i < lines.Count; i++)
                 lines.ToArray()[i].Draw();
 
-            Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            Gl.glColor4d(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
         private void ProcessCommand(string commandString)

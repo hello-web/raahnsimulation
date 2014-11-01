@@ -9,12 +9,12 @@ namespace RaahnSimulation
 	{
         private const uint PANEL_OPTION_COUNT = 2;
 
-        private const float PANEL_ITEM_OFFSET_X_PERCENTAGE = 0.075f;
-        private const float PANEL_ITEM_OFFSET_Y_PERCENTAGE = 0.025f;
-		private const float PANEL_SPACING_PERCENTAGE = 0.05f;
-        private const float PANEL_HEIGHT_SPACE_PERCENTAGE = 0.075f;
-        private const float TRASH_WIDTH_PERCENTAGE = 0.08f;
-        private const float TRASH_HEIGHT_PERCENTAGE = 0.16f;
+        private const double PANEL_ITEM_OFFSET_X_PERCENTAGE = 0.075f;
+        private const double PANEL_ITEM_OFFSET_Y_PERCENTAGE = 0.025f;
+		private const double PANEL_SPACING_PERCENTAGE = 0.05f;
+        private const double PANEL_HEIGHT_SPACE_PERCENTAGE = 0.075f;
+        private const double TRASH_WIDTH_PERCENTAGE = 0.08f;
+        private const double TRASH_HEIGHT_PERCENTAGE = 0.16f;
 
         private const string P0 = "Roads";
         private const string P1 = "Obstacles";
@@ -46,8 +46,8 @@ namespace RaahnSimulation
             background.worldPos.y = 0.0f;
 
 	        Road road;
-	        float winWidth = (float)context.GetWindowWidth();
-            float roadWidth = winWidth * Road.ROAD_DIMENSION_PERCENTAGE;
+	        double winWidth = (double)context.GetWindowWidth();
+            double roadWidth = winWidth * Road.ROAD_DIMENSION_PERCENTAGE;
 
 	        for (int i = 0; i < EntityMap.UNIQUE_ROAD_COUNT; i++)
 	        {
@@ -55,8 +55,8 @@ namespace RaahnSimulation
     
 	            road.SetWindowAsDrawingVec(true);
 
-                float xOffset = PANEL_ITEM_OFFSET_X_PERCENTAGE * winWidth;
-                float yOffset = PANEL_ITEM_OFFSET_Y_PERCENTAGE * (float)context.GetWindowHeight();
+                double xOffset = PANEL_ITEM_OFFSET_X_PERCENTAGE * winWidth;
+                double yOffset = PANEL_ITEM_OFFSET_Y_PERCENTAGE * (double)context.GetWindowHeight();
 				road.windowPos.x = xOffset + (i * (roadWidth + PANEL_SPACING_PERCENTAGE * winWidth));
 	            road.windowPos.y = yOffset;
 				road.SetTexture((TextureManager.TextureType)(TextureManager.ROAD_INDEX_OFFSET + i));
@@ -64,8 +64,8 @@ namespace RaahnSimulation
 	            intersections[i] = false;
 	        }
 
-            float charWidth = (float)context.GetWindowWidth() * Utils.CHAR_WIDTH_PERCENTAGE;
-            float charHeight = (float)context.GetWindowHeight() * Utils.CHAR_HEIGHT_PERCENTAGE;
+            double charWidth = (double)context.GetWindowWidth() * Utils.CHAR_WIDTH_PERCENTAGE;
+            double charHeight = (double)context.GetWindowHeight() * Utils.CHAR_HEIGHT_PERCENTAGE;
 
             panelOption = new ToggleText(context, PANEL_OPTIONS[0]);
             panelOption.SetWindowAsDrawingVec(true);
@@ -76,9 +76,9 @@ namespace RaahnSimulation
                 panelOption.AddString(PANEL_OPTIONS[i]);
             panelOption.Update();
 
-            float panelSpacing = (float)context.GetWindowHeight() * PANEL_HEIGHT_SPACE_PERCENTAGE;
+            double panelSpacing = (double)context.GetWindowHeight() * PANEL_HEIGHT_SPACE_PERCENTAGE;
 
-            background.SetWidth((float)context.GetWindowWidth());
+            background.SetWidth((double)context.GetWindowWidth());
             background.SetHeight(roadWidth + panelOption.GetHeight() + panelSpacing);
 
             //Make the bottom of the visible map equivalent to the bottom of the map in the simulation.
@@ -88,13 +88,13 @@ namespace RaahnSimulation
             trash.SetWindowAsDrawingVec(true);
             trash.SetTexture(TextureManager.TextureType.TRASH);
             trash.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-            trash.SetWidth(TRASH_WIDTH_PERCENTAGE * (float)context.GetWindowWidth());
-            trash.SetHeight(TRASH_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight());
+            trash.SetWidth(TRASH_WIDTH_PERCENTAGE * (double)context.GetWindowWidth());
+            trash.SetHeight(TRASH_HEIGHT_PERCENTAGE * (double)context.GetWindowHeight());
 
-            float xBorderOffset = trash.GetWidth() * 0.2f;
-            float yBorderOffset = trash.GetHeight() * 0.1f;
+            double xBorderOffset = trash.GetWidth() * 0.2f;
+            double yBorderOffset = trash.GetHeight() * 0.1f;
 
-            trash.windowPos.x = (float)context.GetWindowWidth() - trash.GetWidth() - xBorderOffset;
+            trash.windowPos.x = (double)context.GetWindowWidth() - trash.GetWidth() - xBorderOffset;
             trash.windowPos.y = yBorderOffset;
 
             currentState.AddEntity(background, layerIndex);
@@ -129,7 +129,7 @@ namespace RaahnSimulation
 
         }
 
-	    public bool Intersects(float x, float y)
+	    public bool Intersects(double x, double y)
 	    {
             if (x > background.aabb.GetBounds().left && x < background.aabb.GetBounds().right)
             {
@@ -168,16 +168,16 @@ namespace RaahnSimulation
 			}
 			return -1;
 		}
-		public Utils.Vector2 GetDist(float x, float y, Camera cam)
+		public Utils.Vector2 GetDist(double x, double y, Camera cam)
 		{
 			int index = GetSelectedEntity();
 			if (index == -1)
 				return new Utils.Vector2(0.0f, 0.0f);
 
-            float zoom = cam.GetZoom();
+            double zoom = cam.GetZoom();
 
-            float distX = (x - items[index].worldPos.x) * zoom;
-			float distY = (y - items[index].worldPos.y) * zoom;
+            double distX = (x - items[index].worldPos.x) * zoom;
+			double distY = (y - items[index].worldPos.y) * zoom;
 
             return new Utils.Vector2(distX, distY);
 		}

@@ -7,7 +7,7 @@ namespace RaahnSimulation
 	public class Road : ColorableEntity
 	{
         //Roads are squares, so only one constant is needed.
-        public const float ROAD_DIMENSION_PERCENTAGE = 0.1f;
+        public const double ROAD_DIMENSION_PERCENTAGE = 0.1f;
 
 	    public Road(Simulator sim) : base(sim)
 	    {
@@ -15,7 +15,7 @@ namespace RaahnSimulation
 	        //Set default texture.
 	        texture = TextureManager.TextureType.ROAD_0;
 
-            width = height = (float)context.GetWindowWidth() * ROAD_DIMENSION_PERCENTAGE;
+            width = height = (double)context.GetWindowWidth() * ROAD_DIMENSION_PERCENTAGE;
             aabb.SetSize(width, height);
 	    }
 
@@ -35,8 +35,8 @@ namespace RaahnSimulation
 
 	        RotateAroundCenter();
 
-	        Gl.glTranslatef(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
-	        Gl.glScalef(width, height, Utils.DISCARD_Z_SCALE);
+	        Gl.glTranslated(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+	        Gl.glScaled(width, height, Utils.DISCARD_Z_SCALE);
 	        Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 	    }
 

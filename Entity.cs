@@ -13,21 +13,21 @@ namespace RaahnSimulation
             ROAD = 0
         };
 
-		public const float ROTATE_SPEED = 90.0f;
-        public const float DEFAULT_COLOR_R = 1.0f;
-        public const float DEFAULT_COLOR_G = 1.0f;
-        public const float DEFAULT_COLOR_B = 1.0f;
-        public const float DEFAULT_COLOR_T = 1.0f;
+		public const double ROTATE_SPEED = 90.0f;
+        public const double DEFAULT_COLOR_R = 1.0f;
+        public const double DEFAULT_COLOR_G = 1.0f;
+        public const double DEFAULT_COLOR_B = 1.0f;
+        public const double DEFAULT_COLOR_T = 1.0f;
 
         public bool visible;
-		public float angle;
+		public double angle;
 		public Utils.Vector2 worldPos;
 		public Utils.Vector2 windowPos;
 		public Utils.Vector2 drawingVec;
         public AABB aabb;
-        protected float width;
-        protected float height;
-        protected float transparency;
+        protected double width;
+        protected double height;
+        protected double transparency;
 		protected Simulator context;
         protected Utils.Vector2 center;
 		protected Utils.Vector2 velocity;
@@ -37,7 +37,7 @@ namespace RaahnSimulation
 		protected TextureManager.TextureType texture;
         protected Mesh mesh;
         private bool moved;
-        private float previousAngle;
+        private double previousAngle;
         private Utils.Vector2 previousPos;
 
 		protected Entity()
@@ -102,7 +102,7 @@ namespace RaahnSimulation
                 windowPos.y = transform.y;
             }
 
-            float deltaAngle = angle - previousAngle;
+            double deltaAngle = angle - previousAngle;
 
             if (deltaAngle != 0.0f)
             {
@@ -110,8 +110,8 @@ namespace RaahnSimulation
                 previousAngle = angle;
             }
 
-            float deltaX = drawingVec.x - previousPos.x;
-            float deltaY = drawingVec.y - previousPos.y;
+            double deltaX = drawingVec.x - previousPos.x;
+            double deltaY = drawingVec.y - previousPos.y;
 
             if (deltaX != 0.0f || deltaY != 0.0f)
             {
@@ -126,8 +126,8 @@ namespace RaahnSimulation
 	        center.x = drawingVec.x + (width / 2.0f);
 	        center.y = drawingVec.y + (height / 2.0f);
 	        //OpenGL uses degress, standard math uses radians.
-	        velocity.x = (float)Math.Cos(Utils.DegToRad(angle)) * speed.x;
-	        velocity.y = (float)Math.Sin(Utils.DegToRad(angle)) * speed.y;
+	        velocity.x = Math.Cos(Utils.DegToRad(angle)) * speed.x;
+	        velocity.y = Math.Sin(Utils.DegToRad(angle)) * speed.y;
 	    }
 
         public virtual void UpdateEvent(Event e)
@@ -149,17 +149,17 @@ namespace RaahnSimulation
             return moved;
         }
 
-        public float GetWidth()
+        public double GetWidth()
         {
             return width;
         }
 
-        public float GetHeight()
+        public double GetHeight()
         {
             return height;
         }
 
-        public float GetTransparency()
+        public double GetTransparency()
         {
             return transparency;
         }
@@ -179,13 +179,13 @@ namespace RaahnSimulation
             return type;
         }
 
-        public virtual void SetWidth(float w)
+        public virtual void SetWidth(double w)
         {
             width = w;
             aabb.SetSize(width, height);
         }
 
-        public virtual void SetHeight(float h)
+        public virtual void SetHeight(double h)
         {
             height = h;
             aabb.SetSize(width, height);
@@ -209,7 +209,7 @@ namespace RaahnSimulation
 				drawingVec = worldPos;
 		}
 
-		public virtual bool Intersects(float x, float y)
+		public virtual bool Intersects(double x, double y)
 		{
 			if (x >= aabb.GetBounds().left && x <= aabb.GetBounds().right)
 			{
@@ -247,9 +247,9 @@ namespace RaahnSimulation
 
 	    protected void RotateAroundCenter()
 	    {
-	        Gl.glTranslatef(center.x, center.y, Utils.DISCARD_Z_POS);
-	        Gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
-	        Gl.glTranslatef(-center.x, -center.y, -Utils.DISCARD_Z_POS);
+	        Gl.glTranslated(center.x, center.y, Utils.DISCARD_Z_POS);
+	        Gl.glRotated(angle, 0.0f, 0.0f, 1.0f);
+	        Gl.glTranslated(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 	    }
 	}
 }

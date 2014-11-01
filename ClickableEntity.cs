@@ -38,7 +38,7 @@ namespace RaahnSimulation
 	        Vector2i mousePosWindowi = Mouse.GetPosition(context.GetWindow());
 
             Utils.Vector2 comparisonVec;
-	        Utils.Vector2 mousePosWindowf = new Utils.Vector2((float)mousePosWindowi.X, (float)(context.GetWindowHeight()) - (float)mousePosWindowi.Y);
+	        Utils.Vector2 mousePosWindowf = new Utils.Vector2((double)mousePosWindowi.X, (double)(context.GetWindowHeight()) - (double)mousePosWindowi.Y);
             if (drawingVec == windowPos)
                 comparisonVec = mousePosWindowf;
             else

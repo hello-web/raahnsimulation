@@ -21,7 +21,7 @@ namespace RaahnSimulation
             modified = false;
         }
 
-        public void SetColor(float r, float g, float b, float t)
+        public void SetColor(double r, double g, double b, double t)
         {
             color.x = r;
             color.y = g;

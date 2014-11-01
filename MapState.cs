@@ -65,9 +65,9 @@ namespace RaahnSimulation
             if (e.Type == EventType.MouseWheelMoved)
             {
                 if (e.MouseWheel.Delta > 0)
-                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (float)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
+                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (double)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
                 else
-                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (float)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
+                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (double)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
             }
 
             //Update mapBuilder before checking whether or not to pan.
@@ -76,7 +76,7 @@ namespace RaahnSimulation
             if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
             {
                 if (!entityPanel.Intersects(cursor.aabb.GetBounds())
-                && !mapBuilder.Floating() && context.GetWindowHasFocus())
+                && !mapBuilder.doubleing() && context.GetWindowHasFocus())
                     panning = true;
             }
 

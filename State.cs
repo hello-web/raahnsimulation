@@ -135,7 +135,7 @@ namespace RaahnSimulation
 
                         Utils.Vector3 color = curEntity.GetColor();
 
-                        Gl.glColor4f(color.x, color.y, color.z, curEntity.GetTransparency());
+                        Gl.glColor4d(color.x, color.y, color.z, curEntity.GetTransparency());
 
                         // Disable camera transformation.
                         if (curEntity.drawingVec == curEntity.windowPos)
@@ -143,7 +143,7 @@ namespace RaahnSimulation
 
                         curEntity.Draw();
 
-                        Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                        Gl.glColor4d(1.0f, 1.0f, 1.0f, 1.0f);
 
                         Gl.glPopMatrix();
 
@@ -153,7 +153,7 @@ namespace RaahnSimulation
 
                             Gl.glDisable(Gl.GL_TEXTURE_2D);
 
-                            Gl.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+                            Gl.glColor4d(0.0f, 0.0f, 0.0f, 0.5f);
 
                             // Disable camera transformation.
                             if (curEntity.drawingVec == curEntity.windowPos)
@@ -165,7 +165,7 @@ namespace RaahnSimulation
 
                             Gl.glEnable(Gl.GL_TEXTURE_2D);
 
-                            Gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                            Gl.glColor4d(1.0f, 1.0f, 1.0f, 1.0f);
                         }
                     }
                 }

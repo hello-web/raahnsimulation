@@ -6,12 +6,12 @@ namespace RaahnSimulation
 {
 	public class Text : ClickableEntity
 	{
-        public const float SPACING_WIDTH_PERCENTAGE = 0.8f;
+        public const double SPACING_WIDTH_PERCENTAGE = 0.8f;
 		private const int ASCII_OFFSET = 32;
 
 		protected string text;
-		private float spacing;
-		private float charWidth;
+		private double spacing;
+		private double charWidth;
 		private Utils.Vector2 charTexPos;
 		private Utils.Vector2 charCenter;
 
@@ -50,7 +50,7 @@ namespace RaahnSimulation
 	    {
 	        base.Draw();
 
-	        Gl.glColor3f(color.x, color.y, color.z);
+	        Gl.glColor3d(color.x, color.y, color.z);
 
 	        for (int i = 0; i < text.Length; i++)
 	        {
@@ -77,21 +77,21 @@ namespace RaahnSimulation
 	            Gl.glMatrixMode(Gl.GL_TEXTURE);
 
 	            Gl.glLoadIdentity();
-	            Gl.glTranslatef((charTexPos.x * Utils.TEXTURE_CHAR_WIDTH), (charTexPos.y * Utils.TEXTURE_CHAR_HEIGHT), 1);
-	            Gl.glScalef(Utils.TEXTURE_CHAR_WIDTH, Utils.TEXTURE_CHAR_HEIGHT, 1);
+	            Gl.glTranslated((charTexPos.x * Utils.TEXTURE_CHAR_WIDTH), (charTexPos.y * Utils.TEXTURE_CHAR_HEIGHT), 1);
+	            Gl.glScaled(Utils.TEXTURE_CHAR_WIDTH, Utils.TEXTURE_CHAR_HEIGHT, 1);
 
 	            Gl.glMatrixMode(Gl.GL_MODELVIEW);
 
 	            Gl.glPushMatrix();
 
-	            Gl.glTranslatef(drawingVec.x + (i * spacing), drawingVec.y, Utils.DISCARD_Z_POS);
-	            Gl.glScalef(charWidth, height, Utils.DISCARD_Z_SCALE);
+	            Gl.glTranslated(drawingVec.x + (i * spacing), drawingVec.y, Utils.DISCARD_Z_POS);
+	            Gl.glScaled(charWidth, height, Utils.DISCARD_Z_SCALE);
 	            Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
 	            Gl.glPopMatrix();
 	        }
 
-	        Gl.glColor3f(1.0f, 1.0f, 1.0f);
+	        Gl.glColor3d(1.0f, 1.0f, 1.0f);
 
 	        Gl.glMatrixMode(Gl.GL_TEXTURE);
 
@@ -105,7 +105,7 @@ namespace RaahnSimulation
             base.DebugDraw();
         }
 
-	    public void SetCharBounds(float x, float y, float cWidth, float cHeight, bool fromCenter)
+	    public void SetCharBounds(double x, double y, double cWidth, double cHeight, bool fromCenter)
 	    {
 	        charWidth = cWidth;
 	        height = cHeight;
@@ -135,7 +135,7 @@ namespace RaahnSimulation
             aabb.SetSize(width, height);
 	    }
 
-        public void SetColor(float r, float g, float b)
+        public void SetColor(double r, double g, double b)
         {
             color.x = r;
             color.y = g;

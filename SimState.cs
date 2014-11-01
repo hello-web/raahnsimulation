@@ -5,12 +5,12 @@ namespace RaahnSimulation
 {
 	public class SimState : State
 	{
-		private const float CAR_WIDTH_SCALE = 0.1f;
-		private const float CAR_HEIGHT_SCALE = 0.1f;
-        private const float HIGHLIGHT_R = 0.0f;
-        private const float HIGHLIGHT_G = 1.0f;
-        private const float HIGHLIGHT_B = 0.0f;
-        private const float HIGHLIGHT_T = 1.0f;
+		private const double CAR_WIDTH_SCALE = 0.1f;
+		private const double CAR_HEIGHT_SCALE = 0.1f;
+        private const double HIGHLIGHT_R = 0.0f;
+        private const double HIGHLIGHT_G = 1.0f;
+        private const double HIGHLIGHT_B = 0.0f;
+        private const double HIGHLIGHT_T = 1.0f;
 
 	    private static SimState simState = new SimState();
 
@@ -30,13 +30,13 @@ namespace RaahnSimulation
 
             camera = context.GetCamera();
 
-            quadTree = new QuadTree(new AABB((float)context.GetWindowWidth(), (float)context.GetWindowHeight()));
+            quadTree = new QuadTree(new AABB((double)context.GetWindowWidth(), (double)context.GetWindowHeight()));
 
             raahnCar = new Car(context, quadTree);
-            raahnCar.SetWidth((float)context.GetWindowWidth() * CAR_WIDTH_SCALE);
-            raahnCar.SetHeight((float)context.GetWindowHeight() * CAR_HEIGHT_SCALE);
-            raahnCar.worldPos.x = (float)context.GetWindowWidth() *  0.1f;
-            raahnCar.worldPos.y = (float)context.GetWindowHeight() * 0.1f;
+            raahnCar.SetWidth((double)context.GetWindowWidth() * CAR_WIDTH_SCALE);
+            raahnCar.SetHeight((double)context.GetWindowHeight() * CAR_HEIGHT_SCALE);
+            raahnCar.worldPos.x = (double)context.GetWindowWidth() *  0.1f;
+            raahnCar.worldPos.y = (double)context.GetWindowHeight() * 0.1f;
             raahnCar.Update();
 
 	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, Utils.ROAD_FILE);
@@ -53,7 +53,7 @@ namespace RaahnSimulation
             quadTree.Update();
 
             Utils.Vector2 lowerLeft = camera.WindowToWorld(0.0f, 0.0f);
-            Utils.Vector2 upperRight = camera.WindowToWorld((float)context.GetWindowWidth(), (float)context.GetWindowHeight());
+            Utils.Vector2 upperRight = camera.WindowToWorld((double)context.GetWindowWidth(), (double)context.GetWindowHeight());
 
             AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
             viewBounds.Translate(lowerLeft.x, lowerLeft.y);
@@ -88,13 +88,13 @@ namespace RaahnSimulation
         {
             if (e.Type == EventType.MouseWheelMoved)
             {
-                float mouseX = (float)e.MouseWheel.X;
-                float mouseY = (float)context.GetWindowHeight() - (float)e.MouseWheel.Y;
+                double mouseX = (double)e.MouseWheel.X;
+                double mouseY = (double)context.GetWindowHeight() - (double)e.MouseWheel.Y;
 
                 if (e.MouseWheel.Delta > 0)
-                    camera.ZoomTo(mouseX, mouseY, (float)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
+                    camera.ZoomTo(mouseX, mouseY, (double)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
                 else
-                    camera.ZoomTo(mouseX, mouseY, (float)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
+                    camera.ZoomTo(mouseX, mouseY, (double)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
             }
 
             EntityMap.UpdateEvent(e);

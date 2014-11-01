@@ -4,9 +4,9 @@ namespace RaahnSimulation
 {
 	public class Camera
 	{
-        public const float MOUSE_SCROLL_ZOOM = 1.25f;
+        public const double MOUSE_SCROLL_ZOOM = 1.25f;
 
-        private float zoom;
+        private double zoom;
 		private Utils.Vector2 vecPos;
 
 	    public Camera()
@@ -25,39 +25,39 @@ namespace RaahnSimulation
 
 	    public void Transform()
 	    {
-            Gl.glScalef(zoom, zoom, Utils.DISCARD_Z_SCALE);
-            Gl.glTranslatef(-vecPos.x, -vecPos.y, Utils.DISCARD_Z_POS);
+            Gl.glScaled(zoom, zoom, Utils.DISCARD_Z_SCALE);
+            Gl.glTranslated(-vecPos.x, -vecPos.y, Utils.DISCARD_Z_POS);
 	    }
 
-	    public void Pan(float dx, float dy)
+	    public void Pan(double dx, double dy)
 	    {
 	        vecPos.x += dx / zoom;
 	        vecPos.y += dy / zoom;
 	    }
 
-        public void Zoom(float zoomFactor)
+        public void Zoom(double zoomFactor)
         {
             zoom *= zoomFactor;
         }
 
-        public void ZoomTo(float x, float y, float zoomFactor)
+        public void ZoomTo(double x, double y, double zoomFactor)
         {
             Pan(x, y);
             Zoom(zoomFactor);
             Pan(-x, -y);
         }
 
-        public Utils.Vector2 WorldToWindow(float worldX, float worldY)
+        public Utils.Vector2 WorldToWindow(double worldX, double worldY)
         {
-            float x = (worldX - vecPos.x) * zoom;
-            float y = (worldY - vecPos.y) * zoom;
+            double x = (worldX - vecPos.x) * zoom;
+            double y = (worldY - vecPos.y) * zoom;
             return new Utils.Vector2(x, y);
         }
 
-        public Utils.Vector2 WindowToWorld(float windowX, float windowY)
+        public Utils.Vector2 WindowToWorld(double windowX, double windowY)
         {
-            float x = (windowX / zoom) + vecPos.x;
-            float y = (windowY / zoom) + vecPos.y;
+            double x = (windowX / zoom) + vecPos.x;
+            double y = (windowY / zoom) + vecPos.y;
             return new Utils.Vector2(x, y);
         }
 
@@ -97,7 +97,7 @@ namespace RaahnSimulation
             return transform;
         }
 
-        public float GetZoom()
+        public double GetZoom()
         {
             return zoom;
         }

@@ -36,7 +36,7 @@ namespace RaahnSimulation
 		private uint windowHeight;
 		private long lastTime;
 		private long curTime;
-        private float deltaTime;
+        private double deltaTime;
 		private List<State> states;
 		private Window simWindow;
         private Stopwatch stopwatch;
@@ -108,8 +108,8 @@ namespace RaahnSimulation
 	    {
 	        //Create size based on monitor resolution.
 	        VideoMode monitor = VideoMode.DesktopMode;
-	        windowWidth = (uint)((float)monitor.Width * Utils.WIDTH_PERCENTAGE);
-	        windowHeight = (uint)((float)monitor.Height * Utils.HEIGHT_PERCENTAGE);
+	        windowWidth = (uint)((double)monitor.Width * Utils.WIDTH_PERCENTAGE);
+	        windowHeight = (uint)((double)monitor.Height * Utils.HEIGHT_PERCENTAGE);
 
 	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Close);
 
@@ -119,7 +119,7 @@ namespace RaahnSimulation
             //Check to make sure OpenGL 1.5 is supported.
             string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
             Console.WriteLine("GL Version " + glVersion);
-            if (float.Parse(glVersion) < Utils.MIN_GL_VERSION)
+            if (double.Parse(glVersion) < Utils.MIN_GL_VERSION)
             {
                 glInitFailed = true;
                 Console.WriteLine(Utils.GL_VERSION_UNSUPPORTED);
@@ -237,7 +237,7 @@ namespace RaahnSimulation
 	    private void Update()
 	    {
             curTime = stopwatch.ElapsedMilliseconds;
-            deltaTime = (float)(curTime - lastTime) / 1000.0f;
+            deltaTime = (double)(curTime - lastTime) / 1000.0f;
             lastTime = curTime;
 
             //Update with events.
@@ -521,7 +521,7 @@ namespace RaahnSimulation
             return windowHeight;
         }
 
-        public float GetDeltaTime()
+        public double GetDeltaTime()
         {
             return deltaTime;
         }

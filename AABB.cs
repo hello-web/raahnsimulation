@@ -7,7 +7,7 @@ namespace RaahnSimulation
     public class AABB
     {
         //Angle and pos refer to the angle and position of the encapsulated entity.
-        private float angle;
+        private double angle;
         private Utils.Vector2 pos;
         private Utils.Vector2 center;
         private Utils.Rect bounds;
@@ -18,7 +18,7 @@ namespace RaahnSimulation
             Construct();
         }
 
-        public AABB(float w, float h)
+        public AABB(double w, double h)
         {
             Construct();
 
@@ -91,7 +91,7 @@ namespace RaahnSimulation
             return bounds;
         }
 
-        public float GetAngle()
+        public double GetAngle()
         {
             return angle;
         }
@@ -119,9 +119,9 @@ namespace RaahnSimulation
             mesh = newMesh;
         }
 
-        public void SetSize(float w, float h)
+        public void SetSize(double w, double h)
         {
-            float currentAngle = angle;
+            double currentAngle = angle;
             //Undo the rotation so we can scale.
             Rotate(-currentAngle);
 
@@ -151,11 +151,11 @@ namespace RaahnSimulation
             Update();
         }
 
-        public void Rotate(float rotationChange)
+        public void Rotate(double rotationChange)
         {
             angle += rotationChange;
 
-            float angleTransform = Utils.DegToRad(rotationChange);
+            double angleTransform = Utils.DegToRad(rotationChange);
             
             RotateVector2(bounds.ll, angleTransform);
             RotateVector2(bounds.lr, angleTransform);
@@ -166,7 +166,7 @@ namespace RaahnSimulation
         }
 
         // Translates by a distance rather than an actual point.
-        public void Translate(float xDist, float yDist)
+        public void Translate(double xDist, double yDist)
         {
             pos.x += xDist;
             pos.y += yDist;
@@ -194,8 +194,8 @@ namespace RaahnSimulation
             if (!mesh.IsCurrent())
                 mesh.MakeCurrent();
 
-            Gl.glTranslatef(bounds.left, bounds.bottom, Utils.DISCARD_Z_POS);
-            Gl.glScalef(bounds.width, bounds.height, Utils.DISCARD_Z_SCALE);
+            Gl.glTranslated(bounds.left, bounds.bottom, Utils.DISCARD_Z_POS);
+            Gl.glScaled(bounds.width, bounds.height, Utils.DISCARD_Z_SCALE);
 
             Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
         }
@@ -212,10 +212,10 @@ namespace RaahnSimulation
             mesh = Simulator.quad;
         }
 
-        private void RotateVector2(Utils.Vector2 vec, float angle)
+        private void RotateVector2(Utils.Vector2 vec, double angle)
         {
-            float xTransform = center.x + (vec.x - center.x) * (float)Math.Cos(angle) - (vec.y - center.y) * (float)Math.Sin(angle);
-            float yTransform = center.y + (vec.x - center.x) * (float)Math.Sin(angle) + (vec.y - center.y) * (float)Math.Cos(angle);
+            double xTransform = center.x + (vec.x - center.x) * (double)Math.Cos(angle) - (vec.y - center.y) * (double)Math.Sin(angle);
+            double yTransform = center.y + (vec.x - center.x) * (double)Math.Sin(angle) + (vec.y - center.y) * (double)Math.Cos(angle);
 
             vec.x = xTransform;
             vec.y = yTransform;

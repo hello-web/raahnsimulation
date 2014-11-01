@@ -6,8 +6,8 @@ namespace RaahnSimulation
 {
 	public class Cursor : Entity
 	{
-		private const float CURSOR_SIZE_PERCENTAGE_X = 0.025f;
-		private const float CURSOR_SIZE_PERCENTAGE_Y = 0.05f;
+		private const double CURSOR_SIZE_PERCENTAGE_X = 0.025f;
+		private const double CURSOR_SIZE_PERCENTAGE_Y = 0.05f;
 
 		private Utils.Vector2 lastPos;
 		private Utils.Vector2 deltaPos;
@@ -15,8 +15,8 @@ namespace RaahnSimulation
 	    public Cursor(Simulator sim) : base(sim)
 		{
 	        texture = TextureManager.TextureType.CURSOR_0;
-	        width = (float)context.GetWindowWidth() * CURSOR_SIZE_PERCENTAGE_X;
-	        height = (float)context.GetWindowHeight() * CURSOR_SIZE_PERCENTAGE_Y;
+	        width = (double)context.GetWindowWidth() * CURSOR_SIZE_PERCENTAGE_X;
+	        height = (double)context.GetWindowHeight() * CURSOR_SIZE_PERCENTAGE_Y;
             aabb.SetSize(width, height);
 	        lastPos = new Utils.Vector2(0.0f, 0.0f);
 	        deltaPos = new Utils.Vector2(0.0f, 0.0f);
@@ -29,12 +29,12 @@ namespace RaahnSimulation
 	        Vector2i mousePos = Mouse.GetPosition(context.GetWindow());
 	        //Subtract width / 2 to center the mouse.
 	        //Subtract height to draw from top to bottom instread of bottom to top.
-	        windowPos.x = (float)(mousePos.X) - (width / 2.0f);
-	        windowPos.y = (float)(context.GetWindowHeight() - mousePos.Y) - height;
+	        windowPos.x = (double)(mousePos.X) - (width / 2.0f);
+	        windowPos.y = (double)(context.GetWindowHeight() - mousePos.Y) - height;
 
 	        if (Mouse.IsButtonPressed(Mouse.Button.Left))
 	        {
-	            if (mousePos.X < (float)context.GetWindowWidth() && mousePos.Y < context.GetWindowHeight())
+	            if (mousePos.X < (double)context.GetWindowWidth() && mousePos.Y < context.GetWindowHeight())
 	            {
 	                if (mousePos.X > 0 && mousePos.Y > 0)
 	                {
@@ -66,8 +66,8 @@ namespace RaahnSimulation
 
 	        RotateAroundCenter();
 
-	        Gl.glTranslatef(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
-	        Gl.glScalef(width, height, Utils.DISCARD_Z_SCALE);
+	        Gl.glTranslated(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+	        Gl.glScaled(width, height, Utils.DISCARD_Z_SCALE);
 	        Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 	    }
 

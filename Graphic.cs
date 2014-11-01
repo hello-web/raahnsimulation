@@ -6,14 +6,14 @@ namespace RaahnSimulation
 {
 	public class Graphic : ColorableEntity
 	{
-		private const float DEFALUT_WIDTH_PERCENTAGE = 0.2f;
-		private const float DEFAULT_HEIGHT_PERCENTAGE = 0.2f;
+		private const double DEFALUT_WIDTH_PERCENTAGE = 0.2f;
+		private const double DEFAULT_HEIGHT_PERCENTAGE = 0.2f;
 
 		public Graphic(Simulator sim) : base(sim)
 		{
 			texture = TextureManager.TextureType.DEFAULT;
-			width = DEFALUT_WIDTH_PERCENTAGE * (float)context.GetWindowWidth();
-			height = DEFAULT_HEIGHT_PERCENTAGE * (float)context.GetWindowHeight();
+			width = DEFALUT_WIDTH_PERCENTAGE * (double)context.GetWindowWidth();
+			height = DEFAULT_HEIGHT_PERCENTAGE * (double)context.GetWindowHeight();
 
             aabb.SetSize(width, height);
 		}
@@ -32,8 +32,8 @@ namespace RaahnSimulation
 		{
 			base.Draw();
 
-			Gl.glTranslatef(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
-			Gl.glScalef(width, height, Utils.DISCARD_Z_SCALE);
+			Gl.glTranslated(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+			Gl.glScaled(width, height, Utils.DISCARD_Z_SCALE);
 
 			Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 		}

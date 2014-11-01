@@ -26,9 +26,9 @@ namespace RaahnSimulation
         private class EntityInfo
         {
             public int textureVariation;
-            public float x;
-            public float y;
-            public float angle;
+            public double x;
+            public double y;
+            public double angle;
             public Entity.EntityType type;
         }
 
@@ -48,9 +48,9 @@ namespace RaahnSimulation
         private const int STRAIGHT = 0;
         private const int TURN = 1;
         private const int ENTITY_DEFAULT_TEXTURE_VARIATION = 0;
-        private const float ENTITY_DEFAULT_X = 0.0f;
-        private const float ENTITY_DEFAULT_Y = 0.0f;
-        private const float ENTITY_DEFAULT_ANGLE = 0.0f;
+        private const double ENTITY_DEFAULT_X = 0.0f;
+        private const double ENTITY_DEFAULT_Y = 0.0f;
+        private const double ENTITY_DEFAULT_ANGLE = 0.0f;
         private const Entity.EntityType ENTITY_DEFAULT_TYPE = Entity.EntityType.ROAD;
 
         private int layer;
@@ -262,17 +262,17 @@ namespace RaahnSimulation
             {
                 case XMLElement.X:
                 {
-                    float.TryParse(attribute, out raahnCar.worldPos.x);
+                    double.TryParse(attribute, out raahnCar.worldPos.x);
                     break;
                 }
                 case XMLElement.Y:
                 {
-                    float.TryParse(attribute, out raahnCar.worldPos.y);
+                    double.TryParse(attribute, out raahnCar.worldPos.y);
                     break;
                 }
                 case XMLElement.ANGLE:
                 {
-                    float.TryParse(attribute, out raahnCar.angle);
+                    double.TryParse(attribute, out raahnCar.angle);
                     break;
                 }
             }
@@ -292,17 +292,17 @@ namespace RaahnSimulation
             {
                 case XMLElement.X:
                 {
-                    float.TryParse(attribute, out info.x);
+                    double.TryParse(attribute, out info.x);
                     break;
                 }
                 case XMLElement.Y:
                 {
-                    float.TryParse(attribute, out info.y);
+                    double.TryParse(attribute, out info.y);
                     break;
                 }
                 case XMLElement.ANGLE:
                 {
-                    float.TryParse(attribute, out info.angle);
+                    double.TryParse(attribute, out info.angle);
                     break;
                 }
                 case XMLElement.TEXTURE:

@@ -10,9 +10,9 @@ namespace RaahnSimulation
 	{
         public class Vector2
         {
-            public float x, y;
+            public double x, y;
 
-            public Vector2(float _x, float _y)
+            public Vector2(double _x, double _y)
             {
                 x = _x;
                 y = _y;
@@ -32,9 +32,9 @@ namespace RaahnSimulation
 
         public class Vector3
         {
-            public float x, y, z;
+            public double x, y, z;
 
-            public Vector3(float _x, float _y, float _z)
+            public Vector3(double _x, double _y, double _z)
             {
                 x = _x;
                 y = _y;
@@ -51,8 +51,8 @@ namespace RaahnSimulation
 
         public class Rect
         {
-            public float left, right, bottom, top;
-            public float width, height;
+            public double left, right, bottom, top;
+            public double width, height;
             public Vector2 ll, lr, ul, ur;
 
             public Rect()
@@ -88,8 +88,8 @@ namespace RaahnSimulation
         //Points are structs, vectors are classes.
         public struct Point2
         {
-            public float x, y;
-            public Point2(float _x, float _y)
+            public double x, y;
+            public Point2(double _x, double _y)
             {
                 x = _x;
                 y = _y;
@@ -111,17 +111,17 @@ namespace RaahnSimulation
         public struct LineSegment
         {
             public bool vertical;
-            public float yIntercept;
-            public float slope;
-            public float lowerBoundX;
-            public float upperBoundX;
+            public double yIntercept;
+            public double slope;
+            public double lowerBoundX;
+            public double upperBoundX;
             //Vertical lines need y bounds explicitly specified.
-            public float lowerBoundY;
-            public float upperBoundY;
+            public double lowerBoundY;
+            public double upperBoundY;
 
             public void SetUp(Point2 startPoint, Point2 endPoint)
             {
-                float deltaX = endPoint.x - startPoint.x;
+                double deltaX = endPoint.x - startPoint.x;
 
                 //If the change in x is 0, the slope is undefined.
                 if (Math.Abs(deltaX) <= EPSILON)
@@ -163,13 +163,13 @@ namespace RaahnSimulation
             }
 
             //Returns infinity if x or the computed y value is invalid.
-            public float GetY(float x)
+            public double GetY(double x)
             {
                 //Make sure x is in bounds and the line is not vertical.
                 if (x >= lowerBoundX && x <= upperBoundX && !vertical)
                     return (slope * x) + yIntercept;//y = mx + b
                 else
-                    return float.PositiveInfinity;
+                    return double.PositiveInfinity;
             }
 
             //Returns the point of intersection or bounds of intersection within two points.
@@ -213,11 +213,11 @@ namespace RaahnSimulation
                 //If both are not vertical or parallel, there is a single point of intersection.
                 else if (vertical)
                 {
-                    float y = line.GetY(lowerBoundX);
+                    double y = line.GetY(lowerBoundX);
 
                     //Make sure the returned y is valid.
                     //GetY not returning infinity makes sure that the point is in bounds of this line.
-                    if (float.IsInfinity(y) || !line.ValueInBounds(y, lowerBoundY, upperBoundY))
+                    if (double.IsInfinity(y) || !line.ValueInBounds(y, lowerBoundY, upperBoundY))
                         return intersection;
 
                     intersection.Add(new Point2(lowerBoundX, y));
@@ -226,11 +226,11 @@ namespace RaahnSimulation
                 }
                 else if (line.vertical)
                 {
-                    float y = GetY(line.lowerBoundX);
+                    double y = GetY(line.lowerBoundX);
 
                     //Make sure the returned y is valid.
                     //GetY not returning infinity makes sure that the point is in bounds of line.
-                    if (float.IsInfinity(y) || !ValueInBounds(y, line.lowerBoundY, line.upperBoundY))
+                    if (double.IsInfinity(y) || !ValueInBounds(y, line.lowerBoundY, line.upperBoundY))
                         return intersection;
 
                     intersection.Add(new Point2(line.lowerBoundX, y));
@@ -239,7 +239,7 @@ namespace RaahnSimulation
                 }
                 else
                 {
-                    float intersectionX = (line.yIntercept - yIntercept) / (slope - line.slope);
+                    double intersectionX = (line.yIntercept - yIntercept) / (slope - line.slope);
                     //If the value is within the x bounds of both lines, we don't have to check if GetY returns an invalid number.
                     if (ValueInBounds(intersectionX, lowerBoundX, upperBoundX) && ValueInBounds(intersectionX, line.lowerBoundX, line.upperBoundX))
                         intersection.Add(new Point2(intersectionX, GetY(intersectionX)));
@@ -249,7 +249,7 @@ namespace RaahnSimulation
             }
 
             //Checks whether a value is in bounds of two other values.
-            public bool ValueInBounds(float value, float lowerBound, float upperBound)
+            public bool ValueInBounds(double value, double lowerBound, double upperBound)
             {
                 if (value >= lowerBound && value <= upperBound)
                     return true;
@@ -264,20 +264,20 @@ namespace RaahnSimulation
         public const uint CHARACTER_TEX_COLUMN_COUNT = 11;
         public const uint CHARACTER_TEX_ROW_COUNT = 9;
 
-        public const float MIN_GL_VERSION = 1.5f;
-		public const float WIDTH_PERCENTAGE = 0.6f;
-		public const float HEIGHT_PERCENTAGE = 0.75f;
-		public const float CHAR_WIDTH_PERCENTAGE = 0.03125f;
-		public const float CHAR_HEIGHT_PERCENTAGE = 0.0625f;
-		public const float DISCARD_Z_POS = 0.0f;
-		public const float DISCARD_Z_SCALE = 1.0f;
         //Color value of background in common GTK apps.
         public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
-		public const float DEG_TO_RAD = (float)3.1415926535f / 180.0f;
-        public const float TEXTURE_CHAR_WIDTH = 1.0f / (float)CHARACTER_TEX_COLUMN_COUNT;
-        public const float TEXTURE_CHAR_HEIGHT = 1.0f / (float)CHARACTER_TEX_ROW_COUNT;
+        public const double MIN_GL_VERSION = 1.5;
+		public const double WIDTH_PERCENTAGE = 0.6;
+		public const double HEIGHT_PERCENTAGE = 0.75;
+		public const double CHAR_WIDTH_PERCENTAGE = 0.03125;
+		public const double CHAR_HEIGHT_PERCENTAGE = 0.0625;
+		public const double DISCARD_Z_POS = 0.0;
+		public const double DISCARD_Z_SCALE = 1.0;
+		public const double DEG_TO_RAD = 3.1415926535 / 180.0;
+        public const double TEXTURE_CHAR_WIDTH = 1.0 / CHARACTER_TEX_COLUMN_COUNT;
+        public const double TEXTURE_CHAR_HEIGHT = 1.0 / CHARACTER_TEX_ROW_COUNT;
         //Chosen as it works for slope calculations for line segments.
-        public const double EPSILON = 0.00009;
+        public const double EPSILON = 0.00000002;
 
 		public const char FILE_COMMENT = '#';
 		public const char FILE_VALUE_SEPERATOR = ' ';
@@ -286,7 +286,7 @@ namespace RaahnSimulation
         public const string DEFAULT_SAVE_FILE = "Data/Maps/OutMap.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.91";
+		public const string VERSION_STRING = "Version 1.92";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
@@ -294,14 +294,14 @@ namespace RaahnSimulation
         public const string FILE_NOT_FOUND = "File: {0} not found.";
         public const string XML_READ_ERROR = "Error while reading XML. The map may not have been created correctly.";
 
-		public static float DegToRad(float deg)
+		public static double DegToRad(double deg)
 		{
 			return deg * DEG_TO_RAD;
 		}
 
-        public static float GetDist(Point2 point0, Point2 point1)
+        public static double GetDist(Point2 point0, Point2 point1)
         {
-            return (float)Math.Sqrt(Math.Pow(point1.y - point0.y, 2) + Math.Pow(point1.x - point0.x, 2));
+            return Math.Sqrt(Math.Pow(point1.y - point0.y, 2) + Math.Pow(point1.x - point0.x, 2));
         }
     }
 }

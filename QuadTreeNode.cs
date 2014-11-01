@@ -126,8 +126,8 @@ namespace RaahnSimulation
             Utils.Vector2 bCenter = nodeBounds.GetCenter();
             Utils.Rect bBox = nodeBounds.GetBounds();
 
-            float subNodeWidth = bBox.width / 2.0f;
-            float subNodeHeight = bBox.height / 2.0f;
+            double subNodeWidth = bBox.width / 2.0f;
+            double subNodeHeight = bBox.height / 2.0f;
 
             //Bottom left.
             AABB newNodeBounds = new AABB(subNodeWidth, subNodeHeight);
