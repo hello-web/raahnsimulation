@@ -1,103 +1,96 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Map>
     <Robot>
-        <X>68</X>
-        <Y>125.4375</Y>
+        <X>576</X>
+        <Y>522</Y>
     </Robot>
     <Entity>
-        <X>657</X>
-        <Y>5.0625</Y>
+        <X>1367.99999995084</X>
+        <Y>397</Y>
         <Angle>0</Angle>
         <Type>Road</Type>
         <Texture>0</Texture>
     </Entity>
     <Entity>
-        <X>753</X>
-        <Y>5.0625</Y>
+        <X>1732.99999995084</X>
+        <Y>397</Y>
+        <Angle>0</Angle>
+        <Type>Road</Type>
+        <Texture>0</Texture>
+    </Entity>
+    <Entity>
+        <X>3193</X>
+        <Y>32</Y>
         <Angle>0</Angle>
         <Type>Road</Type>
         <Texture>1</Texture>
     </Entity>
     <Entity>
-        <X>753.0002</X>
-        <Y>101.0625</Y>
+        <X>3192.99999997542</X>
+        <Y>397.000000024582</Y>
         <Angle>270</Angle>
         <Type>Road</Type>
         <Texture>0</Texture>
     </Entity>
     <Entity>
-        <X>752.9999</X>
-        <Y>197.0629</Y>
+        <X>3192.99999997542</X>
+        <Y>762.000000073745</Y>
         <Angle>270</Angle>
         <Type>Road</Type>
         <Texture>0</Texture>
     </Entity>
     <Entity>
-        <X>752.9999</X>
-        <Y>293.0631</Y>
-        <Angle>270</Angle>
-        <Type>Road</Type>
-        <Texture>0</Texture>
-    </Entity>
-    <Entity>
-        <X>753.0003</X>
-        <Y>389.0632</Y>
+        <X>3192.99999995903</X>
+        <Y>1127.00000010652</Y>
         <Angle>90</Angle>
         <Type>Road</Type>
         <Texture>1</Texture>
     </Entity>
     <Entity>
-        <X>657.0002</X>
-        <Y>389.0632</Y>
+        <X>2828</X>
+        <Y>1127.00000011471</Y>
         <Angle>0</Angle>
         <Type>Road</Type>
         <Texture>0</Texture>
     </Entity>
     <Entity>
-        <X>464.9996</X>
-        <Y>389.0629</Y>
+        <X>2097.99999997542</X>
+        <Y>762.000000024581</Y>
+        <Angle>270</Angle>
+        <Type>Road</Type>
+        <Texture>0</Texture>
+    </Entity>
+    <Entity>
+        <X>2097.99999998361</X>
+        <Y>1127.00000006555</Y>
         <Angle>180</Angle>
         <Type>Road</Type>
         <Texture>1</Texture>
     </Entity>
     <Entity>
-        <X>464.9995</X>
-        <Y>293.0624</Y>
-        <Angle>270</Angle>
-        <Type>Road</Type>
-        <Texture>0</Texture>
-    </Entity>
-    <Entity>
-        <X>464.9995</X>
-        <Y>197.0629</Y>
-        <Angle>270</Angle>
-        <Type>Road</Type>
-        <Texture>0</Texture>
-    </Entity>
-    <Entity>
-        <X>561.0002</X>
-        <Y>389.0633</Y>
-        <Angle>0</Angle>
-        <Type>Road</Type>
-        <Texture>0</Texture>
-    </Entity>
-    <Entity>
-        <X>464.9994</X>
-        <Y>101.0628</Y>
+        <X>2097.99999995084</X>
+        <Y>397.000000049164</Y>
         <Angle>0</Angle>
         <Type>Road</Type>
         <Texture>1</Texture>
     </Entity>
     <Entity>
-        <X>368.9994</X>
-        <Y>101.0625</Y>
+        <X>2463</X>
+        <Y>1127.00000004916</Y>
         <Angle>0</Angle>
         <Type>Road</Type>
         <Texture>0</Texture>
     </Entity>
     <Entity>
-        <X>272.9994</X>
-        <Y>101.0625</Y>
+        <X>2828</X>
+        <Y>32</Y>
+        <Angle>0</Angle>
+        <Type>Road</Type>
+        <Texture>0</Texture>
+    </Entity>
+    <Entity>
+        <X>1002.99999995084</X>
+        <Y>397</Y>
         <Angle>0</Angle>
         <Type>Road</Type>
         <Texture>0</Texture>

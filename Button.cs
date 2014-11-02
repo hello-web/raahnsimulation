@@ -7,7 +7,7 @@ namespace RaahnSimulation
     public class Button : ClickableEntity
     {
         //The width is set to the height, so only height is needed.
-        private const double CHAR_HEIGHT_PERCENTAGE = 0.8f;
+        private const double CHAR_HEIGHT_PERCENTAGE = 0.8;
 
         private Text label;
 
@@ -31,8 +31,8 @@ namespace RaahnSimulation
 
             if (fromCenter)
             {
-                drawingVec.x = x - (width / 2.0f);
-                drawingVec.y = y - (height / 2.0f);
+                drawingVec.x = x - (width / 2.0);
+                drawingVec.y = y - (height / 2.0);
             }
             else
             {
@@ -40,9 +40,9 @@ namespace RaahnSimulation
                 drawingVec.y = y;
             }
 
-            double charHeight = Height * CHAR_HEIGHT_PERCENTAGE;
+            double charHeight = height * CHAR_HEIGHT_PERCENTAGE;
 
-            label.SetCharBounds(drawingVec.x + (width / 2.0f), drawingVec.y + (height / 2.0f), charHeight, charHeight, true);
+            label.SetCharBounds(drawingVec.x + (width / 2.0), drawingVec.y + (height / 2.0), charHeight, charHeight, true);
         }
 
         public override void Update()
@@ -50,9 +50,9 @@ namespace RaahnSimulation
             base.Update();
 
             if (hovering)
-                transparency = 0.5f;
+                transparency = 0.5;
             else
-                transparency = 1.0f;
+                transparency = 1.0;
 
             label.Update();
         }
@@ -68,7 +68,7 @@ namespace RaahnSimulation
         {
             base.Draw();
 
-            Gl.glColor4d(1.0f, 1.0f, 1.0f, transparency);
+            Gl.glColor4d(1.0, 1.0, 1.0, transparency);
 
             Gl.glPushMatrix();
 
@@ -79,7 +79,7 @@ namespace RaahnSimulation
 
             Gl.glPopMatrix();
 
-            Gl.glColor4d(1.0f, 1.0f, 1.0f, transparency);
+            Gl.glColor4d(1.0, 1.0, 1.0, transparency);
 
             label.Draw();
         }
@@ -102,11 +102,11 @@ namespace RaahnSimulation
         private void Construct(string text)
         {
             label = new Text(context, text);
-            label.SetWindowAsDrawingVec(true);
-            label.SetColor(1.0f, 1.0f, 1.0f);
+            label.SetTransformUsage(false);
+            label.SetColor(1.0, 1.0, 1.0);
 
             texture = TextureManager.TextureType.BUTTON;
-            transparency = 1.0f;
+            transparency = 1.0;
         }
     }
 }

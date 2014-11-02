@@ -18,6 +18,10 @@ namespace RaahnSimulation
 			CHANGE = 2
 		}
 
+        //Scaling down is usually better, if it even matters in this context.
+        public const double WORLD_WINDOW_WIDTH = 3840.0;
+        public const double WORLD_WINDOW_HEIGHT = 2160.0;
+
         //Shared mesh resources.
         public static Mesh lineSquare;
         public static Mesh quad;
@@ -51,7 +55,7 @@ namespace RaahnSimulation
 	    {
 	        lastTime = 0;
 	        curTime = 0;
-	        deltaTime = 0.0f;
+	        deltaTime = 0.0;
 
 	        running = true;
             glInitFailed = false;
@@ -66,7 +70,6 @@ namespace RaahnSimulation
 	        requestedState = null;
 	        changeType = StateChangeType.NONE;
             stopwatch = new Stopwatch();
-			camera = new Camera();
 			states = new List<State>();
 			eventQueue = new Queue<Event>();
 	        texMan = new TextureManager();
@@ -111,10 +114,12 @@ namespace RaahnSimulation
 	        windowWidth = (uint)((double)monitor.Width * Utils.WIDTH_PERCENTAGE);
 	        windowHeight = (uint)((double)monitor.Height * Utils.HEIGHT_PERCENTAGE);
 
+            camera = new Camera(this);
+
 	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Close);
 
-	        Vector2i windowPos = new Vector2i((int)((monitor.Width / 2) - (windowWidth / 2)), (int)((monitor.Height / 2) - (windowHeight / 2)));
-	        simWindow.Position = windowPos;
+	        Vector2i worldPos = new Vector2i((int)((monitor.Width / 2) - (windowWidth / 2)), (int)((monitor.Height / 2) - (windowHeight / 2)));
+	        simWindow.Position = worldPos;
 
             //Check to make sure OpenGL 1.5 is supported.
             string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
@@ -237,7 +242,7 @@ namespace RaahnSimulation
 	    private void Update()
 	    {
             curTime = stopwatch.ElapsedMilliseconds;
-            deltaTime = (double)(curTime - lastTime) / 1000.0f;
+            deltaTime = (double)(curTime - lastTime) / 1000.0;
             lastTime = curTime;
 
             //Update with events.
@@ -276,7 +281,7 @@ namespace RaahnSimulation
 
 	        Gl.glLoadIdentity();
 
-	        Gl.glOrtho(0.0, (double)windowWidth, 0.0, (double)windowHeight, -1.0, 1.0);
+	        Gl.glOrtho(0.0, WORLD_WINDOW_WIDTH, 0.0, WORLD_WINDOW_HEIGHT, -1.0, 1.0);
 
 	        Gl.glMatrixMode(Gl.GL_MODELVIEW);
 

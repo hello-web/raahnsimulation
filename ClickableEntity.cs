@@ -38,11 +38,11 @@ namespace RaahnSimulation
 	        Vector2i mousePosWindowi = Mouse.GetPosition(context.GetWindow());
 
             Utils.Vector2 comparisonVec;
-	        Utils.Vector2 mousePosWindowf = new Utils.Vector2((double)mousePosWindowi.X, (double)(context.GetWindowHeight()) - (double)mousePosWindowi.Y);
-            if (drawingVec == windowPos)
-                comparisonVec = mousePosWindowf;
-            else
-                comparisonVec = context.GetCamera().WindowToWorld(mousePosWindowf);
+	        Utils.Vector2 mousePosWindowd = new Utils.Vector2((double)mousePosWindowi.X, (double)context.GetWindowHeight() - (double)mousePosWindowi.Y);
+            comparisonVec = context.GetCamera().ProjectWindow(mousePosWindowd);
+
+            if (drawingVec == transformedWorldPos)
+                comparisonVec = context.GetCamera().TransformWorld(comparisonVec);
 
 	        if (Intersects(comparisonVec.x, comparisonVec.y))
 	        {

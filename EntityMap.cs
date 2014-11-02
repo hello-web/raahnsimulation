@@ -48,9 +48,9 @@ namespace RaahnSimulation
         private const int STRAIGHT = 0;
         private const int TURN = 1;
         private const int ENTITY_DEFAULT_TEXTURE_VARIATION = 0;
-        private const double ENTITY_DEFAULT_X = 0.0f;
-        private const double ENTITY_DEFAULT_Y = 0.0f;
-        private const double ENTITY_DEFAULT_ANGLE = 0.0f;
+        private const double ENTITY_DEFAULT_X = 0.0;
+        private const double ENTITY_DEFAULT_Y = 0.0;
+        private const double ENTITY_DEFAULT_ANGLE = 0.0;
         private const Entity.EntityType ENTITY_DEFAULT_TYPE = Entity.EntityType.ROAD;
 
         private int layer;
@@ -199,8 +199,8 @@ namespace RaahnSimulation
                     {
                         Road road = new Road(context);
 
-                        road.worldPos.x = newEntities[i].x;
-                        road.worldPos.y = newEntities[i].y;
+                        road.transformedWorldPos.x = newEntities[i].x;
+                        road.transformedWorldPos.y = newEntities[i].y;
                         road.angle = newEntities[i].angle;
                         if (newEntities[i].textureVariation < UNIQUE_ROAD_COUNT)
                             road.SetTexture((TextureManager.TextureType)(newEntities[i].textureVariation + TextureManager.ROAD_INDEX_OFFSET));
@@ -262,12 +262,12 @@ namespace RaahnSimulation
             {
                 case XMLElement.X:
                 {
-                    double.TryParse(attribute, out raahnCar.worldPos.x);
+                    double.TryParse(attribute, out raahnCar.transformedWorldPos.x);
                     break;
                 }
                 case XMLElement.Y:
                 {
-                    double.TryParse(attribute, out raahnCar.worldPos.y);
+                    double.TryParse(attribute, out raahnCar.transformedWorldPos.y);
                     break;
                 }
                 case XMLElement.ANGLE:

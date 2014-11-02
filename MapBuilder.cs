@@ -12,15 +12,15 @@ namespace RaahnSimulation
         private const uint UNIQUE_ENTITIES = 1;
         private const int XML_INDENT_SPACE = 4;
 
-		private const double FLAG_WIDTH_PERCENTAGE = 0.05f;
-		private const double FLAG_HEIGHT_PERCENTAGE = 0.1f;
-        private const double SNAPPING_ANGLE_BOUNDS = 7.5f;
+		private const double FLAG_WIDTH = 192.0;
+		private const double FLAG_HEIGHT = 216.0;
+        private const double SNAPPING_ANGLE_BOUNDS = 7.5;
 
-        private static readonly double[] SNAPPING_ANGLES = { 0.0f, 90.0f, 180.0f, 270.0f };
+        private static readonly double[] SNAPPING_ANGLES = { 0.0, 90.0, 180.0, 270.0 };
 
         private int layer;
         private bool trashHovering;
-        private double doubleingExactAngle;
+        private double floatingExactAngle;
 		private List<LinkedList<ColorableEntity>> entities;
         private Simulator context;
         private State currentState;
@@ -28,7 +28,7 @@ namespace RaahnSimulation
 		private Cursor cursor;
 		private Camera cam;
 		private EntityPanel entityPanel;
-		private ColorableEntity entitydoubleing;
+		private ColorableEntity entityFloating;
 		private Graphic flag;
 		private Utils.Vector2 dist;
         private Utils.Vector2 entitySnappingDist;
@@ -42,7 +42,7 @@ namespace RaahnSimulation
             layer = stateLayer;
 
 	        roadPool = new RoadPool(context);
-            entitySnappingDist = new Utils.Vector2(0.0f, 0.0f);
+            entitySnappingDist = new Utils.Vector2(0.0, 0.0);
 
             entities = new List<LinkedList<ColorableEntity>>();
 
@@ -52,16 +52,16 @@ namespace RaahnSimulation
 	        flag = new Graphic(context);
             flag.visible = false;
 	        flag.SetTexture(TextureManager.TextureType.FLAG);
-	        flag.SetWidth(FLAG_WIDTH_PERCENTAGE * (double)context.GetWindowWidth());
-	        flag.SetHeight(FLAG_HEIGHT_PERCENTAGE * (double)context.GetWindowHeight());
+	        flag.SetWidth(FLAG_WIDTH);
+	        flag.SetHeight(FLAG_HEIGHT);
 
 	        cursor = c;
 	        cam = camera;
 	        entityPanel = panel;
-	        entitydoubleing = null;
+	        entityFloating = null;
 
-            doubleingExactAngle = 0.0f;
-            dist = new Utils.Vector2(0.0f, 0.0f);
+            floatingExactAngle = 0.0;
+            dist = new Utils.Vector2(0.0, 0.0);
 
             currentState.AddEntity(flag, stateLayer + 1);
 	    }
@@ -78,24 +78,24 @@ namespace RaahnSimulation
 
 	    public void Update()
 	    {
-	        if (entitydoubleing != null)
-	            UpdateEntitydoubleing();
+	        if (entityFloating != null)
+	            UpdateEntityFloating();
 
-            if (entitydoubleing != null)
+            if (entityFloating != null)
             {
-                if (entitydoubleing.Intersects(cam.WindowToWorld(entityPanel.GetTrash().aabb.GetBounds())))
+                if (entityFloating.Intersects(cam.TransformWorld(entityPanel.GetTrash().aabb.GetBounds())))
                 {
                     if (!trashHovering)
                     {
                         //Turn the trash red when hovering.
-                        entityPanel.GetTrash().SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+                        entityPanel.GetTrash().SetColor(1.0, 0.0, 0.0, 1.0);
                         trashHovering = true;
                     }
                 }
                 else
                 {
                     //Set the trash can back to black.
-                    entityPanel.GetTrash().SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    entityPanel.GetTrash().SetColor(0.0, 0.0, 0.0, 1.0);
                     trashHovering = false;
                 }
             }
@@ -109,16 +109,8 @@ namespace RaahnSimulation
                     flag.visible = false;
                 else
                 {
-                    Vector2i mousePosi = Mouse.GetPosition(context.GetWindow());
-
-                    double x = (double)(mousePosi.X) - (cursor.GetWidth() / 2.0f);
-                    double y = (double)(context.GetWindowHeight() - mousePosi.Y) - cursor.GetHeight();
-
-                    Utils.Vector2 mousePosf = new Utils.Vector2(x, y);
-                    Utils.Vector2 transform = cam.WindowToWorld(mousePosf);
-
-                    flag.worldPos.x = transform.x;
-                    flag.worldPos.y = transform.y;
+                    flag.transformedWorldPos.x = cursor.transformedWorldPos.x;
+                    flag.transformedWorldPos.y = cursor.transformedWorldPos.y;
                     flag.visible = true;
                 }
             }
@@ -134,8 +126,8 @@ namespace RaahnSimulation
                     if (selectedEntity != -1)
                     {
                         AddEntity(selectedEntity);
-                        dist = entityPanel.GetDist(cursor.worldPos.x, cursor.worldPos.y, cam);
-                        UpdateEntitydoubleing();
+                        dist = entityPanel.GetDist(cursor.transformedWorldPos.x, cursor.transformedWorldPos.y, cam);
+                        UpdateEntityFloating();
                     }
                     else
                     {
@@ -147,22 +139,22 @@ namespace RaahnSimulation
                             {
                                 //The cursor's bounds are in window coordinates, we need world coordinates.
                                 Utils.Rect comparisonRect;
-                                comparisonRect = cam.WindowToWorld(cursor.aabb.GetBounds());
+                                comparisonRect = cam.TransformWorld(cursor.aabb.GetBounds());
 
                                 if (curEntity.Intersects(comparisonRect) && Mouse.IsButtonPressed(Mouse.Button.Left))
                                 {
-                                    entitydoubleing = curEntity;
-                                    entitydoubleing.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
-                                    currentState.ChangeLayer(entitydoubleing, currentState.GetTopLayerIndex() - 1);
+                                    entityFloating = curEntity;
+                                    entityFloating.SetColor(0.0, 0.0, 1.0, 0.85);
+                                    currentState.ChangeLayer(entityFloating, currentState.GetTopLayerIndex() - 1);
 
                                     cursor.Update();
 
-                                    dist.x = cursor.worldPos.x - curEntity.worldPos.x;
-                                    dist.y = cursor.worldPos.y - curEntity.worldPos.y;
+                                    dist.x = cursor.transformedWorldPos.x - curEntity.transformedWorldPos.x;
+                                    dist.y = cursor.transformedWorldPos.y - curEntity.transformedWorldPos.y;
 
-                                    doubleingExactAngle = entitydoubleing.angle;
+                                    floatingExactAngle = entityFloating.angle;
 
-                                    UpdateEntitydoubleing();
+                                    UpdateEntityFloating();
                                     shouldBreak = true;
                                 }
                                 if (shouldBreak)
@@ -175,24 +167,24 @@ namespace RaahnSimulation
                 }
             }
 
-            if (entitydoubleing != null)
+            if (entityFloating != null)
             {
                 if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
                 {
                     if (trashHovering)
                     {
-                        RemoveEntityFromList(entitydoubleing, 0);
-                        roadPool.Free((Road)entitydoubleing);
-                        entityPanel.GetTrash().SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+                        RemoveEntityFromList(entityFloating, 0);
+                        roadPool.Free((Road)entityFloating);
+                        entityPanel.GetTrash().SetColor(0.0, 0.0, 0.0, 1.0);
                         trashHovering = false;
                     }
                     else
                     {
                         //Change the entitiy's color back to its original upon dropping it.
-                        entitydoubleing.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-                        currentState.ChangeLayer(entitydoubleing, layer);
+                        entityFloating.SetColor(1.0, 1.0, 1.0, 1.0);
+                        currentState.ChangeLayer(entityFloating, layer);
                     }
-                    entitydoubleing = null;
+                    entityFloating = null;
                 }
             }
         }
@@ -212,11 +204,11 @@ namespace RaahnSimulation
             writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.ROBOT]);
 
             writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.X]);
-            writer.WriteString(flag.worldPos.x.ToString());
+            writer.WriteString(flag.transformedWorldPos.x.ToString());
             writer.WriteEndElement();
 
             writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.Y]);
-            writer.WriteString(flag.worldPos.y.ToString());
+            writer.WriteString(flag.transformedWorldPos.y.ToString());
             writer.WriteEndElement();
 
             //Do not write angle because map builder currently does not have an angle value for the robot.
@@ -232,11 +224,11 @@ namespace RaahnSimulation
                     writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.ENTITY]);
 
                     writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.X]);
-                    writer.WriteString(entity.worldPos.x.ToString());
+                    writer.WriteString(entity.transformedWorldPos.x.ToString());
                     writer.WriteEndElement();
 
                     writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.Y]);
-                    writer.WriteString(entity.worldPos.y.ToString());
+                    writer.WriteString(entity.transformedWorldPos.y.ToString());
                     writer.WriteEndElement();
 
                     writer.WriteStartElement(EntityMap.XML_ELEMENTS[(int)EntityMap.XMLElement.ANGLE]);
@@ -290,16 +282,16 @@ namespace RaahnSimulation
                 foreach (Entity curEntity in entities[x])
                 {
                     if (!(curEntity.aabb.GetBounds().left > bounds.right || curEntity.aabb.GetBounds().right < bounds.left
-                          || curEntity.aabb.GetBounds().bottom > bounds.top || curEntity.aabb.GetBounds().top < bounds.bottom))
+                    || curEntity.aabb.GetBounds().bottom > bounds.top || curEntity.aabb.GetBounds().top < bounds.bottom))
                         return true;
                 }
             }
             return false;
         }
 
-        public bool doubleing()
+        public bool Floating()
         {
-            if (entitydoubleing != null)
+            if (entityFloating != null)
                 return true;
             else
                 return false;
@@ -311,15 +303,15 @@ namespace RaahnSimulation
             {
                 Road newRoad = roadPool.Alloc();
                 newRoad.SetTexture((TextureManager.TextureType)(itemIndex + TextureManager.ROAD_INDEX_OFFSET));
-                newRoad.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
+                newRoad.SetColor(0.0, 0.0, 1.0, 0.85);
 
                 AddEntityToList(newRoad, 0);
 
-                entitydoubleing = newRoad;
-                entitySnappingDist.x = newRoad.GetWidth() / 4.0f;
-                entitySnappingDist.y = newRoad.GetHeight() / 4.0f;
-                newRoad.angle = 0.0f;
-                doubleingExactAngle = newRoad.angle;
+                entityFloating = newRoad;
+                entitySnappingDist.x = newRoad.GetWidth() / 4.0;
+                entitySnappingDist.y = newRoad.GetHeight() / 4.0;
+                newRoad.angle = 0.0;
+                floatingExactAngle = newRoad.angle;
             }
         }
 
@@ -335,30 +327,30 @@ namespace RaahnSimulation
             currentState.RemoveEntity(entity);
         }
 
-        private void UpdateEntitydoubleing()
+        private void UpdateEntityFloating()
         {
             //Make sure the mouse is in bounds.
-            if (cursor.windowPos.x < 0 || cursor.windowPos.y < 0
-            || cursor.windowPos.x > context.GetWindowWidth() || cursor.windowPos.y > context.GetWindowHeight())
+            if (cursor.worldPos.x < 0 || cursor.worldPos.y < 0
+            || cursor.worldPos.x > Simulator.WORLD_WINDOW_WIDTH || cursor.worldPos.y > Simulator.WORLD_WINDOW_HEIGHT)
             {
                 //Change the entitiy's color back to its original upon dropping it.
-                entitydoubleing.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-                currentState.ChangeLayer(entitydoubleing, layer);
-                entitydoubleing = null;
+                entityFloating.SetColor(1.0, 1.0, 1.0, 1.0);
+                currentState.ChangeLayer(entityFloating, layer);
+                entityFloating = null;
                 return;
             }
 
-            Utils.Vector2 mousePosf = new Utils.Vector2(cursor.worldPos.x - dist.x, cursor.worldPos.y - dist.y);
+            Utils.Vector2 mousePosf = new Utils.Vector2(cursor.transformedWorldPos.x - dist.x, cursor.transformedWorldPos.y - dist.y);
             UpdatePosition(mousePosf);
 
             UpdateAngle();
         }
 
-        private void UpdatePosition(Utils.Vector2 mouseWorldPos)
+        private void UpdatePosition(Utils.Vector2 mousetransformedWorldPos)
         {
-            entitydoubleing.worldPos.x = mouseWorldPos.x;
-            entitydoubleing.worldPos.y = mouseWorldPos.y;
-            entitydoubleing.Update();
+            entityFloating.transformedWorldPos.x = mousetransformedWorldPos.x;
+            entityFloating.transformedWorldPos.y = mousetransformedWorldPos.y;
+            entityFloating.Update();
 
             int boundsUsageX = 0;
             int boundsUsageY = 0;
@@ -375,18 +367,18 @@ namespace RaahnSimulation
             {
                 foreach (Entity curEntity in entities[x])
                 {
-                    if (entitydoubleing == curEntity)
+                    if (entityFloating == curEntity)
                         continue;
 
-                    xDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().left - curEntity.aabb.GetBounds().left));
-                    xDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().left - curEntity.aabb.GetBounds().right));
-                    xDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().right - curEntity.aabb.GetBounds().left));
-                    xDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().right - curEntity.aabb.GetBounds().right));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().left - curEntity.aabb.GetBounds().left));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().left - curEntity.aabb.GetBounds().right));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().right - curEntity.aabb.GetBounds().left));
+                    xDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().right - curEntity.aabb.GetBounds().right));
 
-                    yDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().bottom - curEntity.aabb.GetBounds().bottom));
-                    yDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().bottom - curEntity.aabb.GetBounds().top));
-                    yDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().top - curEntity.aabb.GetBounds().bottom));
-                    yDistances.Add(Math.Abs(entitydoubleing.aabb.GetBounds().top - curEntity.aabb.GetBounds().top));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().bottom - curEntity.aabb.GetBounds().bottom));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().bottom - curEntity.aabb.GetBounds().top));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().top - curEntity.aabb.GetBounds().bottom));
+                    yDistances.Add(Math.Abs(entityFloating.aabb.GetBounds().top - curEntity.aabb.GetBounds().top));
 
                     //Find the shortest distance to the current entity and use it if it is shorter than shortest.
                     for (int i = 0; i < xDistances.Count; i++)
@@ -416,38 +408,38 @@ namespace RaahnSimulation
 
             if (shortestXYDist.x < entitySnappingDist.x && shortestXYDist.y < entitySnappingDist.y)
             {
-                Utils.Rect doubleingBounds = entitydoubleing.aabb.GetBounds();
+                Utils.Rect floatingBounds = entityFloating.aabb.GetBounds();
                 Utils.Rect entitySnappingBounds = closestEntityX.aabb.GetBounds();
-                double distanceToBound = 0.0f;
+                double distanceToBound = 0.0;
 
                 switch (boundsUsageX)
                 {
                     //Snap left aabb to left aabb.
                     case 0:
                     {
-                        distanceToBound = entitydoubleing.worldPos.x - doubleingBounds.left;
-                        entitydoubleing.worldPos.x = entitySnappingBounds.left + distanceToBound;
+                        distanceToBound = entityFloating.transformedWorldPos.x - floatingBounds.left;
+                        entityFloating.transformedWorldPos.x = entitySnappingBounds.left + distanceToBound;
                         break;
                     }
                     //Snap left aabb to right aabb.
                     case 1:
                     {
-                        distanceToBound = entitydoubleing.worldPos.x - doubleingBounds.left;
-                        entitydoubleing.worldPos.x = entitySnappingBounds.right + distanceToBound;
+                        distanceToBound = entityFloating.transformedWorldPos.x - floatingBounds.left;
+                        entityFloating.transformedWorldPos.x = entitySnappingBounds.right + distanceToBound;
                         break;
                     }
                     //Snap right aabb to left aabb.
                     case 2:
                     {
-                        distanceToBound = doubleingBounds.right - entitydoubleing.worldPos.x;
-                        entitydoubleing.worldPos.x = entitySnappingBounds.left - distanceToBound;
+                        distanceToBound = floatingBounds.right - entityFloating.transformedWorldPos.x;
+                        entityFloating.transformedWorldPos.x = entitySnappingBounds.left - distanceToBound;
                         break;
                     }
                     //Snap right aabb to right aabb.
                     case 3:
                     {
-                        distanceToBound = doubleingBounds.right - entitydoubleing.worldPos.x;
-                        entitydoubleing.worldPos.x = entitySnappingBounds.right - distanceToBound;
+                        distanceToBound = floatingBounds.right - entityFloating.transformedWorldPos.x;
+                        entityFloating.transformedWorldPos.x = entitySnappingBounds.right - distanceToBound;
                         break;
                     }
                 }
@@ -459,29 +451,29 @@ namespace RaahnSimulation
                     //Snap bottom aabb to left bottom.
                     case 0:
                     {
-                        distanceToBound = entitydoubleing.worldPos.y - doubleingBounds.bottom;
-                        entitydoubleing.worldPos.y = entitySnappingBounds.bottom + distanceToBound;
+                        distanceToBound = entityFloating.transformedWorldPos.y - floatingBounds.bottom;
+                        entityFloating.transformedWorldPos.y = entitySnappingBounds.bottom + distanceToBound;
                         break;
                     }
                     //Snap bottom aabb to top aabb.
                     case 1:
                     {
-                        distanceToBound = entitydoubleing.worldPos.y - doubleingBounds.bottom;
-                        entitydoubleing.worldPos.y = entitySnappingBounds.top + distanceToBound;
+                        distanceToBound = entityFloating.transformedWorldPos.y - floatingBounds.bottom;
+                        entityFloating.transformedWorldPos.y = entitySnappingBounds.top + distanceToBound;
                         break;
                     }
                     //Snap top aabb to bottom aabb.
                     case 2:
                     {
-                        distanceToBound = doubleingBounds.top - entitydoubleing.worldPos.y;
-                        entitydoubleing.worldPos.y = entitySnappingBounds.bottom - distanceToBound;
+                        distanceToBound = floatingBounds.top - entityFloating.transformedWorldPos.y;
+                        entityFloating.transformedWorldPos.y = entitySnappingBounds.bottom - distanceToBound;
                         break;
                     }
                     //Snap top aabb to top aabb.
                     case 3:
                     {
-                        distanceToBound = doubleingBounds.top - entitydoubleing.worldPos.y;
-                        entitydoubleing.worldPos.y = entitySnappingBounds.top - distanceToBound;
+                        distanceToBound = floatingBounds.top - entityFloating.transformedWorldPos.y;
+                        entityFloating.transformedWorldPos.y = entitySnappingBounds.top - distanceToBound;
                         break;
                     }
                 }
@@ -491,28 +483,28 @@ namespace RaahnSimulation
         private void UpdateAngle()
         {
             if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
-                doubleingExactAngle += Entity.ROTATE_SPEED * context.GetDeltaTime();
+                floatingExactAngle += Entity.ROTATE_SPEED * context.GetDeltaTime();
             if (Keyboard.IsKeyPressed(Keyboard.Key.Down))
-                doubleingExactAngle -= Entity.ROTATE_SPEED * context.GetDeltaTime();
+                floatingExactAngle -= Entity.ROTATE_SPEED * context.GetDeltaTime();
 
-            if (doubleingExactAngle >= 360.0f)
-                doubleingExactAngle -= 360.0f;
-            else if (doubleingExactAngle < 0.0f)
-                doubleingExactAngle += 360.0f;
+            if (floatingExactAngle >= 360.0)
+                floatingExactAngle -= 360.0;
+            else if (floatingExactAngle < 0.0)
+                floatingExactAngle += 360.0;
 
             bool snaps = false;
             for (uint i = 0; i < SNAPPING_ANGLES_COUNT; i++)
             {
-                if (doubleingExactAngle > SNAPPING_ANGLES[i] - SNAPPING_ANGLE_BOUNDS
-                && doubleingExactAngle < SNAPPING_ANGLES[i] + SNAPPING_ANGLE_BOUNDS)
+                if (floatingExactAngle > SNAPPING_ANGLES[i] - SNAPPING_ANGLE_BOUNDS
+                && floatingExactAngle < SNAPPING_ANGLES[i] + SNAPPING_ANGLE_BOUNDS)
                 {
-                    entitydoubleing.angle = SNAPPING_ANGLES[i];
+                    entityFloating.angle = SNAPPING_ANGLES[i];
                     snaps = true;
                     break;
                 }
             }
             if (!snaps)
-                entitydoubleing.angle = doubleingExactAngle;
+                entityFloating.angle = floatingExactAngle;
         }
 	}
 }

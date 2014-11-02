@@ -4,23 +4,28 @@ namespace RaahnSimulation
 {
 	public class Camera
 	{
-        public const double MOUSE_SCROLL_ZOOM = 1.25f;
+        public const double MOUSE_SCROLL_ZOOM = 1.25;
 
         private double zoom;
+        private Utils.Vector2 windowWorldRatio;
 		private Utils.Vector2 vecPos;
 
-	    public Camera()
+	    public Camera(Simulator sim)
 	    {
-	        vecPos = new Utils.Vector2(0.0f, 0.0f);
+            double widthRatio = (double)sim.GetWindowWidth() / Simulator.WORLD_WINDOW_WIDTH;
+            double heightRatio = (double)sim.GetWindowHeight() / Simulator.WORLD_WINDOW_HEIGHT;
+
+            windowWorldRatio = new Utils.Vector2(widthRatio, heightRatio);
+	        vecPos = new Utils.Vector2(0.0, 0.0);
             Reset();
 	    }
 
         public void Reset()
         {
-            zoom = 1.0f;
+            zoom = 1.0;
 
-            vecPos.x = 0.0f;
-            vecPos.y = 0.0f;
+            vecPos.x = 0.0;
+            vecPos.y = 0.0;
         }
 
 	    public void Transform()
@@ -47,32 +52,65 @@ namespace RaahnSimulation
             Pan(-x, -y);
         }
 
-        public Utils.Vector2 WorldToWindow(double worldX, double worldY)
-        {
-            double x = (worldX - vecPos.x) * zoom;
-            double y = (worldY - vecPos.y) * zoom;
-            return new Utils.Vector2(x, y);
-        }
-
-        public Utils.Vector2 WindowToWorld(double windowX, double windowY)
+        public Utils.Vector2 TransformWorld(double windowX, double windowY)
         {
             double x = (windowX / zoom) + vecPos.x;
             double y = (windowY / zoom) + vecPos.y;
             return new Utils.Vector2(x, y);
         }
 
-        public Utils.Vector2 WorldToWindow(Utils.Vector2 world)
+        public Utils.Vector2 UntransformWorld(double worldX, double worldY)
         {
-            return WorldToWindow(world.x, world.y);
+            double x = (worldX - vecPos.x) * zoom;
+            double y = (worldY - vecPos.y) * zoom;
+            return new Utils.Vector2(x, y);
         }
 
-        public Utils.Vector2 WindowToWorld(Utils.Vector2 window)
+        public Utils.Vector2 TransformWorld(Utils.Vector2 world)
         {
-            return WindowToWorld(window.x, window.y);
+            return TransformWorld(world.x, world.y);
         }
 
-        //Only transforms bounding properties.
-        public Utils.Rect WorldToWindow(Utils.Rect world)
+        public Utils.Vector2 UntransformWorld(Utils.Vector2 tWorld)
+        {
+            return UntransformWorld(tWorld.x, tWorld.y);
+        }
+
+        public Utils.Vector2 ProjectWindow(double windowX, double windowY)
+        {
+            return new Utils.Vector2(windowX / windowWorldRatio.x, windowY / windowWorldRatio.y);
+        }
+
+        public Utils.Vector2 UnProjectWorld(double worldX, double worldY)
+        {
+            return new Utils.Vector2(worldX * windowWorldRatio.x, worldY * windowWorldRatio.y);
+        }
+
+        public Utils.Vector2 ProjectWindow(Utils.Vector2 window)
+        {
+            return new Utils.Vector2(window.x / windowWorldRatio.x, window.y / windowWorldRatio.y);
+        }
+
+        public Utils.Vector2 UnProjectWorld(Utils.Vector2 world)
+        {
+            return new Utils.Vector2(world.x * windowWorldRatio.x, world.y * windowWorldRatio.y);
+        }
+
+        //Performs camera transformations on world coordinates.
+        public Utils.Rect TransformWorld(Utils.Rect window)
+        {
+            Utils.Rect transform = new Utils.Rect();
+
+            transform.left = (window.left / zoom) + vecPos.x;
+            transform.right = (window.right / zoom) + vecPos.x;
+            transform.bottom = (window.bottom / zoom) + vecPos.y;
+            transform.top = (window.top / zoom) + vecPos.y;
+
+            return transform;
+        }
+
+        //Undoes camera transformations on world coordinates.
+        public Utils.Rect UntransformWorld(Utils.Rect world)
         {
             Utils.Rect transform = new Utils.Rect();
 
@@ -84,15 +122,26 @@ namespace RaahnSimulation
             return transform;
         }
 
-        //Only transforms bounding properties.
-        public Utils.Rect WindowToWorld(Utils.Rect window)
+        public Utils.Rect ProjectWindow(Utils.Rect window)
         {
             Utils.Rect transform = new Utils.Rect();
 
-            transform.left = (window.left / zoom) + vecPos.x;
-            transform.right = (window.right / zoom) + vecPos.x;
-            transform.bottom = (window.bottom / zoom) + vecPos.y;
-            transform.top = (window.top / zoom) + vecPos.y;
+            transform.left /= windowWorldRatio.x;
+            transform.right /= windowWorldRatio.x;
+            transform.bottom /= windowWorldRatio.y;
+            transform.top /= windowWorldRatio.y;
+
+            return transform;
+        }
+
+        public Utils.Rect UnProjectWorld(Utils.Rect world)
+        {
+            Utils.Rect transform = new Utils.Rect();
+
+            transform.left *= windowWorldRatio.x;
+            transform.right *= windowWorldRatio.x;
+            transform.bottom *= windowWorldRatio.y;
+            transform.top *= windowWorldRatio.y;
 
             return transform;
         }

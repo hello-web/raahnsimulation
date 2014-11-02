@@ -6,14 +6,14 @@ namespace RaahnSimulation
 {
 	public class Graphic : ColorableEntity
 	{
-		private const double DEFALUT_WIDTH_PERCENTAGE = 0.2f;
-		private const double DEFAULT_HEIGHT_PERCENTAGE = 0.2f;
+		private const double DEFALUT_WIDTH = 768.0;
+		private const double DEFAULT_HEIGHT = 432.0;
 
 		public Graphic(Simulator sim) : base(sim)
 		{
 			texture = TextureManager.TextureType.DEFAULT;
-			width = DEFALUT_WIDTH_PERCENTAGE * (double)context.GetWindowWidth();
-			height = DEFAULT_HEIGHT_PERCENTAGE * (double)context.GetWindowHeight();
+            width = DEFALUT_WIDTH;
+			height = DEFAULT_HEIGHT;
 
             aabb.SetSize(width, height);
 		}

@@ -40,10 +40,10 @@ namespace RaahnSimulation
 	    public override void Update()
 	    {
             bool mouseOutOfBounds = false;
-            Vector2i mouseWindowPos = Mouse.GetPosition(context.GetWindow());
-            if (mouseWindowPos.X < 0 || mouseWindowPos.Y < 0)
+            Vector2i mouseworldPos = Mouse.GetPosition(context.GetWindow());
+            if (mouseworldPos.X < 0 || mouseworldPos.Y < 0)
                 mouseOutOfBounds = true;
-            else if (mouseWindowPos.X > context.GetWindowWidth() || mouseWindowPos.Y > context.GetWindowHeight())
+            else if (mouseworldPos.X > Simulator.WORLD_WINDOW_WIDTH || mouseworldPos.Y > Simulator.WORLD_WINDOW_HEIGHT)
                 mouseOutOfBounds = true;
 
             if (entityPanel.Intersects(cursor.aabb.GetBounds()) || mouseOutOfBounds)
@@ -65,9 +65,9 @@ namespace RaahnSimulation
             if (e.Type == EventType.MouseWheelMoved)
             {
                 if (e.MouseWheel.Delta > 0)
-                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (double)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
+                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, (double)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
                 else
-                    camera.ZoomTo(cursor.windowPos.x, cursor.windowPos.y, (double)(-e.MouseWheel.Delta) * (1.0f / Camera.MOUSE_SCROLL_ZOOM));
+                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, (double)(-e.MouseWheel.Delta) * (1.0 / Camera.MOUSE_SCROLL_ZOOM));
             }
 
             //Update mapBuilder before checking whether or not to pan.
@@ -76,7 +76,7 @@ namespace RaahnSimulation
             if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
             {
                 if (!entityPanel.Intersects(cursor.aabb.GetBounds())
-                && !mapBuilder.doubleing() && context.GetWindowHasFocus())
+                && !mapBuilder.Floating() && context.GetWindowHasFocus())
                     panning = true;
             }
 

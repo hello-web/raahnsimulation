@@ -13,16 +13,16 @@ namespace RaahnSimulation
             ROAD = 0
         };
 
-		public const double ROTATE_SPEED = 90.0f;
-        public const double DEFAULT_COLOR_R = 1.0f;
-        public const double DEFAULT_COLOR_G = 1.0f;
-        public const double DEFAULT_COLOR_B = 1.0f;
-        public const double DEFAULT_COLOR_T = 1.0f;
+		public const double ROTATE_SPEED = 90.0;
+        public const double DEFAULT_COLOR_R = 1.0;
+        public const double DEFAULT_COLOR_G = 1.0;
+        public const double DEFAULT_COLOR_B = 1.0;
+        public const double DEFAULT_COLOR_T = 1.0;
 
         public bool visible;
 		public double angle;
+		public Utils.Vector2 transformedWorldPos;
 		public Utils.Vector2 worldPos;
-		public Utils.Vector2 windowPos;
 		public Utils.Vector2 drawingVec;
         public AABB aabb;
         protected double width;
@@ -54,31 +54,32 @@ namespace RaahnSimulation
             //Default to quad mesh.
             mesh = Simulator.quad;
 	        context = sim;
-	        width = 1.0f;
-	        height = 1.0f;
-	        angle = 0.0f;
+	        width = 1.0;
+	        height = 1.0;
+	        angle = 0.0;
             moved = false;
-            previousAngle = 0.0f;
+            previousAngle = 0.0;
             //Initially opaque.
             transparency = DEFAULT_COLOR_T;
 
             aabb = new AABB();
             aabb.SetSize(width, height);
-	        windowPos = new Utils.Vector2(0.0f, 0.0f);
-	        worldPos = new Utils.Vector2(0.0f, 0.0f);
-            velocity = new Utils.Vector2(0.0f, 0.0f);
-            speed = new Utils.Vector2(0.0f, 0.0f);
-            center = new Utils.Vector2(0.0f, 0.0f);
-            previousPos = new Utils.Vector2(0.0f, 0.0f);
+
+	        worldPos = new Utils.Vector2(0.0, 0.0);
+	        transformedWorldPos = new Utils.Vector2(0.0, 0.0);
+            velocity = new Utils.Vector2(0.0, 0.0);
+            speed = new Utils.Vector2(0.0, 0.0);
+            center = new Utils.Vector2(0.0, 0.0);
+            previousPos = new Utils.Vector2(0.0, 0.0);
             //Initially no change on color.
             color = new Utils.Vector3(DEFAULT_COLOR_R, DEFAULT_COLOR_G, DEFAULT_COLOR_B);
 
-	        //Default drawing vector is worldPos.
-	        drawingVec = worldPos;
-	        velocity.x = 0.0f;
-	        velocity.y = 0.0f;
-	        speed.x = 1.0f;
-	        speed.y = 1.0f;
+	        //Default drawing vector is transformedWorldPos.
+	        drawingVec = transformedWorldPos;
+	        velocity.x = 0.0;
+	        velocity.y = 0.0;
+	        speed.x = 1.0;
+	        speed.y = 1.0;
 	    }
 
 	    ~Entity()
@@ -89,22 +90,22 @@ namespace RaahnSimulation
 	    public virtual void Update()
 	    {
 	        Camera cam = context.GetCamera();
-            if (drawingVec == windowPos)
+            if (drawingVec == worldPos)
             {
-                Utils.Vector2 transform = cam.WindowToWorld(windowPos);
-                worldPos.x = transform.x;
-                worldPos.y = transform.y;
+                Utils.Vector2 transform = cam.TransformWorld(worldPos);
+                transformedWorldPos.x = transform.x;
+                transformedWorldPos.y = transform.y;
             }
             else
             {
-                Utils.Vector2 transform = cam.WorldToWindow(worldPos);
-                windowPos.x = transform.x;
-                windowPos.y = transform.y;
+                Utils.Vector2 transform = cam.UntransformWorld(transformedWorldPos);
+                worldPos.x = transform.x;
+                worldPos.y = transform.y;
             }
 
             double deltaAngle = angle - previousAngle;
 
-            if (deltaAngle != 0.0f)
+            if (deltaAngle != 0.0)
             {
                 aabb.Rotate(deltaAngle);
                 previousAngle = angle;
@@ -113,7 +114,7 @@ namespace RaahnSimulation
             double deltaX = drawingVec.x - previousPos.x;
             double deltaY = drawingVec.y - previousPos.y;
 
-            if (deltaX != 0.0f || deltaY != 0.0f)
+            if (deltaX != 0.0 || deltaY != 0.0)
             {
                 aabb.Translate(deltaX, deltaY);
                 previousPos.x = drawingVec.x;
@@ -123,8 +124,8 @@ namespace RaahnSimulation
             else
                 moved = false;
 
-	        center.x = drawingVec.x + (width / 2.0f);
-	        center.y = drawingVec.y + (height / 2.0f);
+	        center.x = drawingVec.x + (width / 2.0);
+	        center.y = drawingVec.y + (height / 2.0);
 	        //OpenGL uses degress, standard math uses radians.
 	        velocity.x = Math.Cos(Utils.DegToRad(angle)) * speed.x;
 	        velocity.y = Math.Sin(Utils.DegToRad(angle)) * speed.y;
@@ -201,10 +202,10 @@ namespace RaahnSimulation
             mesh = newMesh;
         }
 
-		public void SetWindowAsDrawingVec(bool window)
+		public void SetTransformUsage(bool usage)
 		{
-			if (window)
-				drawingVec = windowPos;
+			if (usage)
+				drawingVec = transformedWorldPos;
 			else
 				drawingVec = worldPos;
 		}
@@ -248,7 +249,7 @@ namespace RaahnSimulation
 	    protected void RotateAroundCenter()
 	    {
 	        Gl.glTranslated(center.x, center.y, Utils.DISCARD_Z_POS);
-	        Gl.glRotated(angle, 0.0f, 0.0f, 1.0f);
+	        Gl.glRotated(angle, 0.0, 0.0, 1.0);
 	        Gl.glTranslated(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 	    }
 	}

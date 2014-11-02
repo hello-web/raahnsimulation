@@ -57,15 +57,15 @@ namespace RaahnSimulation
 
             public Rect()
             {
-                ll = new Vector2(0.0f, 0.0f);
-                lr = new Vector2(0.0f, 0.0f);
-                ul = new Vector2(0.0f, 0.0f);
-                ur = new Vector2(0.0f, 0.0f);
+                ll = new Vector2(0.0, 0.0);
+                lr = new Vector2(0.0, 0.0);
+                ul = new Vector2(0.0, 0.0);
+                ur = new Vector2(0.0, 0.0);
 
-                top = 0.0f;
-                bottom = 0.0f;
-                left = 0.0f;
-                right = 0.0f;
+                top = 0.0;
+                bottom = 0.0;
+                left = 0.0;
+                right = 0.0;
             }
 
             public void Copy(Utils.Rect copyRect)
@@ -268,9 +268,7 @@ namespace RaahnSimulation
         public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
         public const double MIN_GL_VERSION = 1.5;
 		public const double WIDTH_PERCENTAGE = 0.6;
-		public const double HEIGHT_PERCENTAGE = 0.75;
-		public const double CHAR_WIDTH_PERCENTAGE = 0.03125;
-		public const double CHAR_HEIGHT_PERCENTAGE = 0.0625;
+        public const double HEIGHT_PERCENTAGE = 0.75;
 		public const double DISCARD_Z_POS = 0.0;
 		public const double DISCARD_Z_SCALE = 1.0;
 		public const double DEG_TO_RAD = 3.1415926535 / 180.0;
@@ -286,7 +284,7 @@ namespace RaahnSimulation
         public const string DEFAULT_SAVE_FILE = "Data/Maps/OutMap.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.93";
+		public const string VERSION_STRING = "Version 1.95";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";

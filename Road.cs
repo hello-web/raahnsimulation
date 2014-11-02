@@ -7,7 +7,7 @@ namespace RaahnSimulation
 	public class Road : ColorableEntity
 	{
         //Roads are squares, so only one constant is needed.
-        public const double ROAD_DIMENSION_PERCENTAGE = 0.1f;
+        public const double ROAD_DIMENSION = 365.0;
 
 	    public Road(Simulator sim) : base(sim)
 	    {
@@ -15,7 +15,7 @@ namespace RaahnSimulation
 	        //Set default texture.
 	        texture = TextureManager.TextureType.ROAD_0;
 
-            width = height = (double)context.GetWindowWidth() * ROAD_DIMENSION_PERCENTAGE;
+            width = height = ROAD_DIMENSION;
             aabb.SetSize(width, height);
 	    }
 

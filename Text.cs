@@ -6,7 +6,10 @@ namespace RaahnSimulation
 {
 	public class Text : ClickableEntity
 	{
-        public const double SPACING_WIDTH_PERCENTAGE = 0.8f;
+        public const double SPACING_WIDTH_PERCENTAGE = 0.8;
+        public const double CHAR_DEFAULT_WIDTH = 120.0;
+        public const double CHAR_DEFAULT_HEIGHT = 135.0;
+
 		private const int ASCII_OFFSET = 32;
 
 		protected string text;
@@ -23,12 +26,12 @@ namespace RaahnSimulation
 	    public Text(Simulator sim, string str) : base(sim)
 	    {
 	        text = str;
-	        spacing = 1.0f;
+	        spacing = 1.0;
 	        texture = TextureManager.TextureType.CHAR_MAP;
-            charTexPos = new Utils.Vector2(0.0f, 0.0f);
-            charCenter = new Utils.Vector2(0.0f, 0.0f);
+            charTexPos = new Utils.Vector2(0.0, 0.0);
+            charCenter = new Utils.Vector2(0.0, 0.0);
             //Initially black.
-            SetColor(0.0f, 0.0f, 0.0f);
+            SetColor(0.0, 0.0, 0.0);
 	    }
 
 	    ~Text()
@@ -67,12 +70,12 @@ namespace RaahnSimulation
 	            }
 	            else
 	            {
-	                charTexPos.x = 0.0f;
-	                charTexPos.y = 0.0f;
+	                charTexPos.x = 0.0;
+	                charTexPos.y = 0.0;
 	            }
 
-	            charCenter.x = (worldPos.x + (i * spacing)) + (charWidth / 2.0f);
-	            charCenter.y = worldPos.y + (height / 2.0f);
+	            charCenter.x = (transformedWorldPos.x + (i * spacing)) + (charWidth / 2.0);
+	            charCenter.y = transformedWorldPos.y + (height / 2.0);
 
 	            Gl.glMatrixMode(Gl.GL_TEXTURE);
 
@@ -91,7 +94,7 @@ namespace RaahnSimulation
 	            Gl.glPopMatrix();
 	        }
 
-	        Gl.glColor3d(1.0f, 1.0f, 1.0f);
+	        Gl.glColor3d(1.0, 1.0, 1.0);
 
 	        Gl.glMatrixMode(Gl.GL_TEXTURE);
 
@@ -112,14 +115,14 @@ namespace RaahnSimulation
 	        spacing = charWidth * SPACING_WIDTH_PERCENTAGE;
 
             //To get the entire width, we need the complete width of the last char.
-	        width = (spacing * text.Length) + charWidth * (1.0f - SPACING_WIDTH_PERCENTAGE);
+	        width = (spacing * text.Length) + charWidth * (1.0 - SPACING_WIDTH_PERCENTAGE);
 
             aabb.SetSize(width, height);
 
 	        if (fromCenter)
 	        {
-	            drawingVec.x = x - (width / 2.0f);
-	            drawingVec.y = y - (height / 2.0f);
+	            drawingVec.x = x - (width / 2.0);
+	            drawingVec.y = y - (height / 2.0);
 	        }
 	        else
 	        {

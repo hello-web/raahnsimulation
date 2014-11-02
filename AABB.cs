@@ -22,8 +22,8 @@ namespace RaahnSimulation
         {
             Construct();
 
-            bounds.ll.x = 0.0f;
-            bounds.ll.y = 0.0f;
+            bounds.ll.x = 0.0;
+            bounds.ll.y = 0.0;
 
             SetSize(w, h);
         }
@@ -142,8 +142,8 @@ namespace RaahnSimulation
             bounds.bottom = bounds.ll.y;
             bounds.top = bounds.ul.y;
 
-            center.x = bounds.ll.x + (bounds.width / 2.0f);
-            center.y = bounds.ll.y + (bounds.height / 2.0f);
+            center.x = bounds.ll.x + (bounds.width / 2.0);
+            center.y = bounds.ll.y + (bounds.height / 2.0);
 
             //Restore the pervious rotation.
             Rotate(currentAngle);
@@ -202,10 +202,10 @@ namespace RaahnSimulation
 
         private void Construct()
         {
-            angle = 0.0f;
+            angle = 0.0;
 
-            pos = new Utils.Vector2(0.0f, 0.0f);
-            center = new Utils.Vector2(0.0f, 0.0f);
+            pos = new Utils.Vector2(0.0, 0.0);
+            center = new Utils.Vector2(0.0, 0.0);
             bounds = new Utils.Rect();
 
             //Default to quad.
