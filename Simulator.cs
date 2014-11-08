@@ -23,7 +23,7 @@ namespace RaahnSimulation
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
 
         //Shared mesh resources.
-        public static Mesh lineSquare;
+        public static Mesh lineRect;
         public static Mesh quad;
 		private static Simulator simulator = new Simulator();
 
@@ -164,14 +164,14 @@ namespace RaahnSimulation
             Gl.glEnableClientState(Gl.GL_VERTEX_ARRAY);
             Gl.glEnableClientState(Gl.GL_TEXTURE_COORD_ARRAY);
 
-            lineSquare = new Mesh(2, Gl.GL_LINES);
+            lineRect = new Mesh(2, Gl.GL_LINES);
 
             float[] lsVertices = new float[]
             {
-                0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 1.0f,
-                1.0f, 1.0f, 1.0f, 1.0f
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                0.0f, 1.0f,
+                1.0f, 1.0f
             };
 
             ushort[] lsIndices =
@@ -182,9 +182,9 @@ namespace RaahnSimulation
                 2, 0
             };
 
-            lineSquare.SetVerticesWithUV(lsVertices);
-            lineSquare.SetIndices(lsIndices);
-            lineSquare.Allocate();
+            lineRect.SetVertices(lsVertices, false);
+            lineRect.SetIndices(lsIndices);
+            lineRect.Allocate(Gl.GL_STATIC_DRAW);
 
             quad = new Mesh(2, Gl.GL_TRIANGLES);
 
@@ -196,16 +196,16 @@ namespace RaahnSimulation
                 1.0f, 1.0f, 1.0f, 1.0f
             };
 
-	        ushort[] indices =
+	        ushort[] quadIndices =
 	        {
 	            0, 1, 2,
 	            2, 3, 1
 	        };
 
-            quad.SetVerticesWithUV(quadVertices);
-            quad.SetIndices(indices);
+            quad.SetVertices(quadVertices, true);
+            quad.SetIndices(quadIndices);
             //Also makes quad's vertex buffer current.
-            quad.Allocate();
+            quad.Allocate(Gl.GL_STATIC_DRAW);
             quad.MakeCurrent();
 
             terminal = new Terminal(this);
@@ -389,7 +389,7 @@ namespace RaahnSimulation
 
             if (!glInitFailed)
             {
-                lineSquare.Free();
+                lineRect.Free();
                 quad.Free();
             }
 

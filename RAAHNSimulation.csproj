@@ -55,6 +55,8 @@
     <Compile Include="QuadTreeNode.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="EntityMap.cs" />
+    <Compile Include="PieSliceSensor.cs" />
+    <Compile Include="PieSliceSensorGroup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

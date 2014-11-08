@@ -7,11 +7,20 @@ namespace RaahnSimulation
 {
 	public class Car : Entity
 	{
+        //Some pie slice sensor and range finder constants are for debugging.
+        //They will be loaded from a file later on.
+
+        private const int PIE_SLICE_SENSOR_COUNT = 9;
+        private const int PIE_SLICE_SENSOR_MAX_DETECT_COUNT = 3;
         private const int RANGE_FINDER_COUNT = 11;
-        //Relative to the car's length.
-        private const double RELATIVE_RANGE_FINDER_LENGTH = 1.25;
         //1.0 for a line.
-        private const double RANGE_FINDER_HEIGHT = 1.0;
+        public const double LINE_HEIGHT = 1.0;
+        private const double PIE_SLICE_SENSOR_MIN_ANGLE = -90.0;
+        private const double PIE_SLICE_SENSOR_ANGLE = 20.0;
+        private const double PIE_SLICE_SENSOR_LENGTH = 400.0;
+        private const double PIE_SLICE_SENSOR_OFFSET = 0.0;
+        //Relative to the car's length.
+        private const double RANGE_FINDER_REALTIVE_LENGTH = 1.25;
         private const double RANGE_FINDER_HIGHEST_ANGLE = 75.0;
         private const double RANGE_FINDER_ANGLE_SPACING = 15.0;
         private const double RANGE_FINDER_COLOR_R = 1.0;
@@ -32,6 +41,7 @@ namespace RaahnSimulation
         private List<Entity.EntityType>[] entitiesToDetect;
         private QuadTree quadTree;
         private Camera camera;
+        private PieSliceSensorGroup pieSliceSensors;
 
 	    public Car(Simulator sim, QuadTree tree) : base(sim)
 	    {
@@ -47,8 +57,8 @@ namespace RaahnSimulation
 
                 float[] vertices = new float[]
                 {
-                    0.0f, 0.0f, 0.0f, 0.0f,
-                    1.0f, 0.0f, 1.0f, 0.0f
+                    0.0f, 0.0f,
+                    1.0f, 0.0f
                 };
 
                 ushort[] indices =
@@ -56,9 +66,9 @@ namespace RaahnSimulation
                     0, 1
                 };
 
-                line.SetVerticesWithUV(vertices);
+                line.SetVertices(vertices, false);
                 line.SetIndices(indices);
-                line.Allocate();
+                line.Allocate(Gl.GL_STATIC_DRAW);
             }
 
             rangeFinderLengths = new double[RANGE_FINDER_COUNT];
@@ -78,6 +88,19 @@ namespace RaahnSimulation
                 entitiesToDetect[i].Add(Entity.EntityType.ROAD);
             }
 
+            pieSliceSensors = new PieSliceSensorGroup(context, this, quadTree);
+            pieSliceSensors.AddSensors(PIE_SLICE_SENSOR_COUNT);
+            //For debugging purposes, hard code the number of pie slice sensors for now.
+            double sensorAngle = PIE_SLICE_SENSOR_MIN_ANGLE;
+            for (int i = 0; i < PIE_SLICE_SENSOR_COUNT; i++)
+            {
+                pieSliceSensors.ConfigureSensor(i, PIE_SLICE_SENSOR_MAX_DETECT_COUNT, PIE_SLICE_SENSOR_ANGLE, 
+                                                PIE_SLICE_SENSOR_LENGTH, sensorAngle, PIE_SLICE_SENSOR_OFFSET);
+                //Hard code to road for debugging.
+                pieSliceSensors.AddEntityToDetect(i, Entity.EntityType.ROAD);
+                sensorAngle += PIE_SLICE_SENSOR_ANGLE;
+            }
+
 	        speed.x = CAR_SPEED_X;
 	        speed.y = CAR_SPEED_Y;
 
@@ -88,7 +111,7 @@ namespace RaahnSimulation
         {
             base.SetWidth(w);
 
-            rangeFinderLength = w * RELATIVE_RANGE_FINDER_LENGTH;
+            rangeFinderLength = w * RANGE_FINDER_REALTIVE_LENGTH;
             for (int i = 0; i < RANGE_FINDER_COUNT; i++)
                 rangeFinderLengths[i] = rangeFinderLength;
         }
@@ -114,6 +137,7 @@ namespace RaahnSimulation
             base.Update();
 
             UpdateRangeFinders();
+            pieSliceSensors.Update();
 	    }
 
         public override void UpdateEvent(Event e)
@@ -200,16 +224,14 @@ namespace RaahnSimulation
             {
                 Gl.glPushMatrix();
 
-                RotateAroundCenter();
-
                 double rangeFinderAngle = RANGE_FINDER_HIGHEST_ANGLE - (RANGE_FINDER_ANGLE_SPACING * i);
 
                 Gl.glTranslated(center.x, center.y, Utils.DISCARD_Z_POS);
-                Gl.glRotated(rangeFinderAngle, 0.0, 0.0, 1.0);
+                Gl.glRotated(angle + rangeFinderAngle, 0.0, 0.0, 1.0);
                 Gl.glTranslated(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 
                 Gl.glTranslated(center.x, center.y, Utils.DISCARD_Z_POS);
-                Gl.glScaled(rangeFinderLengths[i], RANGE_FINDER_HEIGHT, Utils.DISCARD_Z_SCALE);
+                Gl.glScaled(rangeFinderLengths[i], LINE_HEIGHT, Utils.DISCARD_Z_SCALE);
 
                 Gl.glDrawElements(line.GetRenderMode(), line.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
@@ -219,6 +241,8 @@ namespace RaahnSimulation
             Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
 
             Gl.glEnable(Gl.GL_TEXTURE_2D);
+
+            pieSliceSensors.Draw();
 	    }
 
         public override void DebugDraw()

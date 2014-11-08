@@ -258,7 +258,8 @@ namespace RaahnSimulation
             }
         }
 
-        public const int VertexSize = sizeof(float) * 4;
+        public const int TexturedVertexSize = sizeof(float) * 4;
+        public const int VertexSize = sizeof(float) * 2;
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
         public const uint CHARACTER_TEX_COLUMN_COUNT = 11;
@@ -284,7 +285,7 @@ namespace RaahnSimulation
         public const string DEFAULT_SAVE_FILE = "Data/Maps/OutMap.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 1.95";
+		public const string VERSION_STRING = "Version 2.0";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
@@ -296,6 +297,11 @@ namespace RaahnSimulation
 		{
 			return deg * DEG_TO_RAD;
 		}
+
+        public static double RadToDeg(double deg)
+        {
+            return deg / DEG_TO_RAD;
+        }
 
         public static double GetDist(Point2 point0, Point2 point1)
         {

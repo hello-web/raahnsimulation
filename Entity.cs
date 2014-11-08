@@ -170,6 +170,11 @@ namespace RaahnSimulation
             return texture;
         }
 
+        public Utils.Vector2 GetCenter()
+        {
+            return center;
+        }
+
         public Utils.Vector3 GetColor()
         {
             return color;
@@ -232,7 +237,7 @@ namespace RaahnSimulation
         public virtual void DebugDraw()
         {
             //Handle all generic debug drawing here.
-            Simulator.lineSquare.MakeCurrent();
+            Simulator.lineRect.MakeCurrent();
             aabb.DebugDraw();
             Simulator.quad.MakeCurrent();
         }
