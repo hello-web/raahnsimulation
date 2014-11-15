@@ -6,8 +6,8 @@ namespace RaahnSimulation
 	{
         public const double MOUSE_SCROLL_ZOOM = 1.25;
 
+        public Utils.Vector2 windowWorldRatio;
         private double zoom;
-        private Utils.Vector2 windowWorldRatio;
 		private Utils.Vector2 vecPos;
 
 	    public Camera(Simulator sim)

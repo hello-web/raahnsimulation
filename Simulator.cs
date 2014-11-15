@@ -116,7 +116,7 @@ namespace RaahnSimulation
 
             camera = new Camera(this);
 
-	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Close);
+	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Default);
 
 	        Vector2i worldPos = new Vector2i((int)((monitor.Width / 2) - (windowWidth / 2)), (int)((monitor.Height / 2) - (windowHeight / 2)));
 	        simWindow.Position = worldPos;
@@ -254,7 +254,14 @@ namespace RaahnSimulation
 
                 states[states.Count - 1].UpdateEvent(e);
 
-                if (e.Type == EventType.KeyPressed && e.Key.Code == terminalKey)
+                if (e.Type == EventType.Resized)
+                {
+                    windowWidth = e.Size.Width;
+                    windowHeight = e.Size.Height;
+                    camera.windowWorldRatio.x = (double)windowWidth / Simulator.WORLD_WINDOW_WIDTH;
+                    camera.windowWorldRatio.y = (double)windowHeight / Simulator.WORLD_WINDOW_HEIGHT;
+                }
+                else if (e.Type == EventType.KeyPressed && e.Key.Code == terminalKey)
                 {
                     if (terminalOpen)
                         terminalOpen = false;

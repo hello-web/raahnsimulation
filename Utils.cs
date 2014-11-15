@@ -285,7 +285,7 @@ namespace RaahnSimulation
         public const string DEFAULT_SAVE_FILE = "Data/Maps/OutMap.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 2.0";
+		public const string VERSION_STRING = "Version 2.0.1";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
