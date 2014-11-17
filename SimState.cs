@@ -14,14 +14,20 @@ namespace RaahnSimulation
 
 	    private static SimState simState = new SimState();
 
+        private bool panning;
         private QuadTree quadTree;
         private Camera camera;
+        private Cursor cursor;
 		private Car raahnCar;
 		private EntityMap EntityMap;
 
 	    public SimState()
 	    {
-
+            panning = false;
+            quadTree = null;
+            camera = null;
+            raahnCar = null;
+            EntityMap = null;
 	    }
 
 	    public override void Init(Simulator context)
@@ -31,6 +37,10 @@ namespace RaahnSimulation
             camera = context.GetCamera();
 
             quadTree = new QuadTree(new AABB(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT));
+
+            context.GetWindow().SetMouseCursorVisible(false);
+
+            cursor = new Cursor(context);
 
             raahnCar = new Car(context, quadTree);
             raahnCar.SetWidth(Simulator.WORLD_WINDOW_WIDTH * CAR_WIDTH_SCALE);
@@ -42,12 +52,28 @@ namespace RaahnSimulation
 	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, Utils.ROAD_FILE);
 
             AddEntity(raahnCar, 0);
+            AddEntity(cursor, 1);
 
             quadTree.AddEntity(raahnCar);
 	    }
 
 	    public override void Update()
 	    {
+            cursor.Update();
+
+            Vector2i mouseworldPos = Mouse.GetPosition(context.GetWindow());
+
+            if (mouseworldPos.X < 0 || mouseworldPos.Y < 0)
+                panning = false;
+            else if (mouseworldPos.X > context.GetWindowWidth() || mouseworldPos.Y > context.GetWindowHeight())
+                panning = false;
+
+            if (panning)
+            {
+                Utils.Vector2 deltaPos = cursor.GetDeltaPosition();
+                camera.Pan(-deltaPos.x, -deltaPos.y);
+            }
+
             base.Update();
             EntityMap.Update();
             quadTree.Update();
@@ -96,6 +122,14 @@ namespace RaahnSimulation
                     camera.ZoomTo(transform.x, transform.y, (double)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
                 else
                     camera.ZoomTo(transform.x, transform.y, (double)(-e.MouseWheel.Delta) * (1.0 / Camera.MOUSE_SCROLL_ZOOM));
+            }
+
+            if (e.MouseButton.Button == Mouse.Button.Left)
+            {
+                if (e.Type == EventType.MouseButtonPressed)
+                    panning = true;
+                else if (e.Type == EventType.MouseButtonReleased)
+                    panning = false;
             }
 
             EntityMap.UpdateEvent(e);

@@ -41,9 +41,10 @@ namespace RaahnSimulation
 	    {
             bool mouseOutOfBounds = false;
             Vector2i mouseworldPos = Mouse.GetPosition(context.GetWindow());
+
             if (mouseworldPos.X < 0 || mouseworldPos.Y < 0)
                 mouseOutOfBounds = true;
-            else if (mouseworldPos.X > Simulator.WORLD_WINDOW_WIDTH || mouseworldPos.Y > Simulator.WORLD_WINDOW_HEIGHT)
+            else if (mouseworldPos.X > context.GetWindowWidth() || mouseworldPos.Y > context.GetWindowHeight())
                 mouseOutOfBounds = true;
 
             if (entityPanel.Intersects(cursor.aabb.GetBounds()) || mouseOutOfBounds)
@@ -73,15 +74,17 @@ namespace RaahnSimulation
             //Update mapBuilder before checking whether or not to pan.
             mapBuilder.UpdateEvent(e);
 
-            if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
+            if (e.MouseButton.Button == Mouse.Button.Left)
             {
-                if (!entityPanel.Intersects(cursor.aabb.GetBounds())
-                && !mapBuilder.Floating() && context.GetWindowHasFocus())
-                    panning = true;
+                if (e.Type == EventType.MouseButtonPressed)
+                {
+                    if (!entityPanel.Intersects(cursor.aabb.GetBounds())
+                        && !mapBuilder.Floating() && context.GetWindowHasFocus())
+                        panning = true;
+                }
+                else if (e.Type == EventType.MouseButtonReleased)
+                    panning = false;
             }
-
-            if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
-                panning = false;
 
             entityPanel.UpdateEvent(e);
             base.UpdateEvent(e);

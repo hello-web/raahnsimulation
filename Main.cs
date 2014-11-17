@@ -2,7 +2,7 @@ namespace RaahnSimulation
 {
 	static class Program
 	{
-		static void Main(string[] argv)
+		private static int Main(string[] argv)
 		{
 		    Simulator sim = Simulator.Instance();
 		    if (argv.Length > 1)
@@ -12,7 +12,8 @@ namespace RaahnSimulation
 		        if (strValue == 1)
 		            sim.SetHeadLess(true);
 		    }
-		    sim.Execute();
+
+		    return sim.Execute();
 		}
 	}
 }
