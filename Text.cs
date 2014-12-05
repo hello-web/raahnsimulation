@@ -15,6 +15,7 @@ namespace RaahnSimulation
 		protected string text;
 		private double spacing;
 		private double charWidth;
+        private double maxLength;
 		private Utils.Vector2 charTexPos;
 		private Utils.Vector2 charCenter;
 
@@ -27,7 +28,10 @@ namespace RaahnSimulation
 	    {
 	        text = str;
 	        spacing = 1.0;
+            maxLength = 0.0;
+
 	        texture = TextureManager.TextureType.CHAR_MAP;
+
             charTexPos = new Utils.Vector2(0.0, 0.0);
             charCenter = new Utils.Vector2(0.0, 0.0);
             //Initially black.
@@ -57,6 +61,14 @@ namespace RaahnSimulation
 
 	        for (int i = 0; i < text.Length; i++)
 	        {
+                if (maxLength > 0.0)
+                {
+                    double currentWidth = spacing * (i + 1) + charWidth * (1.0 - SPACING_WIDTH_PERCENTAGE);
+
+                    if (currentWidth > maxLength)
+                        break;
+                }
+
 	            char currentChar = text[i];
 
                 //Is the character within the representable character range.
@@ -130,6 +142,11 @@ namespace RaahnSimulation
 	            drawingVec.y = y;
 	        }
 	    }
+
+        public void SetMaxLength(double length)
+        {
+            maxLength = length;
+        }
 
 	    public void SetText(string newText)
 	    {

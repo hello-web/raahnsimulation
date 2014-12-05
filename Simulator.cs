@@ -29,6 +29,8 @@ namespace RaahnSimulation
 
 		public bool running;
         public bool debugging;
+        public int windowDefaultX;
+        public int windowDefaultY;
         //Events are copied.
 		public Queue<Event> eventQueue;
         private bool glInitFailed;
@@ -109,6 +111,10 @@ namespace RaahnSimulation
 
 	    private bool Init()
 	    {
+            //Initialize GTK if needed.
+            if (!headLess)
+                Gtk.Application.Init();
+
 	        //Create size based on monitor resolution.
 	        VideoMode monitor = VideoMode.DesktopMode;
 	        windowWidth = (uint)((double)monitor.Width * Utils.WIDTH_PERCENTAGE);
@@ -118,7 +124,9 @@ namespace RaahnSimulation
 
 	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Default);
 
-	        Vector2i worldPos = new Vector2i((int)((monitor.Width / 2) - (windowWidth / 2)), (int)((monitor.Height / 2) - (windowHeight / 2)));
+            windowDefaultX = (int)((monitor.Width / 2) - (windowWidth / 2));
+            windowDefaultY = (int)((monitor.Height / 2) - (windowHeight / 2));
+	        Vector2i worldPos = new Vector2i(windowDefaultX, windowDefaultY);
 	        simWindow.Position = worldPos;
 
             //Check to make sure OpenGL 1.5 is supported.
@@ -223,6 +231,10 @@ namespace RaahnSimulation
 	        {
 				simWindow.DispatchEvents();
 
+                //Update GTK events.
+                while (Gtk.Application.EventsPending())
+                    Gtk.Application.RunIteration();
+
 	            Update();
 	            RenderFrame();
 
@@ -278,7 +290,7 @@ namespace RaahnSimulation
 
             if (terminalOpen)
                 terminal.Update();
-	    }
+        }
 
 	    private void RenderFrame()
 	    {

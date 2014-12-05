@@ -6,7 +6,6 @@ namespace RaahnSimulation
 {
     public class Button : ClickableEntity
     {
-        //The width is set to the height, so only height is needed.
         private const double CHAR_HEIGHT_PERCENTAGE = 0.8;
 
         private Text label;
@@ -29,6 +28,8 @@ namespace RaahnSimulation
 
             aabb.SetSize(width, height);
 
+            label.SetMaxLength(width);
+
             if (fromCenter)
             {
                 drawingVec.x = x - (width / 2.0);
@@ -43,6 +44,9 @@ namespace RaahnSimulation
             double charHeight = height * CHAR_HEIGHT_PERCENTAGE;
 
             label.SetCharBounds(drawingVec.x + (width / 2.0), drawingVec.y + (height / 2.0), charHeight, charHeight, true);
+
+            if (label.GetWidth() > width)
+                label.SetCharBounds(drawingVec.x, drawingVec.y, charHeight, charHeight, false);
         }
 
         public override void Update()

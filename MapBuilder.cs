@@ -189,9 +189,9 @@ namespace RaahnSimulation
             }
         }
 
-        public void SaveMap()
+        public void SaveMap(string file)
         {
-            XmlTextWriter writer = new XmlTextWriter(Utils.DEFAULT_SAVE_FILE, System.Text.Encoding.UTF8);
+            XmlTextWriter writer = new XmlTextWriter(file, System.Text.Encoding.UTF8);
 
             writer.WriteStartDocument(true);
             writer.Indentation = XML_INDENT_SPACE;

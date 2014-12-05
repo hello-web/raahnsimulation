@@ -31,7 +31,12 @@ namespace RaahnSimulation
 	        //Subtract height to draw from top to bottom instread of bottom to top.
 	        double windowX = (double)(mousePos.X);
 	        double windowY = (double)(context.GetWindowHeight() - mousePos.Y);
-            worldPos.Copy(context.GetCamera().ProjectWindow(windowX, windowY));
+
+            Utils.Vector2 projection = context.GetCamera().ProjectWindow(windowX, windowY);
+            //Center the cursor around the mouse.
+            projection.x -= (width / 2.0);
+            projection.y -= (height / 2.0);
+            worldPos.Copy(projection);
 
 	        if (Mouse.IsButtonPressed(Mouse.Button.Left))
 	        {

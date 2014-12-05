@@ -282,10 +282,16 @@ namespace RaahnSimulation
 		public const char FILE_VALUE_SEPERATOR = ' ';
 		public const string WINDOW_TITLE = "RAAHN Simulation";
         public const string ROAD_FILE = "Data/Maps/Default.xml";
-        public const string DEFAULT_SAVE_FILE = "Data/Maps/OutMap.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-		public const string VERSION_STRING = "Version 2.0.2";
+        public const string SAVE_MAP = "Save Map";
+		public const string VERSION_STRING = "Version 2.1";
+        //Dialog strings.
+        public const string SAVE_FILE = "Choose a file name and location.";
+        public const string SAVE_BUTTON = "Save";
+        public const string CANCEL_BUTTON = "Cancel";
+        //File extensions.
+        public const string MAP_FILE_EXTENSION = ".xml";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";

@@ -5,12 +5,18 @@ namespace RaahnSimulation
 {
 	public class MapState : State
 	{
+        private const double SAVE_BUTTON_WIDTH = 800.0;
+        private const double SAVE_BUTTON_HEIGHT = 150.0;
+        private const double SAVE_BUTTON_X = 2500.0;
+        private const double SAVE_BUTTON_Y = 50.0;
+
 	    private static MapState mapState = new MapState();
 		private bool panning;
 		private Camera camera;
 		private Cursor cursor;
 		private EntityPanel entityPanel;
 		private MapBuilder mapBuilder;
+        private Button saveMap;
 
 	    public MapState()
 	    {
@@ -18,6 +24,7 @@ namespace RaahnSimulation
             camera = null;
 	        entityPanel = null;
 	        mapBuilder = null;
+            saveMap = null;
 	    }
 
 	    public override void Init(Simulator sim)
@@ -34,6 +41,12 @@ namespace RaahnSimulation
 
 	        mapBuilder = new MapBuilder(context, cursor, camera, entityPanel, 0);
 
+            saveMap = new Button(context, Utils.SAVE_MAP);
+            saveMap.SetTransformUsage(false);
+            saveMap.SetBounds(SAVE_BUTTON_X, SAVE_BUTTON_Y, SAVE_BUTTON_WIDTH, SAVE_BUTTON_HEIGHT, false);
+            saveMap.SetOnClickListener(SaveMapOnClick);
+
+            AddEntity(saveMap, 2);
             AddEntity(cursor, 3);
 	    }
 
@@ -95,9 +108,13 @@ namespace RaahnSimulation
 	        base.Draw();
 	    }
 
+        public void Save(string file)
+        {
+            mapBuilder.SaveMap(file);
+        }
+
 	    public override void Clean()
 	    {
-            mapBuilder.SaveMap();
 	        base.Clean();
 	    }
 
@@ -110,5 +127,39 @@ namespace RaahnSimulation
 		{
 			return panning;
 		}
+
+        //Saves the map to the file specified by the user.
+        public static void SaveMapOnClick(Simulator sim)
+        {
+            MapState mapState = MapState.Instance();
+            Window mainWindow = sim.GetWindow();
+
+            string file;
+
+            Gtk.FileChooserDialog saveDialog = new Gtk.FileChooserDialog(Utils.SAVE_FILE, null, Gtk.FileChooserAction.Save);
+            saveDialog.AddButton(Utils.SAVE_BUTTON, Gtk.ResponseType.Ok);
+            saveDialog.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
+
+            //Since SFML.Net and GTK# could not be integrated, only one window
+            //should have focus at a given time, or else things get weird...
+            mainWindow.SetVisible(false);
+
+            if (saveDialog.Run() == (int)Gtk.ResponseType.Ok)
+            {
+                //saveDialog makes sure the Filename has at least some text, so we don't have to check it.
+                if (saveDialog.Filename.EndsWith(Utils.MAP_FILE_EXTENSION))
+                    file = saveDialog.Filename;
+                else
+                    file = saveDialog.Filename + Utils.MAP_FILE_EXTENSION;
+
+                mapState.Save(file);
+            }
+
+            saveDialog.Destroy();
+
+            mainWindow.SetVisible(true);
+            //At least with X11 the window needs to be repositioned.
+            mainWindow.Position = new Vector2i(sim.windowDefaultX, sim.windowDefaultY);
+        }
 	}
 }

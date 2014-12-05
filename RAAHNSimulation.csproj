@@ -9,7 +9,6 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>RaahnSimulation</RootNamespace>
     <AssemblyName>RaahnSimulation</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>false</Optimize>
@@ -64,5 +63,8 @@
     <Reference Include="Tao.OpenGl" />
     <Reference Include="sfmlnet-window-2" />
     <Reference Include="sfmlnet-graphics-2" />
+	<Reference Include="gtk-sharp" />
+    <Reference Include="atk-sharp" />
+    <Reference Include="glib-sharp" />
   </ItemGroup>
 </Project>
