@@ -76,6 +76,30 @@ namespace RaahnSimulation
 
 	    public static void StartSimOnClick(Simulator sim)
 	    {
+            Window mainWindow = sim.GetWindow();
+
+            bool configChoosen = true;
+
+            Gtk.FileChooserDialog mapChooser = new Gtk.FileChooserDialog(Utils.CHOOSE_MAP_FILE, null, Gtk.FileChooserAction.Open);
+            mapChooser.AddButton(Utils.OPEN_BUTTON, Gtk.ResponseType.Ok);
+            mapChooser.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
+
+            mainWindow.SetVisible(false);
+
+            if (mapChooser.Run() == (int)Gtk.ResponseType.Ok)
+                SimState.Instance().mapFile = mapChooser.Filename;
+            else
+                configChoosen = false;
+
+            mapChooser.Destroy();
+
+            mainWindow.SetVisible(true);
+
+            mainWindow.Position = sim.GetDefaultWindowPosition();
+
+            if (!configChoosen)
+                return;
+
 	        sim.RequestStateChange(Simulator.StateChangeType.PUSH, SimState.Instance());
 	    }
 

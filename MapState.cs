@@ -159,7 +159,7 @@ namespace RaahnSimulation
 
             mainWindow.SetVisible(true);
             //At least with X11 the window needs to be repositioned.
-            mainWindow.Position = new Vector2i(sim.windowDefaultX, sim.windowDefaultY);
+            mainWindow.Position = sim.GetDefaultWindowPosition();
         }
 	}
 }

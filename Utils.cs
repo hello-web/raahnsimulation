@@ -281,13 +281,14 @@ namespace RaahnSimulation
 		public const char FILE_COMMENT = '#';
 		public const char FILE_VALUE_SEPERATOR = ' ';
 		public const string WINDOW_TITLE = "RAAHN Simulation";
-        public const string ROAD_FILE = "Data/Maps/Default.xml";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
         public const string SAVE_MAP = "Save Map";
-		public const string VERSION_STRING = "Version 2.1";
+		public const string VERSION_STRING = "Version 2.1.1";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
+        public const string CHOOSE_MAP_FILE = "Choose a map file.";
+        public const string OPEN_BUTTON = "Open";
         public const string SAVE_BUTTON = "Save";
         public const string CANCEL_BUTTON = "Cancel";
         //File extensions.

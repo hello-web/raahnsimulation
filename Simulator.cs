@@ -29,8 +29,6 @@ namespace RaahnSimulation
 
 		public bool running;
         public bool debugging;
-        public int windowDefaultX;
-        public int windowDefaultY;
         //Events are copied.
 		public Queue<Event> eventQueue;
         private bool glInitFailed;
@@ -38,6 +36,8 @@ namespace RaahnSimulation
         private bool terminalOpen;
 		private bool windowHasFocus;
 		private bool stateChangeRequested;
+        private int windowDefaultX;
+        private int windowDefaultY;
 		private uint windowWidth;
 		private uint windowHeight;
 		private long lastTime;
@@ -45,6 +45,7 @@ namespace RaahnSimulation
         private double deltaTime;
 		private List<State> states;
 		private Window simWindow;
+        private Vector2i defaultWindowPosition;
         private Stopwatch stopwatch;
         private Keyboard.Key terminalKey;
 		private Camera camera;
@@ -126,8 +127,8 @@ namespace RaahnSimulation
 
             windowDefaultX = (int)((monitor.Width / 2) - (windowWidth / 2));
             windowDefaultY = (int)((monitor.Height / 2) - (windowHeight / 2));
-	        Vector2i worldPos = new Vector2i(windowDefaultX, windowDefaultY);
-	        simWindow.Position = worldPos;
+	        defaultWindowPosition = new Vector2i(windowDefaultX, windowDefaultY);
+	        simWindow.Position = defaultWindowPosition;
 
             //Check to make sure OpenGL 1.5 is supported.
             string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
@@ -569,6 +570,11 @@ namespace RaahnSimulation
 		{
 			return texMan;
 		}
+
+        public Vector2i GetDefaultWindowPosition()
+        {
+            return defaultWindowPosition;
+        }
 
         public Stopwatch GetStopwatch()
         {

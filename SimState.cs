@@ -14,6 +14,7 @@ namespace RaahnSimulation
 
 	    private static SimState simState = new SimState();
 
+        public string mapFile;
         private bool panning;
         private QuadTree quadTree;
         private Camera camera;
@@ -23,6 +24,7 @@ namespace RaahnSimulation
 
 	    public SimState()
 	    {
+            mapFile = "";
             panning = false;
             quadTree = null;
             camera = null;
@@ -49,7 +51,7 @@ namespace RaahnSimulation
             raahnCar.transformedWorldPos.y = 0.0;
             raahnCar.Update();
 
-	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, Utils.ROAD_FILE);
+	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFile);
 
             AddEntity(raahnCar, 0);
             AddEntity(cursor, 1);
