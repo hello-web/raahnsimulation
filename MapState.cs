@@ -139,6 +139,7 @@ namespace RaahnSimulation
             Gtk.FileChooserDialog saveDialog = new Gtk.FileChooserDialog(Utils.SAVE_FILE, null, Gtk.FileChooserAction.Save);
             saveDialog.AddButton(Utils.SAVE_BUTTON, Gtk.ResponseType.Ok);
             saveDialog.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
+            saveDialog.SetCurrentFolder(Utils.MAP_FOLDER);
 
             //Since SFML.Net and GTK# could not be integrated, only one window
             //should have focus at a given time, or else things get weird...

@@ -5,8 +5,8 @@ namespace RaahnSimulation
 {
 	public class SimState : State
 	{
-		private const double CAR_WIDTH_SCALE = 0.1;
-		private const double CAR_HEIGHT_SCALE = 0.1;
+        private const double CAR_WIDTH = 260.0;
+        private const double CAR_HEIGHT = 160.0;
         private const double HIGHLIGHT_R = 0.0;
         private const double HIGHLIGHT_G = 1.0;
         private const double HIGHLIGHT_B = 0.0;
@@ -45,8 +45,8 @@ namespace RaahnSimulation
             cursor = new Cursor(context);
 
             raahnCar = new Car(context, quadTree);
-            raahnCar.SetWidth(Simulator.WORLD_WINDOW_WIDTH * CAR_WIDTH_SCALE);
-            raahnCar.SetHeight(Simulator.WORLD_WINDOW_HEIGHT * CAR_HEIGHT_SCALE);
+            raahnCar.SetWidth(CAR_WIDTH);
+            raahnCar.SetHeight(CAR_HEIGHT);
             raahnCar.transformedWorldPos.x = 0.0;
             raahnCar.transformedWorldPos.y = 0.0;
             raahnCar.Update();

@@ -83,6 +83,7 @@ namespace RaahnSimulation
             Gtk.FileChooserDialog mapChooser = new Gtk.FileChooserDialog(Utils.CHOOSE_MAP_FILE, null, Gtk.FileChooserAction.Open);
             mapChooser.AddButton(Utils.OPEN_BUTTON, Gtk.ResponseType.Ok);
             mapChooser.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
+            mapChooser.SetCurrentFolder(Utils.MAP_FOLDER);
 
             mainWindow.SetVisible(false);
 

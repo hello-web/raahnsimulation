@@ -284,7 +284,8 @@ namespace RaahnSimulation
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
         public const string SAVE_MAP = "Save Map";
-		public const string VERSION_STRING = "Version 2.1.1";
+        public const string MAP_FOLDER = "Data/Maps";
+		public const string VERSION_STRING = "Version 2.1.2";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_MAP_FILE = "Choose a map file.";

@@ -15,12 +15,12 @@ namespace RaahnSimulation
         private const int RANGE_FINDER_COUNT = 11;
         //1.0 for a line.
         public const double LINE_HEIGHT = 1.0;
+        private const double RANGE_FINDER_LENGTH = 400.0;
         private const double PIE_SLICE_SENSOR_MIN_ANGLE = -90.0;
         private const double PIE_SLICE_SENSOR_ANGLE = 20.0;
         private const double PIE_SLICE_SENSOR_LENGTH = 400.0;
         private const double PIE_SLICE_SENSOR_OFFSET = 0.0;
         //Relative to the car's length.
-        private const double RANGE_FINDER_REALTIVE_LENGTH = 1.25;
         private const double RANGE_FINDER_HIGHEST_ANGLE = 75.0;
         private const double RANGE_FINDER_ANGLE_SPACING = 15.0;
         private const double RANGE_FINDER_COLOR_R = 1.0;
@@ -35,7 +35,6 @@ namespace RaahnSimulation
         private static Mesh line = null;
 
         public List<Entity> entitiesHovering;
-        private double rangeFinderLength;
         private double[] rangeFinderLengths;
         private double[] rangeFinderActivations;
         private List<Entity.EntityType>[] entitiesToDetect;
@@ -75,9 +74,6 @@ namespace RaahnSimulation
             rangeFinderActivations = new double[RANGE_FINDER_COUNT];
             entitiesToDetect = new List<Entity.EntityType>[RANGE_FINDER_COUNT];
 
-            //Initialize to 0, SetWidth takes care of its actual length.
-            rangeFinderLength = 0.0;
-
             for (int i = 0; i < RANGE_FINDER_COUNT; i++)
             {
                 rangeFinderLengths[i] = 0.0;
@@ -111,9 +107,8 @@ namespace RaahnSimulation
         {
             base.SetWidth(w);
 
-            rangeFinderLength = w * RANGE_FINDER_REALTIVE_LENGTH;
             for (int i = 0; i < RANGE_FINDER_COUNT; i++)
-                rangeFinderLengths[i] = rangeFinderLength;
+                rangeFinderLengths[i] = RANGE_FINDER_LENGTH;
         }
 
 	    public override void Update()
@@ -158,7 +153,7 @@ namespace RaahnSimulation
             for (int i = 0; i < RANGE_FINDER_COUNT; i++)
             {
                 //If no intersections are found reset to rangeFinderLength.
-                double nearestEntityDistance = rangeFinderLength;
+                double nearestEntityDistance = RANGE_FINDER_LENGTH;
 
                 for (int j = 0; j < entitiesInBounds.Count; j++)
                 {
@@ -169,8 +164,8 @@ namespace RaahnSimulation
                         double radians = Utils.DegToRad(rangeFinderAngle);
 
                         //Calculate end point with (direction * magnitude) + firstPoint.
-                        double endPointX = (Math.Cos(radians) * rangeFinderLength) + center.x;
-                        double endPointY = (Math.Sin(radians) * rangeFinderLength) + center.y;
+                        double endPointX = (Math.Cos(radians) * RANGE_FINDER_LENGTH) + center.x;
+                        double endPointY = (Math.Sin(radians) * RANGE_FINDER_LENGTH) + center.y;
 
                         Utils.LineSegment rangeFinderLine = new Utils.LineSegment();
                         //All of the range finders are drawn from the center of the car.
@@ -195,7 +190,7 @@ namespace RaahnSimulation
                 }
 
                 rangeFinderLengths[i] = nearestEntityDistance;
-                rangeFinderActivations[i] = (rangeFinderLength - rangeFinderLengths[i]) / rangeFinderLength;
+                rangeFinderActivations[i] = (RANGE_FINDER_LENGTH - rangeFinderLengths[i]) / RANGE_FINDER_LENGTH;
             }
         }
 
