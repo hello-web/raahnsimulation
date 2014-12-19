@@ -284,11 +284,12 @@ namespace RaahnSimulation
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
         public const string SAVE_MAP = "Save Map";
-        public const string MAP_FOLDER = "Data/Maps";
-		public const string VERSION_STRING = "Version 2.1.2";
+        public const string MAP_FOLDER = "Data/Maps/";
+        public const string EXPERIMENT_FOLDER = "Data/Experiments/";
+		public const string VERSION_STRING = "Version 2.1.3";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
-        public const string CHOOSE_MAP_FILE = "Choose a map file.";
+        public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
         public const string OPEN_BUTTON = "Open";
         public const string SAVE_BUTTON = "Save";
         public const string CANCEL_BUTTON = "Cancel";
@@ -299,7 +300,8 @@ namespace RaahnSimulation
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
         public const string MAP_ALREADY_LOADED = "Map already loaded.";
         public const string FILE_NOT_FOUND = "File: {0} not found.";
-        public const string XML_READ_ERROR = "Error while reading XML. The map may not have been created correctly.";
+        public const string MAP_LOAD_ERROR = "The map may not have been created correctly.";
+        public const string XML_READ_ERROR = "Error while reading XML.";
 
 		public static double DegToRad(double deg)
 		{

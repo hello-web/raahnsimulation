@@ -184,6 +184,7 @@ namespace RaahnSimulation
             catch (Exception e)
             {
                 Console.WriteLine(Utils.XML_READ_ERROR);
+                Console.WriteLine(Utils.MAP_LOAD_ERROR);
                 Console.WriteLine(e.Message);
             }
             finally

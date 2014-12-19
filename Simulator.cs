@@ -29,6 +29,7 @@ namespace RaahnSimulation
 
 		public bool running;
         public bool debugging;
+        public bool eventsEnabled;
         //Events are copied.
 		public Queue<Event> eventQueue;
         private bool glInitFailed;
@@ -36,8 +37,6 @@ namespace RaahnSimulation
         private bool terminalOpen;
 		private bool windowHasFocus;
 		private bool stateChangeRequested;
-        private int windowDefaultX;
-        private int windowDefaultY;
 		private uint windowWidth;
 		private uint windowHeight;
 		private long lastTime;
@@ -65,6 +64,7 @@ namespace RaahnSimulation
 	        headLess = false;
             terminalOpen = false;
             debugging = false;
+            eventsEnabled = true;
             //Upon initial creation of the window, some OSes will not raise a GainnedFocus event.
 	        windowHasFocus = true;
 	        stateChangeRequested = false;
@@ -125,8 +125,8 @@ namespace RaahnSimulation
 
 	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Default);
 
-            windowDefaultX = (int)((monitor.Width / 2) - (windowWidth / 2));
-            windowDefaultY = (int)((monitor.Height / 2) - (windowHeight / 2));
+            int windowDefaultX = (int)((monitor.Width / 2) - (windowWidth / 2));
+            int windowDefaultY = (int)((monitor.Height / 2) - (windowHeight / 2));
 	        defaultWindowPosition = new Vector2i(windowDefaultX, windowDefaultY);
 	        simWindow.Position = defaultWindowPosition;
 
@@ -197,7 +197,7 @@ namespace RaahnSimulation
 
             quad = new Mesh(2, Gl.GL_TRIANGLES);
 
-            float[] quadVertices = new float[]
+            float[] quadVertices = 
             {
                 0.0f, 0.0f, 0.0f, 0.0f,
                 1.0f, 0.0f, 1.0f, 0.0f,
@@ -453,6 +453,8 @@ namespace RaahnSimulation
 			Event e = new Event();
 			e.Type = EventType.MouseButtonPressed;
 			e.MouseButton.Button = mbea.Button;
+            e.MouseButton.X = mbea.X;
+            e.MouseButton.Y = mbea.Y;
 			SaveEvent(e);
 		}
 
@@ -461,6 +463,8 @@ namespace RaahnSimulation
 			Event e = new Event();
 			e.Type = EventType.MouseButtonReleased;
 			e.MouseButton.Button = mbea.Button;
+            e.MouseButton.X = mbea.X;
+            e.MouseButton.Y = mbea.Y;
 			SaveEvent(e);
 		}
 
@@ -518,9 +522,13 @@ namespace RaahnSimulation
             Simulator.Instance().running = false;
 		}
 
-		static void SaveEvent(Event e)
+		public static void SaveEvent(Event e)
 		{
 			Simulator s = Simulator.Instance();
+
+            //Only record events if they are enabled by the application.
+            if (!s.eventsEnabled)
+                return;
 			//Process all events but leave keep them in a queue
 	        //to be processed by all entities.
 			s.eventQueue.Enqueue(e);

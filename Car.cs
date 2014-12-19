@@ -12,10 +12,9 @@ namespace RaahnSimulation
 
         private const int PIE_SLICE_SENSOR_COUNT = 9;
         private const int PIE_SLICE_SENSOR_MAX_DETECT_COUNT = 3;
-        private const int RANGE_FINDER_COUNT = 11;
         //1.0 for a line.
         public const double LINE_HEIGHT = 1.0;
-        private const double RANGE_FINDER_LENGTH = 400.0;
+        private const double RANGE_FINDER_LENGTH = 420.0;
         private const double PIE_SLICE_SENSOR_MIN_ANGLE = -90.0;
         private const double PIE_SLICE_SENSOR_ANGLE = 20.0;
         private const double PIE_SLICE_SENSOR_LENGTH = 400.0;
@@ -35,6 +34,7 @@ namespace RaahnSimulation
         private static Mesh line = null;
 
         public List<Entity> entitiesHovering;
+        private int rangeFinderCount;
         private double[] rangeFinderLengths;
         private double[] rangeFinderActivations;
         private List<Entity.EntityType>[] entitiesToDetect;
@@ -54,7 +54,7 @@ namespace RaahnSimulation
             {
                 line = new Mesh(2, Gl.GL_LINES);
 
-                float[] vertices = new float[]
+                float[] vertices = 
                 {
                     0.0f, 0.0f,
                     1.0f, 0.0f
@@ -70,11 +70,13 @@ namespace RaahnSimulation
                 line.Allocate(Gl.GL_STATIC_DRAW);
             }
 
-            rangeFinderLengths = new double[RANGE_FINDER_COUNT];
-            rangeFinderActivations = new double[RANGE_FINDER_COUNT];
-            entitiesToDetect = new List<Entity.EntityType>[RANGE_FINDER_COUNT];
+            rangeFinderCount = 11;
 
-            for (int i = 0; i < RANGE_FINDER_COUNT; i++)
+            rangeFinderLengths = new double[rangeFinderCount];
+            rangeFinderActivations = new double[rangeFinderCount];
+            entitiesToDetect = new List<Entity.EntityType>[rangeFinderCount];
+
+            for (int i = 0; i < rangeFinderCount; i++)
             {
                 rangeFinderLengths[i] = 0.0;
                 rangeFinderActivations[i] = 0.0;
@@ -107,7 +109,7 @@ namespace RaahnSimulation
         {
             base.SetWidth(w);
 
-            for (int i = 0; i < RANGE_FINDER_COUNT; i++)
+            for (int i = 0; i < rangeFinderCount; i++)
                 rangeFinderLengths[i] = RANGE_FINDER_LENGTH;
         }
 
@@ -150,7 +152,7 @@ namespace RaahnSimulation
 
             List<Entity> entitiesInBounds = quadTree.Query(viewBounds);
 
-            for (int i = 0; i < RANGE_FINDER_COUNT; i++)
+            for (int i = 0; i < rangeFinderCount; i++)
             {
                 //If no intersections are found reset to rangeFinderLength.
                 double nearestEntityDistance = RANGE_FINDER_LENGTH;
@@ -215,7 +217,7 @@ namespace RaahnSimulation
 
             Gl.glColor4d(RANGE_FINDER_COLOR_R, RANGE_FINDER_COLOR_G, RANGE_FINDER_COLOR_B, RANGE_FINDER_COLOR_T);
 
-            for (int i = 0; i < RANGE_FINDER_COUNT; i++)
+            for (int i = 0; i < rangeFinderCount; i++)
             {
                 Gl.glPushMatrix();
 

@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Xml.Serialization;
 using SFML.Window;
 
 namespace RaahnSimulation
@@ -80,19 +82,41 @@ namespace RaahnSimulation
 
             bool configChoosen = true;
 
-            Gtk.FileChooserDialog mapChooser = new Gtk.FileChooserDialog(Utils.CHOOSE_MAP_FILE, null, Gtk.FileChooserAction.Open);
-            mapChooser.AddButton(Utils.OPEN_BUTTON, Gtk.ResponseType.Ok);
-            mapChooser.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
-            mapChooser.SetCurrentFolder(Utils.MAP_FOLDER);
-
             mainWindow.SetVisible(false);
 
-            if (mapChooser.Run() == (int)Gtk.ResponseType.Ok)
-                SimState.Instance().mapFile = mapChooser.Filename;
+            Gtk.FileChooserDialog expChooser = new Gtk.FileChooserDialog(Utils.CHOOSE_EXPERIMENT_FILE, null, Gtk.FileChooserAction.Open);
+            expChooser.AddButton(Utils.OPEN_BUTTON, Gtk.ResponseType.Ok);
+            expChooser.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
+            expChooser.SetCurrentFolder(Utils.EXPERIMENT_FOLDER);
+
+            if ((Gtk.ResponseType)expChooser.Run() == Gtk.ResponseType.Ok)
+            {
+                TextReader expReader = new StreamReader(expChooser.Filename);
+
+                try
+                {
+                    XmlSerializer deserializer = new XmlSerializer(typeof(Experiment));
+                    SimState.Instance().experiment = (Experiment)deserializer.Deserialize(expReader);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    configChoosen = false;
+
+                    Gtk.MessageDialog errorDialog = new Gtk.MessageDialog(null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, 
+                                                                          Gtk.ButtonsType.Ok, Utils.XML_READ_ERROR);
+                    errorDialog.Run();
+                    errorDialog.Destroy();
+                }
+                finally
+                {
+                    expReader.Close();
+                }
+            }
             else
                 configChoosen = false;
 
-            mapChooser.Destroy();
+            expChooser.Destroy();
 
             mainWindow.SetVisible(true);
 

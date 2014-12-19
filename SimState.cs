@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 using SFML.Window;
 
 namespace RaahnSimulation
@@ -14,7 +17,8 @@ namespace RaahnSimulation
 
 	    private static SimState simState = new SimState();
 
-        public string mapFile;
+        //Experiment must be initialized outside of SimState.
+        public Experiment experiment;
         private bool panning;
         private QuadTree quadTree;
         private Camera camera;
@@ -24,8 +28,9 @@ namespace RaahnSimulation
 
 	    public SimState()
 	    {
-            mapFile = "";
+            experiment = null;
             panning = false;
+            experiment = null;
             quadTree = null;
             camera = null;
             raahnCar = null;
@@ -51,7 +56,8 @@ namespace RaahnSimulation
             raahnCar.transformedWorldPos.y = 0.0;
             raahnCar.Update();
 
-	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFile);
+            string mapFilePath = Utils.MAP_FOLDER + experiment.mapFile;
+	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
 
             AddEntity(raahnCar, 0);
             AddEntity(cursor, 1);

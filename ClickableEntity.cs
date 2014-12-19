@@ -35,10 +35,23 @@ namespace RaahnSimulation
 	    {
             base.UpdateEvent(e);
 
-	        Vector2i mousePosWindowi = Mouse.GetPosition(context.GetWindow());
+            double x;
+            double y;
+            if (e.Type == EventType.MouseMoved)
+            {
+                x = (double)e.MouseMove.X;
+                y = (double)context.GetWindowHeight() - (double)e.MouseMove.Y;
+            }
+            else if (e.Type == EventType.MouseButtonPressed)
+            {
+                x = (double)e.MouseButton.X;
+                y = (double)context.GetWindowHeight() - (double)e.MouseButton.Y;
+            }
+            else
+                return;
 
             Utils.Vector2 comparisonVec;
-	        Utils.Vector2 mousePosWindowd = new Utils.Vector2((double)mousePosWindowi.X, (double)context.GetWindowHeight() - (double)mousePosWindowi.Y);
+            Utils.Vector2 mousePosWindowd = new Utils.Vector2(x, y);
             comparisonVec = context.GetCamera().ProjectWindow(mousePosWindowd);
 
             if (drawingVec == transformedWorldPos)
