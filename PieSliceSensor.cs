@@ -28,14 +28,12 @@ namespace RaahnSimulation
         private List<ushort> indices;
         private List<Entity.EntityType> entitiesToDetect;
         private List<Entity> entitiesContained;
-        private PieSliceSensorGroup sensorGroup;
         private Car robot;
         private Utils.Vector3 color;
 
-        public PieSliceSensor(Simulator sim, PieSliceSensorGroup group, Car car)
+        public PieSliceSensor(Simulator sim, Car car)
         {
             robot = car;
-            sensorGroup = group;
 
             maxEntitiesToDetect = 0;
             angleBetween = 0.0;
@@ -105,16 +103,16 @@ namespace RaahnSimulation
             return activation;
         }
 
-        public void Configure(int detectCount, double angleBetweenLines, double lineLength, double angleOffset, double lineOffset)
+        public void Configure(int detectCount, double angleOffset, double angleBetweenLines, double lineLength, double lineOffset)
         {
             //Make sure the angle given is in [0, 360]
             if (angleBetweenLines < 0.0 || angleBetweenLines > 360.0)
                 return;
 
             maxEntitiesToDetect = detectCount;
+            angle = angleOffset;
             angleBetween = angleBetweenLines;
             radius = lineLength;
-            angle = angleOffset;
             offsetLength = lineOffset;
 
             //If this function has already been called, get rid of the old curve points.
@@ -193,8 +191,8 @@ namespace RaahnSimulation
         {
             Utils.Vector2 robotCenter = robot.GetCenter();
 
-            sensorGroup.SetSharedMesh(curvePoints.ToArray(), indices.ToArray());
-            sensorGroup.MakeSharedMeshCurrent();
+            PieSliceSensorGroup.SetSharedMesh(curvePoints.ToArray(), indices.ToArray());
+            PieSliceSensorGroup.MakeSharedMeshCurrent();
 
             Gl.glDisable(Gl.GL_TEXTURE_2D);
 
@@ -209,7 +207,7 @@ namespace RaahnSimulation
             Gl.glTranslated(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
             Gl.glScaled(radius, radius, Utils.DISCARD_Z_SCALE);
 
-            Gl.glDrawElements(sensorGroup.GetSharedRenderMode(), sensorGroup.GetSharedIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+            Gl.glDrawElements(PieSliceSensorGroup.GetSharedRenderMode(), PieSliceSensorGroup.GetSharedIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
 
             Gl.glPopMatrix();
 

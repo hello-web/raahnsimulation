@@ -50,6 +50,8 @@ namespace RaahnSimulation
             cursor = new Cursor(context);
 
             raahnCar = new Car(context, quadTree);
+            if (experiment != null)
+                raahnCar.LoadConfig(Utils.SENSOR_FOLDER + experiment.sensorFile);
             raahnCar.SetWidth(CAR_WIDTH);
             raahnCar.SetHeight(CAR_HEIGHT);
             raahnCar.transformedWorldPos.x = 0.0;

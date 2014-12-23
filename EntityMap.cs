@@ -33,7 +33,6 @@ namespace RaahnSimulation
         }
 
 		public const int UNIQUE_ROAD_COUNT = 2;
-        public const string NULL_ELEMENT = "";
         public static readonly string[] XML_ELEMENTS = 
         {
             "Map", "Robot", "Entity", "X", "Y", "Angle", "Texture", "Type"
@@ -108,7 +107,7 @@ namespace RaahnSimulation
             bool robotHeaderFound = false;
             bool entityHeaderFound = false;
 
-            string currentElement = "";
+            string currentElement = Utils.NULL_ELEMENT;
             List<EntityInfo> newEntities = new List<EntityInfo>();
 
             try
@@ -151,7 +150,7 @@ namespace RaahnSimulation
                             if (!mapHeaderFound)
                                 break;
 
-                            if (!currentElement.Equals(NULL_ELEMENT) && xmlReader.Value.Length > 0)
+                            if (!currentElement.Equals(Utils.NULL_ELEMENT) && xmlReader.Value.Length > 0)
                             {
                                 if (robotHeaderFound)
                                     HandleCarAttribute(currentElement, xmlReader.Value);
@@ -163,7 +162,7 @@ namespace RaahnSimulation
                         }
                         case XmlNodeType.EndElement:
                         {
-                            currentElement = NULL_ELEMENT;
+                            currentElement = Utils.NULL_ELEMENT;
 
                             if (xmlReader.Name.Equals(XML_ELEMENTS[(int)XMLElement.MAP]))
                                 mapHeaderFound = false;

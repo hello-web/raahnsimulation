@@ -57,6 +57,8 @@
     <Compile Include="PieSliceSensor.cs" />
     <Compile Include="PieSliceSensorGroup.cs" />
 	<Compile Include="Experiment.cs" />
+    <Compile Include="RangeFinderGroup.cs" />
+    <Compile Include="SensorConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,9 +1,35 @@
 using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using Tao.OpenGl;
 
 namespace RaahnSimulation
 {
+    [XmlRoot("PieSliceSensorGroup")]
+    public class PieSliceSensorGroupConfig
+    {
+        [XmlElement("Count")]
+        public int count;
+
+        [XmlElement("MaxDetection")]
+        public int maxDetection;
+
+        [XmlElement("AngleOffset")]
+        public double angleOffset;
+
+        [XmlElement("AngleBetween")]
+        public double angleBetween;
+
+        [XmlElement("OuterRadius")]
+        public double outerRadius;
+
+        [XmlElement("InnerRadius")]
+        public double innerRadius;
+
+        [XmlElement("DetectEntity")]
+        public string[] entitiesToDetect;
+    }
+
     public class PieSliceSensorGroup
     {
         //360 degree maximum, 2 coords per degree, plus 2 coords for the center of the sensor.
@@ -15,7 +41,7 @@ namespace RaahnSimulation
         private Simulator context;
         private Car robot;
         //Shared mesh is used for drawing the curve points of each pie slice.
-        private Mesh sharedMesh;
+        private static Mesh sharedMesh;
         private QuadTree quadTree;
 
         public PieSliceSensorGroup(Simulator sim, Car car, QuadTree tree)
@@ -30,51 +56,63 @@ namespace RaahnSimulation
             sensors = new List<PieSliceSensor>();
         }
 
-        public int GetSensorCount()
+        public static void Clean()
         {
-            return sensors.Count;
+            if (sharedMesh != null)
+            {
+                if (sharedMesh.Allocated())
+                    sharedMesh.Free();
+            }
         }
 
-        public int GetSharedRenderMode()
+        public static int GetSharedRenderMode()
         {
             return sharedMesh.GetRenderMode();
         }
 
-        public int GetSharedIndexCount()
+        public static int GetSharedIndexCount()
         {
             return sharedMesh.GetIndexCount();
         }
 
-        public void AddSensors(int sensorCount)
-        {
-            for (int i = 0; i < sensorCount; i++)
-                sensors.Add(new PieSliceSensor(context, this, robot));
-        }
-
-        public void SetSharedMesh(float[] vertices, ushort[] indices)
+        public static void SetSharedMesh(float[] vertices, ushort[] indices)
         {
             sharedMesh.SetVertices(vertices, false);
             sharedMesh.SetIndices(indices);
             sharedMesh.Update();
         }
 
-        public void MakeSharedMeshCurrent()
+        public static void MakeSharedMeshCurrent()
         {
             sharedMesh.MakeCurrent();
         }
 
-        public void ConfigureSensor(int sensorIndex, int detectCount, double angleBetweenLines, double lengthOfLine, double angleOffset, double lineOffset)
+        public int GetSensorCount()
         {
-            //Make sure the sensor index is valid.
-            if (sensors.Count - 1 < sensorIndex)
-                return;
-
-            sensors[sensorIndex].Configure(detectCount, angleBetweenLines, lengthOfLine, angleOffset, lineOffset);
+            return sensors.Count;
         }
 
-        public void AddEntityToDetect(int sensorIndex, Entity.EntityType type)
+        public void AddSensors(int sensorCount)
         {
-            sensors[sensorIndex].AddEntityToDetect(type);
+            for (int i = 0; i < sensorCount; i++)
+                sensors.Add(new PieSliceSensor(context, robot));
+        }
+
+        public void ConfigureSensors(int detectCount, double angleOffset, double angleBetweenLines, double lengthOfLine, double lineOffset)
+        {
+            double sensorAngleOffset = angleOffset;
+
+            for (int i = 0; i < sensors.Count; i++)
+            {
+                sensors[i].Configure(detectCount, sensorAngleOffset, angleBetweenLines, lengthOfLine, lineOffset);
+                sensorAngleOffset += angleBetweenLines;
+            }
+        }
+
+        public void AddEntityToDetect(Entity.EntityType type)
+        {
+            for (int i = 0; i < sensors.Count; i++)
+                sensors[i].AddEntityToDetect(type);
         }
 
         public void Update()

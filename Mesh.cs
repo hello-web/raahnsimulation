@@ -148,6 +148,11 @@ namespace RaahnSimulation
             currentMesh = null;
         }
 
+        public bool Allocated()
+        {
+            return allocated;
+        }
+
         //Returns false if failed to free.
         public bool Free()
         {

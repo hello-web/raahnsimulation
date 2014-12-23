@@ -280,13 +280,15 @@ namespace RaahnSimulation
 
 		public const char FILE_COMMENT = '#';
 		public const char FILE_VALUE_SEPERATOR = ' ';
+        public const string NULL_ELEMENT = "";
 		public const string WINDOW_TITLE = "RAAHN Simulation";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
         public const string SAVE_MAP = "Save Map";
         public const string MAP_FOLDER = "Data/Maps/";
+        public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
-		public const string VERSION_STRING = "Version 2.1.3";
+		public const string VERSION_STRING = "Version 2.2";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
@@ -301,6 +303,7 @@ namespace RaahnSimulation
         public const string MAP_ALREADY_LOADED = "Map already loaded.";
         public const string FILE_NOT_FOUND = "File: {0} not found.";
         public const string MAP_LOAD_ERROR = "The map may not have been created correctly.";
+        public const string CONFIG_LOAD_ERROR = "The sensor configuration may not have been created correctly.";
         public const string XML_READ_ERROR = "Error while reading XML.";
 
 		public static double DegToRad(double deg)

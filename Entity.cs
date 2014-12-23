@@ -13,6 +13,11 @@ namespace RaahnSimulation
             ROAD = 0
         };
 
+        public static readonly string[] ENTITY_TYPE_STRINGS = 
+        {
+            "Road"
+        };
+
 		public const double ROTATE_SPEED = 90.0;
         public const double DEFAULT_COLOR_R = 1.0;
         public const double DEFAULT_COLOR_G = 1.0;
@@ -86,6 +91,27 @@ namespace RaahnSimulation
 	    {
 
 	    }
+
+        public static string GetStringFromType(EntityType entityType)
+        {
+            int typeInt = (int)entityType;
+
+            if (typeInt > 0 && typeInt < ENTITY_TYPE_STRINGS.Length)
+                return ENTITY_TYPE_STRINGS[(int)entityType];
+            else
+                return null;
+        }
+
+        public static EntityType GetTypeFromString(string typeString)
+        {
+            for (int i = 0; i < ENTITY_TYPE_STRINGS.Length; i++)
+            {
+                if (typeString.Equals(ENTITY_TYPE_STRINGS[i]))
+                    return (EntityType)i;
+            }
+
+            return EntityType.NONE;
+        }
 
 	    public virtual void Update()
 	    {
