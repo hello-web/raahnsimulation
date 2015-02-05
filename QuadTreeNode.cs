@@ -91,17 +91,6 @@ namespace RaahnSimulation
             }
         }
 
-        public void Remove(Entity occupant)
-        {
-            occupants.Remove(occupant);
-
-            //If enough of the occupants within the node move
-            //that are not within sub nodes, then Consolidate
-            //will be called anyway.
-            if (GetOccupantCount() < MIN_ENTITY_COUNT && hasSubNodes)
-                Consolidate();
-        }
-
         public void Query(AABB region, List<Entity> occupantsInRegion)
         {
             if (nodeBounds.Intersects(region.GetBounds()))
@@ -293,6 +282,18 @@ namespace RaahnSimulation
 
                 Gl.glPopMatrix();
             }
+        }
+
+        //Used internally to remove an element known in the node.
+        private void Remove(Entity occupant)
+        {
+            occupants.Remove(occupant);
+
+            //If enough of the occupants within the node move
+            //that are not within sub nodes, then Consolidate
+            //will be called anyway.
+            if (GetOccupantCount() < MIN_ENTITY_COUNT && hasSubNodes)
+                Consolidate();
         }
     }
 }
