@@ -63,11 +63,34 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
-    <Reference Include="Tao.OpenGl" />
-	<Reference Include="gtk-sharp" />
-    <Reference Include="atk-sharp" />
-	<Reference Include="gdk-sharp" />
-    <Reference Include="glib-sharp" />
-	<Reference Include="gtkglarea-sharp" />
+    <Reference Include="Tao.OpenGl">
+      <Package>tao-opengl</Package>
+    </Reference>
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Private>False</Private>
+      <Package>gtk-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Private>False</Private>
+      <Package>gtk-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Private>False</Private>
+      <Package>gtk-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Private>False</Private>
+      <Package>glib-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="gtkglarea-sharp, Version=0.0.3.0, Culture=neutral, PublicKeyToken=7df758c0fb49fe62">
+      <Private>False</Private>
+      <Package>gtkglarea-sharp</Package>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\raahn\RAAHN.csproj">
+      <Project>{AF10CDD6-65F7-4A8B-B806-4A8E2892C08D}</Project>
+      <Name>RAAHN</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
