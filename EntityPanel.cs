@@ -1,43 +1,47 @@
 using System;
 using System.Collections.Generic;
 using Tao.OpenGl;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public class EntityPanel : Updateable
+	public class EntityPanel
 	{
-        private const uint PANEL_OPTION_COUNT = 2;
+        private const uint PANEL_OPTION_COUNT = 1;
 
-        private const double PANEL_ITEM_OFFSET_X = 288.0;
-        private const double PANEL_ITEM_OFFSET_Y = 54.0;
-		private const double PANEL_SPACING = 192.0;
-        private const double PANEL_HEIGHT_SPACE = 162.0;
-        private const double TRASH_WIDTH = 307.2;
-        private const double TRASH_HEIGHT = 345.6;
+        private const double PANEL_ITEM_OFFSET_X = 300.0;
+        private const double PANEL_ITEM_OFFSET_Y = 50.0;
+        private const double PANEL_OPTION_Y = 350.0;
+		private const double PANEL_SPACING = 200.0;
+        private const double PANEL_HEIGHT_SPACE = 525.0;
+        private const double TRASH_WIDTH = 300.0;
+        private const double TRASH_HEIGHT = 350.0;
 
-        private const string P0 = "Roads";
-        private const string P1 = "Obstacles";
+        private const string P0 = "Wall";
 
-        private static readonly string[] PANEL_OPTIONS = { P0, P1 };
+        private static readonly string[] PANEL_OPTIONS = { P0 };
 
-		private bool[] intersections;
-		private List<Road> items;
+        private uint itemIndex;
+		private List<List<ColorableEntity>> items;
         private Simulator context;
         private State currentState;
 		private Cursor cursor;
+        private Entity selectedEntity;
         private ToggleText panelOption;
         private Graphic background;
         private Graphic trash;
 
-	    public EntityPanel(Simulator sim, Cursor c, Camera cam, int layerIndex)
+	    public EntityPanel(Simulator sim, Cursor c, Camera cam, uint layerIndex)
 	    {
             context = sim;
 	        cursor = c;
+            itemIndex = 0;
+            selectedEntity = null;
             currentState = context.GetState();
 
-            items = new List<Road>();
-			intersections = new bool[EntityMap.UNIQUE_ROAD_COUNT];
+            items = new List<List<ColorableEntity>>();
+
+            for (int i = 0; i < PANEL_OPTION_COUNT; i++)
+                items.Add(new List<ColorableEntity>());
 
             background = new Graphic(context);
             background.SetTransformUsage(false);
@@ -45,35 +49,21 @@ namespace RaahnSimulation
             background.worldPos.x = 0.0;
             background.transformedWorldPos.y = 0.0;
 
-	        Road road;
-
-	        for (int i = 0; i < EntityMap.UNIQUE_ROAD_COUNT; i++)
-	        {
-	            road = new Road(context);
-    
-	            road.SetTransformUsage(false);
-
-				road.worldPos.x = PANEL_ITEM_OFFSET_X + (i * (Road.ROAD_DIMENSION + PANEL_SPACING));
-	            road.worldPos.y = PANEL_ITEM_OFFSET_Y;
-				road.SetTexture((TextureManager.TextureType)(TextureManager.ROAD_INDEX_OFFSET + i));
-	            items.Add(road);
-	            intersections[i] = false;
-	        }
-
             double charWidth = Text.CHAR_DEFAULT_WIDTH;
             double charHeight = Text.CHAR_DEFAULT_HEIGHT;
 
             panelOption = new ToggleText(context, PANEL_OPTIONS[0]);
             panelOption.SetTransformUsage(false);
-            panelOption.SetCharBounds(items[0].worldPos.x, items[0].worldPos.y + items[0].GetHeight(), charWidth, charHeight, false);
+            panelOption.SetCharBounds(PANEL_ITEM_OFFSET_X, PANEL_OPTION_Y, charWidth, charHeight, false);
             panelOption.aabb.SetSize(panelOption.GetWidth(), panelOption.GetHeight());
+            panelOption.SetOnClickListener(PanelOptionOnClick);
 
             for (uint i = 1; i < PANEL_OPTION_COUNT; i++)
                 panelOption.AddString(PANEL_OPTIONS[i]);
             panelOption.Update();
 
             background.SetWidth(Simulator.WORLD_WINDOW_WIDTH);
-            background.SetHeight(Road.ROAD_DIMENSION + panelOption.GetHeight() + PANEL_HEIGHT_SPACE);
+            background.SetHeight(PANEL_HEIGHT_SPACE);
 
             //Make the bottom of the visible map equivalent to the bottom of the map in the simulation.
             cam.Pan(0.0, -background.GetHeight());
@@ -92,35 +82,52 @@ namespace RaahnSimulation
             trash.worldPos.y = yBorderOffset;
 
             currentState.AddEntity(background, layerIndex);
-            for (int i = 0; i < EntityMap.UNIQUE_ROAD_COUNT; i++)
-                currentState.AddEntity(items[i], layerIndex);
+
+            for (int x = 0; x < items.Count; x++)
+            {
+                for (int y = 0; y < items[x].Count; y++)
+                    currentState.AddEntity(items[x][y], layerIndex);
+            }
+
             currentState.AddEntity(panelOption, layerIndex);
             currentState.AddEntity(trash, layerIndex);
 	    }
 
 	    ~EntityPanel()
 	    {
-	        while (items.Count > 0)
-			{
-	            items.RemoveAt(items.Count - 1);
-	        }
+            for (int i = 0; i < items.Count; i++)
+                items[i].Clear();
+
+	        items.Clear();
 	    }
 
 	    public void Update()
 	    {
-            for (int i = 0; i < items.Count; i++)
-            {
-                intersections[i] = items[i].Intersects(cursor.aabb.GetBounds());
-                if (intersections[i])
-                    items[i].SetColor(0.0, 0.0, 1.0, 0.85);
-                else
-                    items[i].SetColor(1.0, 1.0, 1.0, 1.0);
-            }
+
 	    }
 
         public void UpdateEvent(Event e)
         {
+            if (e.type == Gdk.EventType.ButtonPress)
+            {
+                selectedEntity = null;
 
+                for (int x = 0; x < items.Count; x++)
+                {
+                    for (int y = 0; y < items[x].Count; y++)
+                    {
+                        if (items[x][y].Intersects(cursor.aabb.GetBounds()))
+                        {
+                            items[x][y].SetColor(0.0, 0.0, 1.0, 0.85);
+
+                            if (e.button == Utils.GTK_BUTTON_LEFT)
+                                selectedEntity = items[x][y];
+                        }
+                        else
+                            items[x][y].SetColor(1.0, 1.0, 1.0, 1.0);
+                    }
+                }
+            }
         }
 
 	    public bool Intersects(double x, double y)
@@ -149,31 +156,36 @@ namespace RaahnSimulation
             return trash;
         }
 
-		public int GetSelectedEntity()
+		public Entity GetSelectedEntity()
 		{
-			//Return -1 for no selected item.
-			if (Mouse.IsButtonPressed(Mouse.Button.Left))
-			{
-				for (int i = 0; i < EntityMap.UNIQUE_ROAD_COUNT; i++)
-				{
-					if (intersections[i])
-						return i;
-				}
-			}
-			return -1;
+			return selectedEntity;
 		}
+
 		public Utils.Vector2 GetDist(double x, double y, Camera cam)
 		{
-			int index = GetSelectedEntity();
-			if (index == -1)
+			if (selectedEntity == null)
 				return new Utils.Vector2(0.0, 0.0);
 
             double zoom = cam.GetZoom();
 
-            double distX = (x - items[index].transformedWorldPos.x) * zoom;
-			double distY = (y - items[index].transformedWorldPos.y) * zoom;
+            double distX = (x - selectedEntity.transformedWorldPos.x) * zoom;
+			double distY = (y - selectedEntity.transformedWorldPos.y) * zoom;
 
             return new Utils.Vector2(distX, distY);
 		}
+
+        private void PanelOptionOnClick(Simulator sim)
+        {
+            for (uint i = 0; i < items[(int)itemIndex].Count; i++)
+                items[(int)itemIndex][(int)i].visible = false;
+
+            if (itemIndex < items.Count - 1)
+                itemIndex++;
+            else
+                itemIndex = 0;
+
+            for (uint i = 0; i < items[(int)itemIndex].Count; i++)
+                items[(int)itemIndex][(int)i].visible = true;
+        }
 	}
 }

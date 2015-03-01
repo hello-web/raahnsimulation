@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Tao.OpenGl;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
@@ -19,18 +18,22 @@ namespace RaahnSimulation
             layers.Add(new LinkedList<Entity>());
 	    }
 
-        public void AddEntity(Entity entity, int layerIndex)
+        public void AddEntity(Entity entity, uint layerIndex)
         {
-            int layer = layerIndex + 1;
+            uint layer = layerIndex + 1;
+
             if (layer > layers.Count)
             {
-                for (int i = 0; i < layer; i++)
+                int layersNeeded = (int)layer - layers.Count;
+
+                for (int i = 0; i < layersNeeded; i++)
                     layers.Add(new LinkedList<Entity>());
             }
-            layers[layerIndex].AddLast(entity);
+
+            layers[(int)layerIndex].AddLast(entity);
         }
 
-        public void ChangeLayer(Entity entity, int newLayerIndex)
+        public void ChangeLayer(Entity entity, uint newLayerIndex)
         {
             bool shouldBreak = false;
             bool removed = false;

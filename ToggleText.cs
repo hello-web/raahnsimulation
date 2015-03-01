@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
@@ -40,6 +39,7 @@ namespace RaahnSimulation
 	            toggleIndex++;
 	        else
 	            toggleIndex = 0;
+
 	        SetText(toggleStrings[toggleIndex]);
 	    }
 	}

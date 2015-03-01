@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
-using System.Globalization;
 using Tao.OpenGl;
-using SFML.Window;
+using Gtk;
 
 namespace RaahnSimulation
 {
@@ -18,6 +16,8 @@ namespace RaahnSimulation
 			CHANGE = 2
 		}
 
+        public const uint DEFAULT_WINDOW_WIDTH = 800;
+        public const uint DEFAULT_WINDOW_HEIGHT = 600;
         //Scaling down is usually better, if it even matters in this context.
         public const double WORLD_WINDOW_WIDTH = 3840.0;
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
@@ -31,27 +31,31 @@ namespace RaahnSimulation
         public bool debugging;
         public bool eventsEnabled;
         //Events are copied.
-		public Queue<Event> eventQueue;
         private bool glInitFailed;
 		private bool headLess;
-        private bool terminalOpen;
 		private bool windowHasFocus;
+        private bool leftMouseButtonDown;
 		private bool stateChangeRequested;
+        //Some key states.
+        private bool leftKeyDown;
+        private bool rightKeyDown;
+        private bool upKeyDown;
+        private bool downKeyDown;
 		private uint windowWidth;
 		private uint windowHeight;
 		private long lastTime;
 		private long curTime;
         private double deltaTime;
 		private List<State> states;
+        private Queue<Event> eventQueue;
 		private Window simWindow;
-        private Vector2i defaultWindowPosition;
+        private GLWidget mainGLWidget;
         private Stopwatch stopwatch;
-        private Keyboard.Key terminalKey;
 		private Camera camera;
-        private Terminal terminal;
 		private TextureManager texMan;
 		private State requestedState;
 		private StateChangeType changeType;
+        private Gdk.Cursor blankCursor;
 
 	    public Simulator()
 	    {
@@ -62,19 +66,18 @@ namespace RaahnSimulation
 	        running = true;
             glInitFailed = false;
 	        headLess = false;
-            terminalOpen = false;
             debugging = false;
             eventsEnabled = true;
             //Upon initial creation of the window, some OSes will not raise a GainnedFocus event.
 	        windowHasFocus = true;
+            leftMouseButtonDown = false;
 	        stateChangeRequested = false;
 
-            terminalKey = Keyboard.Key.F1;
 	        requestedState = null;
 	        changeType = StateChangeType.NONE;
             stopwatch = new Stopwatch();
 			states = new List<State>();
-			eventQueue = new Queue<Event>();
+            eventQueue = new Queue<Event>();
 	        texMan = new TextureManager();
 	    }
 
@@ -112,62 +115,77 @@ namespace RaahnSimulation
 
 	    private bool Init()
 	    {
-            //Initialize GTK if needed.
-            if (!headLess)
-                Gtk.Application.Init();
+            Application.Init();
 
-	        //Create size based on monitor resolution.
-	        VideoMode monitor = VideoMode.DesktopMode;
-	        windowWidth = (uint)((double)monitor.Width * Utils.WIDTH_PERCENTAGE);
-	        windowHeight = (uint)((double)monitor.Height * Utils.HEIGHT_PERCENTAGE);
+	        simWindow = new Window(WindowType.Toplevel);
+            simWindow.Title = Utils.WINDOW_TITLE;
+
+            //Create size based on monitor resolution.
+            windowWidth = (uint)((double)simWindow.Screen.Width * Utils.SCREEN_WIDTH_PERCENTAGE);
+            windowHeight = (uint)((double)simWindow.Screen.Height * Utils.SCREEN_HEIGHT_PERCENTAGE);
+
+            simWindow.Resize((int)windowWidth, (int)windowHeight);
+            simWindow.SetPosition(WindowPosition.Center);
 
             camera = new Camera(this);
 
-	        simWindow = new Window(new VideoMode(windowWidth, windowHeight), Utils.WINDOW_TITLE, Styles.Default);
+            //Add some event signaling.
+            simWindow.Events |= Gdk.EventMask.ButtonPressMask | Gdk.EventMask.ButtonReleaseMask 
+                             | Gdk.EventMask.PointerMotionMask | Gdk.EventMask.ScrollMask | Gdk.EventMask.StructureMask;
 
-            int windowDefaultX = (int)((monitor.Width / 2) - (windowWidth / 2));
-            int windowDefaultY = (int)((monitor.Height / 2) - (windowHeight / 2));
-	        defaultWindowPosition = new Vector2i(windowDefaultX, windowDefaultY);
-	        simWindow.Position = defaultWindowPosition;
+            //Add event handlers.
+            simWindow.ConfigureEvent += OnConfigure;
+            simWindow.KeyPressEvent += OnKeyPress;
+            simWindow.KeyReleaseEvent += OnKeyRelease;
+            simWindow.ButtonPressEvent += OnButtonPress;
+            simWindow.ButtonReleaseEvent += OnButtonRelease;
+            simWindow.MotionNotifyEvent += OnMotionNotify;
+            simWindow.ScrollEvent += OnScroll;
+            simWindow.FocusInEvent += OnFocusIn;
+            simWindow.FocusOutEvent += OnFocusOut;
+            simWindow.DeleteEvent += OnDelete;
 
+            Gdk.Pixmap blank = new Gdk.Pixmap(null, 1, 1, 1);
+            blankCursor = new Gdk.Cursor(blank, blank, Gdk.Color.Zero, Gdk.Color.Zero, 0, 0);
+
+            mainGLWidget = new GLWidget(InitGraphics, RenderFrame, ResizeFrame);
+
+            simWindow.Add(mainGLWidget);
+
+            simWindow.Show();
+
+            //Calling this should invoke InitGraphics.
+            mainGLWidget.Show();
+
+            if (glInitFailed)
+                return false;
+
+	        return true;
+	    }
+
+        private void InitGraphics()
+        {
             //Check to make sure OpenGL 1.5 is supported.
             string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
             Console.WriteLine("GL Version " + glVersion);
+
             if (double.Parse(glVersion) < Utils.MIN_GL_VERSION)
             {
                 glInitFailed = true;
                 Console.WriteLine(Utils.GL_VERSION_UNSUPPORTED);
-                return false;
+                return;
             }
-
-	        //Disable multiple keydown events from
-	        //occuring when a key is held down.
-	        simWindow.SetKeyRepeatEnabled(false);
-
-			simWindow.Resized += new EventHandler<SizeEventArgs>(OnResized);
-			simWindow.KeyPressed += new EventHandler<KeyEventArgs>(OnKeyPressed);
-			simWindow.KeyReleased += new EventHandler<KeyEventArgs>(OnKeyReleased);
-			simWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
-			simWindow.MouseButtonReleased += new EventHandler<MouseButtonEventArgs>(OnMouseButtonReleased);
-            simWindow.MouseMoved += new EventHandler<MouseMoveEventArgs>(OnMouseMoved);
-            simWindow.TextEntered += new EventHandler<TextEventArgs>(OnTextEntered);
-            simWindow.MouseWheelMoved += new EventHandler<MouseWheelEventArgs>(OnMouseWheelMoved);
-			simWindow.GainedFocus += new EventHandler(OnGainnedFocus);
-			simWindow.LostFocus += new EventHandler(OnLostFocus);
-			simWindow.Closed += new EventHandler(OnClosed);
-
-			simWindow.SetActive();
 
             Gl.glClearColor(Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, 0.0f);
 
-	        //Enable blending for alpha values.
-	        Gl.glEnable(Gl.GL_BLEND);
-	        Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
+            //Enable blending for alpha values.
+            Gl.glEnable(Gl.GL_BLEND);
+            Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
 
             if (!texMan.LoadTextures())
             {
                 Console.WriteLine(Utils.TEXTURE_LOAD_FAILED);
-                return false;
+                return;
             }
 
             Gl.glEnableClientState(Gl.GL_VERTEX_ARRAY);
@@ -175,7 +193,7 @@ namespace RaahnSimulation
 
             lineRect = new Mesh(2, Gl.GL_LINES);
 
-            float[] lsVertices = new float[]
+            float[] lrVertices = new float[]
             {
                 0.0f, 0.0f,
                 1.0f, 0.0f,
@@ -183,7 +201,7 @@ namespace RaahnSimulation
                 1.0f, 1.0f
             };
 
-            ushort[] lsIndices =
+            ushort[] lrIndices =
             {
                 0, 1,
                 1, 3,
@@ -191,8 +209,8 @@ namespace RaahnSimulation
                 2, 0
             };
 
-            lineRect.SetVertices(lsVertices, false);
-            lineRect.SetIndices(lsIndices);
+            lineRect.SetVertices(lrVertices, false);
+            lineRect.SetIndices(lrIndices);
             lineRect.Allocate(Gl.GL_STATIC_DRAW);
 
             quad = new Mesh(2, Gl.GL_TRIANGLES);
@@ -205,11 +223,11 @@ namespace RaahnSimulation
                 1.0f, 1.0f, 1.0f, 1.0f
             };
 
-	        ushort[] quadIndices =
-	        {
-	            0, 1, 2,
-	            2, 3, 1
-	        };
+            ushort[] quadIndices =
+            {
+                0, 1, 2,
+                2, 3, 1
+            };
 
             quad.SetVertices(quadVertices, true);
             quad.SetIndices(quadIndices);
@@ -217,12 +235,8 @@ namespace RaahnSimulation
             quad.Allocate(Gl.GL_STATIC_DRAW);
             quad.MakeCurrent();
 
-            terminal = new Terminal(this);
-
-	        Gl.glViewport(0, 0, (int)windowWidth, (int)windowHeight);
-
-	        return true;
-	    }
+            Gl.glViewport(0, 0, (int)windowWidth, (int)windowHeight);
+        }
 
 	    private void MainLoop()
 	    {
@@ -230,14 +244,12 @@ namespace RaahnSimulation
 
 	        while (running)
 	        {
-				simWindow.DispatchEvents();
-
                 //Update GTK events.
-                while (Gtk.Application.EventsPending())
-                    Gtk.Application.RunIteration();
+                while (Application.EventsPending())
+                    Application.RunIteration();
 
 	            Update();
-	            RenderFrame();
+                mainGLWidget.RenderFrame();
 
 	            if (stateChangeRequested)
 	                HandleStateChangeRequest();
@@ -260,6 +272,7 @@ namespace RaahnSimulation
 
             //Update with events.
             Event e;
+
             while (eventQueue.Count > 0)
             {
                 e = eventQueue.Peek();
@@ -267,54 +280,43 @@ namespace RaahnSimulation
 
                 states[states.Count - 1].UpdateEvent(e);
 
-                if (e.Type == EventType.Resized)
+                if (e.type == Gdk.EventType.Configure)
                 {
-                    windowWidth = e.Size.Width;
-                    windowHeight = e.Size.Height;
+                    windowWidth = (uint)e.width;
+                    windowHeight = (uint)e.height;
                     camera.windowWorldRatio.x = (double)windowWidth / Simulator.WORLD_WINDOW_WIDTH;
                     camera.windowWorldRatio.y = (double)windowHeight / Simulator.WORLD_WINDOW_HEIGHT;
-                }
-                else if (e.Type == EventType.KeyPressed && e.Key.Code == terminalKey)
-                {
-                    if (terminalOpen)
-                        terminalOpen = false;
-                    else
-                        terminalOpen = true;
-                }
 
-                if (terminalOpen)
-                    terminal.UpdateEvent(e);
+                    mainGLWidget.OnConfigure();
+                }
             }
 
             //Regular update per frame.
             states[states.Count - 1].Update();
+        }
 
-            if (terminalOpen)
-                terminal.Update();
+        private void ResizeFrame()
+        {
+            Gl.glViewport(0, 0, (int)windowWidth, (int)windowHeight);
         }
 
 	    private void RenderFrame()
 	    {
 	        Gl.glClear(Gl.GL_COLOR_BUFFER_BIT);
 
-	        Gl.glMatrixMode(Gl.GL_PROJECTION);
+            Gl.glMatrixMode(Gl.GL_PROJECTION);
 
-	        Gl.glLoadIdentity();
+            Gl.glLoadIdentity();
 
-	        Gl.glOrtho(0.0, WORLD_WINDOW_WIDTH, 0.0, WORLD_WINDOW_HEIGHT, -1.0, 1.0);
+            Gl.glOrtho(0.0, WORLD_WINDOW_WIDTH, 0.0, WORLD_WINDOW_HEIGHT, -1.0, 1.0);
 
-	        Gl.glMatrixMode(Gl.GL_MODELVIEW);
+            Gl.glMatrixMode(Gl.GL_MODELVIEW);
 
 	        Gl.glLoadIdentity();
 
 	        camera.Transform();
 
 	        states[states.Count - 1].Draw();
-
-            if (terminalOpen)
-                terminal.Draw();
-
-	        simWindow.Display();
 	    }
 
 	    public bool RequestStateChange(StateChangeType sc, State newState)
@@ -322,9 +324,11 @@ namespace RaahnSimulation
 			//Make sure state is valid
 			if (sc != StateChangeType.POP && newState == null)
 				return false;
+
 			stateChangeRequested = true;
 			changeType = sc;
 			requestedState = newState;
+
 			return true;
 		}
 
@@ -349,7 +353,10 @@ namespace RaahnSimulation
 				}
 				case StateChangeType.NONE:
 	                break;
+                default:
+                    break;
 			}
+
 			stateChangeRequested = false;
 			changeType = StateChangeType.NONE;
 			requestedState = null;
@@ -363,6 +370,7 @@ namespace RaahnSimulation
 	            states[states.Count - 1].Clean();
 	            states.RemoveAt(states.Count - 1);
 	        }
+
 	        states.Add(newState);
 	        newState.Init(this);
 	    }
@@ -371,6 +379,7 @@ namespace RaahnSimulation
 	    {
 	        if (states.Count > 0)
 	            states[states.Count - 1].Pause();
+
 	        states.Add(newState);
 	        newState.Init(this);
 	    }
@@ -396,6 +405,8 @@ namespace RaahnSimulation
 	    {
             stopwatch.Stop();
 
+            blankCursor.Dispose();
+
 	        while (states.Count > 0)
 	        {
 	            states[states.Count - 1].Clean();
@@ -412,126 +423,188 @@ namespace RaahnSimulation
                 lineRect.Free();
                 quad.Free();
             }
-
-            simWindow.Close();
 	    }
 
-		public static void OnResized(Object sender, SizeEventArgs ea)
+        //Window moved or resized. Must use GLib.ConnectBefore
+        //to avoid an event terminating the cycle before this event.
+        [GLib.ConnectBefore]
+		private void OnConfigure(object sender, ConfigureEventArgs ea)
 		{
-			Event e = new Event();
-			e.Type = EventType.Resized;
-			e.Size.Width = ea.Width;
-			e.Size.Height = ea.Height;
-			SaveEvent(e);
-			Simulator s = Simulator.Instance();
-			s.SetWindowWidth(ea.Width);
-			s.SetWindowHeight(ea.Height);
+            Event e = new Event();
+            e.type = Gdk.EventType.Configure;
+            e.X = ea.Event.X;
+            e.Y = ea.Event.Y;
+            e.width = ea.Event.Width;
+            e.height = ea.Event.Height;
 
-			Gl.glViewport(0, 0, (int)s.GetWindowWidth(), (int)s.GetWindowHeight());
-		}
-
-		public static void OnKeyPressed(Object sender, KeyEventArgs kea)
-		{
-			Event e = new Event();
-			e.Type = EventType.KeyPressed;
-			e.Key.Code = kea.Code;
-			SaveEvent(e);
-			if (kea.Code == Keyboard.Key.Escape)
-				Simulator.Instance().running = false;
-		}
-
-		public static void OnKeyReleased(Object sender, KeyEventArgs kea)
-		{
-			Event e = new Event();
-			e.Type = EventType.KeyReleased;
-			e.Key.Code = kea.Code;
 			SaveEvent(e);
 		}
 
-		public static void OnMouseButtonPressed(Object sender, MouseButtonEventArgs mbea)
+        //Space not registered without GLib.ConnectBefore
+        [GLib.ConnectBefore]
+		private void OnKeyPress(object sender, KeyPressEventArgs ea)
 		{
-			Event e = new Event();
-			e.Type = EventType.MouseButtonPressed;
-			e.MouseButton.Button = mbea.Button;
-            e.MouseButton.X = mbea.X;
-            e.MouseButton.Y = mbea.Y;
+            if (ea.Event.Key == Gdk.Key.Escape)
+            {
+                Simulator.Instance().running = false;
+                //Don't bother saving the event.
+                return;
+            }
+
+            Event e = new Event();
+            e.type = Gdk.EventType.KeyPress;
+            e.key = ea.Event.Key;
+
+            switch (ea.Event.Key)
+            {
+                case Gdk.Key.Left:
+                {
+                    leftKeyDown = true;
+                    break;
+                }
+                case Gdk.Key.Right:
+                {
+                    rightKeyDown = true;
+                    break;
+                }
+                case Gdk.Key.Up:
+                {
+                    upKeyDown = true;
+                    break;
+                }
+                case Gdk.Key.Down:
+                {
+                    downKeyDown = true;
+                    break;
+                }
+            }
+
 			SaveEvent(e);
 		}
 
-		public static void OnMouseButtonReleased(Object sender, MouseButtonEventArgs mbea)
+        [GLib.ConnectBefore]
+		private void OnKeyRelease(object sender, KeyReleaseEventArgs ea)
 		{
-			Event e = new Event();
-			e.Type = EventType.MouseButtonReleased;
-			e.MouseButton.Button = mbea.Button;
-            e.MouseButton.X = mbea.X;
-            e.MouseButton.Y = mbea.Y;
+            Event e = new Event();
+            e.type = Gdk.EventType.KeyRelease;
+            e.key = ea.Event.Key;
+
+			SaveEvent(e);
+
+            switch (ea.Event.Key)
+            {
+                case Gdk.Key.Left:
+                {
+                    leftKeyDown = false;
+                    break;
+                }
+                case Gdk.Key.Right:
+                {
+                    rightKeyDown = false;
+                    break;
+                }
+                case Gdk.Key.Up:
+                {
+                    upKeyDown = false;
+                    break;
+                }
+                case Gdk.Key.Down:
+                {
+                    downKeyDown = false;
+                    break;
+                }
+            }
+		}
+
+        //Mouse button press.
+		private void OnButtonPress(object sender, ButtonPressEventArgs ea)
+		{
+            Event e = new Event();
+            e.type = Gdk.EventType.ButtonPress;
+            e.button = ea.Event.Button;
+            e.X = ea.Event.X;
+            e.Y = ea.Event.Y;
+
+            if (ea.Event.Button == Utils.GTK_BUTTON_LEFT)
+                leftMouseButtonDown = true;
+
 			SaveEvent(e);
 		}
 
-        public static void OnMouseMoved(object sender, MouseMoveEventArgs mmea)
+        //Mouse button release.
+		private void OnButtonRelease(object sender, ButtonReleaseEventArgs ea)
+		{
+            Event e = new Event();
+            e.type = Gdk.EventType.ButtonRelease;
+            e.button = ea.Event.Button;
+            e.X = ea.Event.X;
+            e.Y = ea.Event.Y;
+
+            if (ea.Event.Button == Utils.GTK_BUTTON_LEFT)
+                leftMouseButtonDown = false;
+
+			SaveEvent(e);
+		}
+
+        //Mouse move.
+        private void OnMotionNotify(object sender, MotionNotifyEventArgs ea)
         {
             Event e = new Event();
-            e.Type = EventType.MouseMoved;
-            e.MouseMove.X = mmea.X;
-            e.MouseMove.Y = mmea.Y;
+            e.type = Gdk.EventType.MotionNotify;
+            e.X = ea.Event.X;
+            e.Y = ea.Event.Y;
+
             SaveEvent(e);
         }
 
-        public static void OnTextEntered(Object sender, TextEventArgs tea)
+        //Mouse wheel scroll.
+        private void OnScroll(object sender, ScrollEventArgs ea)
         {
             Event e = new Event();
-            e.Type = EventType.TextEntered;
-            e.Text.Unicode = (char)tea.Unicode[0];
+            e.type = Gdk.EventType.Scroll;
+            e.scrollDirection = ea.Event.Direction;
+            e.X = ea.Event.X;
+            e.Y = ea.Event.Y;
+
             SaveEvent(e);
         }
 
-        public static void OnMouseWheelMoved(Object sender, MouseWheelEventArgs mwea)
-        {
+		private void OnFocusIn(object sender, FocusInEventArgs ea)
+		{
             Event e = new Event();
-            e.Type = EventType.MouseWheelMoved;
-            e.MouseWheel.Delta = mwea.Delta;
-            e.MouseWheel.X = mwea.X;
-            e.MouseWheel.Y = mwea.Y;
-            SaveEvent(e);
-        }
+            e.type = Gdk.EventType.FocusChange;
 
-		public static void OnGainnedFocus(Object sender, EventArgs ea)
-		{
-			Event e = new Event();
-			e.Type = EventType.GainedFocus;
 			SaveEvent(e);
-			Simulator s = Simulator.Instance();
-			s.SetWindowHasFocus(true);
 		}
 
-		public static void OnLostFocus(Object sender, EventArgs ea)
+		private void OnFocusOut(object sender, FocusOutEventArgs ea)
 		{
-			Event e = new Event();
-			e.Type = EventType.LostFocus;
+            Event e = new Event();
+            e.type = Gdk.EventType.FocusChange;
+
+            leftMouseButtonDown = false;
+
 			SaveEvent(e);
-			Simulator s = Simulator.Instance();
-			s.SetWindowHasFocus(false);
 		}
 
-		public static void OnClosed(Object sender, EventArgs ea)
+		private void OnDelete(object sender, DeleteEventArgs ea)
 		{
-			Event e = new Event();
-			e.Type = EventType.Closed;
+            Event e = new Event();
+            e.type = Gdk.EventType.Delete;
+
 			SaveEvent(e);
 
             Simulator.Instance().running = false;
 		}
 
-		public static void SaveEvent(Event e)
+		private void SaveEvent(Event e)
 		{
-			Simulator s = Simulator.Instance();
-
             //Only record events if they are enabled by the application.
-            if (!s.eventsEnabled)
+            if (!eventsEnabled)
                 return;
 			//Process all events but leave keep them in a queue
 	        //to be processed by all entities.
-			s.eventQueue.Enqueue(e);
+			eventQueue.Enqueue(e);
 		}
 
         public bool GetHeadLess()
@@ -542,6 +615,31 @@ namespace RaahnSimulation
         public bool GetWindowHasFocus()
         {
             return windowHasFocus;
+        }
+
+        public bool GetLeftMouseButtonDown()
+        {
+            return leftMouseButtonDown;
+        }
+
+        public bool GetLeftKeyDown()
+        {
+            return leftKeyDown;
+        }
+
+        public bool GetRightKeyDown()
+        {
+            return rightKeyDown;
+        }
+
+        public bool GetUpKeyDown()
+        {
+            return upKeyDown;
+        }
+
+        public bool GetDownKeyDown()
+        {
+            return downKeyDown;
         }
 
         public uint GetWindowWidth()
@@ -564,24 +662,24 @@ namespace RaahnSimulation
             return states[states.Count - 1];
         }
 
-		public Window GetWindow()
-		{
-			return simWindow;
-		}
-		
-        public Camera GetCamera()
-		{
-			return camera;
-		}
-
-		public TextureManager GetTexMan()
-		{
-			return texMan;
-		}
-
-        public Vector2i GetDefaultWindowPosition()
+        public Window GetWindow()
         {
-            return defaultWindowPosition;
+            return simWindow;
+        }
+
+        public Gdk.Cursor GetBlankCursor()
+        {
+            return blankCursor;
+        }
+
+        public Camera GetCamera()
+        {
+            return camera;
+        }
+
+        public TextureManager GetTexMan()
+        {
+            return texMan;
         }
 
         public Stopwatch GetStopwatch()
@@ -589,19 +687,14 @@ namespace RaahnSimulation
             return stopwatch;
         }
 
-		public void SetWindowWidth(uint width)
-		{
-			windowWidth = width;
-		}
+        public void SetWindowSize(uint width, uint height)
+        {
+            simWindow.Resize((int)width, (int)height);
+        }
 
-		public void SetWindowHeight(uint height)
-		{
-			windowHeight = height;
-		}
-
-		public void SetWindowHasFocus(bool focus)
-		{
-			windowHasFocus = focus;
-		}
+        public void SetWindowHasFocus(bool focus)
+        {
+            windowHasFocus = focus;
+        }
 	}
 }

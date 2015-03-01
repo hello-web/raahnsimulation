@@ -9,7 +9,7 @@ namespace RaahnSimulation
     public class RangeFinderGroupConfig
     {
         [XmlElement("Count")]
-        public int count;
+        public uint count;
 
         [XmlElement("Length")]
         public double length;
@@ -35,7 +35,7 @@ namespace RaahnSimulation
 
         private static Mesh line = null;
 
-        private int count;
+        private uint count;
         private double defaultLength;
         private double startAngle;
         private double angleSpacing;
@@ -47,7 +47,7 @@ namespace RaahnSimulation
         private QuadTree quadTree;
         private Camera camera;
 
-        public RangeFinderGroup(Simulator sim, Car car, QuadTree tree, int size)
+        public RangeFinderGroup(Simulator sim, Car car, QuadTree tree, uint size)
         {
             context = sim;
             robot = car;
@@ -202,6 +202,19 @@ namespace RaahnSimulation
             Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
 
             Gl.glEnable(Gl.GL_TEXTURE_2D);
+        }
+
+        public uint GetRangeFinderCount()
+        {
+            return count;
+        }
+
+        public double GetRangeFinderValue(uint index)
+        {
+            if (index >= activations.Length)
+                return Utils.INVALID_ACTIVATION;
+            else
+                return activations[(int)index];
         }
 
         private Utils.Point2 GetNearestIntersection(List<Utils.Point2> intersections)

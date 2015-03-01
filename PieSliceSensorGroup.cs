@@ -9,7 +9,7 @@ namespace RaahnSimulation
     public class PieSliceSensorGroupConfig
     {
         [XmlElement("Count")]
-        public int count;
+        public uint count;
 
         [XmlElement("MaxDetection")]
         public int maxDetection;
@@ -33,15 +33,15 @@ namespace RaahnSimulation
     public class PieSliceSensorGroup
     {
         //360 degree maximum, 2 coords per degree, plus 2 coords for the center of the sensor.
-        public const int MAX_VBO_SIZE = 722;
+        public const uint MAX_VBO_SIZE = 722;
         //Enough indices for a line between each vertex.
-        public const int MAX_IBO_SIZE = 722;
+        public const uint MAX_IBO_SIZE = 722;
 
         private List<PieSliceSensor> sensors;
         private Simulator context;
         private Car robot;
         //Shared mesh is used for drawing the curve points of each pie slice.
-        private static Mesh sharedMesh;
+        private static Mesh sharedMesh = null;
         private QuadTree quadTree;
 
         public PieSliceSensorGroup(Simulator sim, Car car, QuadTree tree)
@@ -50,8 +50,11 @@ namespace RaahnSimulation
             robot = car;
             quadTree = tree;
 
-            sharedMesh = new Mesh(2, Gl.GL_LINE_LOOP);
-            sharedMesh.AllocateEmpty(MAX_VBO_SIZE, MAX_IBO_SIZE, Gl.GL_DYNAMIC_DRAW);
+            if (sharedMesh == null)
+            {
+                sharedMesh = new Mesh(2, Gl.GL_LINE_LOOP);
+                sharedMesh.AllocateEmpty(MAX_VBO_SIZE, MAX_IBO_SIZE, Gl.GL_DYNAMIC_DRAW);
+            }
 
             sensors = new List<PieSliceSensor>();
         }
@@ -92,9 +95,9 @@ namespace RaahnSimulation
             return sensors.Count;
         }
 
-        public void AddSensors(int sensorCount)
+        public void AddSensors(uint sensorCount)
         {
-            for (int i = 0; i < sensorCount; i++)
+            for (uint i = 0; i < sensorCount; i++)
                 sensors.Add(new PieSliceSensor(context, robot));
         }
 
@@ -147,6 +150,19 @@ namespace RaahnSimulation
         {
             for (int i = 0; i < sensors.Count; i++)
                 sensors[i].Draw();
+        }
+
+        public uint GetPieSliceSensorCount()
+        {
+            return (uint)sensors.Count;
+        }
+
+        public double GetPieSliceSensorValue(uint index)
+        {
+            if (index >= sensors.Count)
+                return Utils.INVALID_ACTIVATION;
+            else
+                return sensors[(int)index].GetValue();
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
@@ -37,15 +36,16 @@ namespace RaahnSimulation
 
             double x;
             double y;
-            if (e.Type == EventType.MouseMoved)
+
+            if (e.type == Gdk.EventType.MotionNotify)
             {
-                x = (double)e.MouseMove.X;
-                y = (double)context.GetWindowHeight() - (double)e.MouseMove.Y;
+                x = (double)e.X;
+                y = (double)context.GetWindowHeight() - (double)e.Y;
             }
-            else if (e.Type == EventType.MouseButtonPressed)
+            else if (e.type == Gdk.EventType.ButtonPress)
             {
-                x = (double)e.MouseButton.X;
-                y = (double)context.GetWindowHeight() - (double)e.MouseButton.Y;
+                x = (double)e.X;
+                y = (double)context.GetWindowHeight() - (double)e.Y;
             }
             else
                 return;
@@ -61,15 +61,20 @@ namespace RaahnSimulation
 	        {
 	            hovering = true;
 
-	            if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left && !pressed)
+	            if (e.type == Gdk.EventType.ButtonPress)
 	            {
-	                clicked = true;
-	                if (hasListener)
-	                    OnClick(context);
+                    if (e.button == Utils.GTK_BUTTON_LEFT && !pressed)
+                    {
+                        if (!pressed)
+                        {
+                            clicked = true;
+                            if (hasListener)
+                                OnClick(context);
+                        }
+                        else
+                            pressed = true;
+                    }
 	            }
-
-	            if (e.Type == EventType.MouseButtonPressed && e.MouseButton.Button == Mouse.Button.Left)
-	                pressed = true;
 	        }
 	        else
 	        {
@@ -77,8 +82,11 @@ namespace RaahnSimulation
 	            hovering = false;
 	        }
 
-            if (e.Type == EventType.MouseButtonReleased && e.MouseButton.Button == Mouse.Button.Left)
-	            pressed = false;
+            if (e.type == Gdk.EventType.ButtonRelease)
+            {
+                if (e.button == Utils.GTK_BUTTON_LEFT)
+                    pressed = false;
+            }
 	    }
 
 	    public void SetOnClickListener(OnClickType listener)

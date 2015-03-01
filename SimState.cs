@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public class SimState : State
-	{
+    public class SimState : State
+    {
         private const double CAR_WIDTH = 260.0;
         private const double CAR_HEIGHT = 160.0;
         private const double HIGHLIGHT_R = 0.0;
@@ -15,7 +14,7 @@ namespace RaahnSimulation
         private const double HIGHLIGHT_B = 0.0;
         private const double HIGHLIGHT_T = 1.0;
 
-	    private static SimState simState = new SimState();
+        private static SimState simState = new SimState();
 
         //Experiment must be initialized outside of SimState.
         public Experiment experiment;
@@ -23,11 +22,11 @@ namespace RaahnSimulation
         private QuadTree quadTree;
         private Camera camera;
         private Cursor cursor;
-		private Car raahnCar;
-		private EntityMap EntityMap;
+        private Car raahnCar;
+        private EntityMap EntityMap;
 
-	    public SimState()
-	    {
+        public SimState()
+        {
             experiment = null;
             panning = false;
             experiment = null;
@@ -35,23 +34,25 @@ namespace RaahnSimulation
             camera = null;
             raahnCar = null;
             EntityMap = null;
-	    }
+        }
 
-	    public override void Init(Simulator context)
-	    {
-	        base.Init(context);
+        public override void Init(Simulator context)
+        {
+            base.Init(context);
 
             camera = context.GetCamera();
 
             quadTree = new QuadTree(new AABB(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT));
 
-            context.GetWindow().SetMouseCursorVisible(false);
+            context.GetWindow().GdkWindow.Cursor = context.GetBlankCursor();
 
             cursor = new Cursor(context);
 
             raahnCar = new Car(context, quadTree);
+
             if (experiment != null)
                 raahnCar.LoadConfig(Utils.SENSOR_FOLDER + experiment.sensorFile);
+
             raahnCar.SetWidth(CAR_WIDTH);
             raahnCar.SetHeight(CAR_HEIGHT);
             raahnCar.transformedWorldPos.x = 0.0;
@@ -59,23 +60,26 @@ namespace RaahnSimulation
             raahnCar.Update();
 
             string mapFilePath = Utils.MAP_FOLDER + experiment.mapFile;
-	        EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
+            EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
 
             AddEntity(raahnCar, 0);
             AddEntity(cursor, 1);
 
             quadTree.AddEntity(raahnCar);
-	    }
+        }
 
-	    public override void Update()
-	    {
+        public override void Update()
+        {
             cursor.Update();
 
-            Vector2i mouseworldPos = Mouse.GetPosition(context.GetWindow());
+            int mouseX;
+            int mouseY;
 
-            if (mouseworldPos.X < 0 || mouseworldPos.Y < 0)
+            context.GetWindow().GetPointer(out mouseX, out mouseY);
+
+            if (mouseX < 0 || mouseY < 0)
                 panning = false;
-            else if (mouseworldPos.X > context.GetWindowWidth() || mouseworldPos.Y > context.GetWindowHeight())
+            else if (mouseX > context.GetWindowWidth() || mouseY > context.GetWindowHeight())
                 panning = false;
 
             if (panning)
@@ -118,27 +122,30 @@ namespace RaahnSimulation
                 else if (curEntity.Modified())
                     curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
             }
-	    }
+        }
 
         public override void UpdateEvent(Event e)
         {
-            if (e.Type == EventType.MouseWheelMoved)
+            if (e.type == Gdk.EventType.Scroll)
             {
-                double mouseX = (double)e.MouseWheel.X;
-                double mouseY = (double)(context.GetWindowHeight() - e.MouseWheel.Y);
+                double mouseX = (double)e.X;
+                double mouseY = (double)(context.GetWindowHeight() - e.Y);
                 Utils.Vector2 transform = camera.ProjectWindow(mouseX, mouseY);
 
-                if (e.MouseWheel.Delta > 0)
-                    camera.ZoomTo(transform.x, transform.y, (double)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
-                else
-                    camera.ZoomTo(transform.x, transform.y, (double)(-e.MouseWheel.Delta) * (1.0 / Camera.MOUSE_SCROLL_ZOOM));
+                if (e.scrollDirection == Gdk.ScrollDirection.Up)
+                    camera.ZoomTo(transform.x, transform.y, Camera.MOUSE_SCROLL_ZOOM);
+                else if (e.scrollDirection == Gdk.ScrollDirection.Down)
+                    camera.ZoomTo(transform.x, transform.y, (1.0 / Camera.MOUSE_SCROLL_ZOOM));
             }
 
-            if (e.MouseButton.Button == Mouse.Button.Left)
+            if (e.type == Gdk.EventType.ButtonPress)
             {
-                if (e.Type == EventType.MouseButtonPressed)
+                if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = true;
-                else if (e.Type == EventType.MouseButtonReleased)
+            }
+            else if (e.type == Gdk.EventType.ButtonRelease)
+            {
+                if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = false;
             }
 
@@ -147,23 +154,24 @@ namespace RaahnSimulation
             base.UpdateEvent(e);
         }
 
-	    public override void Draw()
-	    {
-	        base.Draw();
+        public override void Draw()
+        {
+            base.Draw();
+
             if (context.debugging)
             {
                 quadTree.DebugDraw();
             }
-	    }
+        }
 
-	    public override void Clean()
-	    {
-	        base.Clean();
-	    }
+        public override void Clean()
+        {
+            base.Clean();
+        }
 
-		public static SimState Instance()
-		{
-			return simState;
-		}
-	}
+        public static SimState Instance()
+        {
+            return simState;
+        }
+    }
 }

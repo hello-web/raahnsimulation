@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Tao.OpenGl;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
@@ -43,8 +42,8 @@ namespace RaahnSimulation
             activation = 0.0;
             transparency = DEFAULT_COLOR_T;
 
-            curvePoints = new List<float>(PieSliceSensorGroup.MAX_VBO_SIZE);
-            indices = new List<ushort>(PieSliceSensorGroup.MAX_IBO_SIZE);
+            curvePoints = new List<float>((int)PieSliceSensorGroup.MAX_VBO_SIZE);
+            indices = new List<ushort>((int)PieSliceSensorGroup.MAX_IBO_SIZE);
             entitiesToDetect = new List<Entity.EntityType>();
             entitiesContained = new List<Entity>();
             color = new Utils.Vector3(DEFAULT_COLOR_R, DEFAULT_COLOR_G, DEFAULT_COLOR_B);
@@ -96,11 +95,6 @@ namespace RaahnSimulation
                 else
                     return false;
             }
-        }
-
-        public double GetActivation()
-        {
-            return activation;
         }
 
         public void Configure(int detectCount, double angleOffset, double angleBetweenLines, double lineLength, double lineOffset)
@@ -214,6 +208,11 @@ namespace RaahnSimulation
             Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
 
             Gl.glEnable(Gl.GL_TEXTURE_2D);
+        }
+
+        public double GetValue()
+        {
+            return activation;
         }
     }
 }

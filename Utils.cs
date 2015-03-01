@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Globalization;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
@@ -262,14 +261,16 @@ namespace RaahnSimulation
         public const int VertexSize = sizeof(float) * 2;
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
+        public const int GTK_BUTTON_LEFT = 1;
         public const uint CHARACTER_TEX_COLUMN_COUNT = 11;
         public const uint CHARACTER_TEX_ROW_COUNT = 9;
 
         //Color value of background in common GTK apps.
         public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
+        public const double INVALID_ACTIVATION = -1.0;
         public const double MIN_GL_VERSION = 1.5;
-		public const double WIDTH_PERCENTAGE = 0.6;
-        public const double HEIGHT_PERCENTAGE = 0.75;
+		public const double SCREEN_WIDTH_PERCENTAGE = 0.6;
+        public const double SCREEN_HEIGHT_PERCENTAGE = 0.75;
 		public const double DISCARD_Z_POS = 0.0;
 		public const double DISCARD_Z_SCALE = 1.0;
 		public const double DEG_TO_RAD = 3.1415926535 / 180.0;
@@ -288,7 +289,7 @@ namespace RaahnSimulation
         public const string MAP_FOLDER = "Data/Maps/";
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
-		public const string VERSION_STRING = "Version 2.2";
+		public const string VERSION_STRING = "Version 2.7";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
@@ -303,8 +304,9 @@ namespace RaahnSimulation
         public const string MAP_ALREADY_LOADED = "Map already loaded.";
         public const string FILE_NOT_FOUND = "File: {0} not found.";
         public const string MAP_LOAD_ERROR = "The map may not have been created correctly.";
-        public const string CONFIG_LOAD_ERROR = "The sensor configuration may not have been created correctly.";
+        public const string SENSOR_LOAD_ERROR = "The sensor configuration may not have been created correctly.";
         public const string XML_READ_ERROR = "Error while reading XML.";
+        public const string XML_WRITE_ERROR = "Error while writing XML.";
 
 		public static double DegToRad(double deg)
 		{

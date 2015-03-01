@@ -34,8 +34,6 @@
     <Compile Include="MapBuilder.cs" />
     <Compile Include="MapState.cs" />
     <Compile Include="MenuState.cs" />
-    <Compile Include="Road.cs" />
-    <Compile Include="RoadPool.cs" />
     <Compile Include="SimState.cs" />
     <Compile Include="Simulator.cs" />
     <Compile Include="State.cs" />
@@ -44,30 +42,32 @@
     <Compile Include="ToggleText.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="EntityPool.cs" />
-    <Compile Include="Terminal.cs" />
     <Compile Include="TextPool.cs" />
     <Compile Include="AABB.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="ColorableEntity.cs" />
-    <Compile Include="Updateable.cs" />
     <Compile Include="QuadTree.cs" />
     <Compile Include="QuadTreeNode.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="EntityMap.cs" />
     <Compile Include="PieSliceSensor.cs" />
     <Compile Include="PieSliceSensorGroup.cs" />
-	<Compile Include="Experiment.cs" />
+    <Compile Include="Experiment.cs" />
     <Compile Include="RangeFinderGroup.cs" />
     <Compile Include="SensorConfig.cs" />
+    <Compile Include="Wall.cs" />
+    <Compile Include="WallPool.cs" />
+    <Compile Include="GLWidget.cs" />
+    <Compile Include="Event.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="Tao.OpenGl" />
-    <Reference Include="sfmlnet-window-2" />
-    <Reference Include="sfmlnet-graphics-2" />
 	<Reference Include="gtk-sharp" />
     <Reference Include="atk-sharp" />
+	<Reference Include="gdk-sharp" />
     <Reference Include="glib-sharp" />
+	<Reference Include="gtkglarea-sharp" />
   </ItemGroup>
 </Project>

@@ -1,7 +1,5 @@
 using System;
 using Tao.OpenGl;
-using SFML.Window;
-using SFML.Graphics;
 
 namespace RaahnSimulation
 {
@@ -12,28 +10,25 @@ namespace RaahnSimulation
 			NONE = -1,
 			DEFAULT = 0,
 			CAR = 0,
-			ROAD_0 = 1,
-			ROAD_1 = 2,
-			CURSOR_0 = 3,
-			CURSOR_1 = 4,
-			CHAR_MAP = 5,
-			FLAG = 6,
-            TRASH = 7,
-            BUTTON = 8,
-            PANEL = 9
+			CURSOR_0 = 1,
+			CURSOR_1 = 2,
+			CHAR_MAP = 3,
+			FLAG = 4,
+            TRASH = 5,
+            BUTTON = 6,
+            PANEL = 7
 		};
 
 		public const int ROAD_INDEX_OFFSET = 1;
 
 		private string[] TEXTURE_RESOURCES =
 		{
-			"Data/Textures/TopViewCar.png", "Data/Textures/Road0.png", "Data/Textures/Road1.png",
-			"Data/Textures/Cursor0.png", "Data/Textures/Cursor1.png", "Data/Textures/CharMap.png",
-			"Data/Textures/raahn.png", "Data/Textures/Trash.png", "Data/Textures/Button.png",
-            "Data/Textures/Panel.png"
+			"Data/Textures/TopViewCar.png", "Data/Textures/Cursor0.png", "Data/Textures/Cursor1.png", 
+            "Data/Textures/CharMap.png", "Data/Textures/raahn.png", "Data/Textures/Trash.png", 
+            "Data/Textures/Button.png", "Data/Textures/Panel.png"
 		};
 
-		private const int TEXTURE_COUNT = 10;
+		private const int TEXTURE_COUNT = 8;
 
         private bool loadedTextures;
 		private uint[] textures;
@@ -57,17 +52,17 @@ namespace RaahnSimulation
 				if (!System.IO.File.Exists(TEXTURE_RESOURCES[i]))
 					return false;
 
-				Image currentImage = new Image(TEXTURE_RESOURCES[i]);
-                //SFML loads textures from the top left.
-                currentImage.FlipVertically();
+                Gdk.Pixbuf currentImage = new Gdk.Pixbuf(TEXTURE_RESOURCES[i]);
+                //Flip the image vertically for glTexImage2D.
+                currentImage = currentImage.Flip(false);
 
 				Gl.glBindTexture(Gl.GL_TEXTURE_2D, textures[i]);
 				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MAG_FILTER, Gl.GL_LINEAR);
 				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MIN_FILTER, Gl.GL_LINEAR);
 				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_S, Gl.GL_CLAMP_TO_EDGE);
 				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_T, Gl.GL_CLAMP_TO_EDGE);
-				Vector2u size = currentImage.Size;
-				Gl.glTexImage2D(Gl.GL_TEXTURE_2D, 0, Gl.GL_RGBA, (int)size.X, (int)size.Y, 0, Gl.GL_RGBA, Gl.GL_UNSIGNED_BYTE, currentImage.Pixels);
+				Gl.glTexImage2D(Gl.GL_TEXTURE_2D, 0, Gl.GL_RGBA, (int)currentImage.Width, (int)currentImage.Height, 0, 
+                                Gl.GL_RGBA, Gl.GL_UNSIGNED_BYTE, currentImage.Pixels);
 	        }
 
             loadedTextures = true;

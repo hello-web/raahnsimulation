@@ -111,7 +111,7 @@ namespace RaahnSimulation
             return true;
         }
 
-        public bool AllocateEmpty(int vboSize, int iboSize, int usage)
+        public bool AllocateEmpty(uint vboSize, uint iboSize, int usage)
         {
             if (allocated)
                 return false;

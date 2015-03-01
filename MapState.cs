@@ -1,45 +1,44 @@
 using System;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public class MapState : State
-	{
+    public class MapState : State
+    {
         private const double SAVE_BUTTON_WIDTH = 800.0;
         private const double SAVE_BUTTON_HEIGHT = 150.0;
         private const double SAVE_BUTTON_X = 2500.0;
         private const double SAVE_BUTTON_Y = 50.0;
 
-	    private static MapState mapState = new MapState();
-		private bool panning;
-		private Camera camera;
-		private Cursor cursor;
-		private EntityPanel entityPanel;
-		private MapBuilder mapBuilder;
+        private static MapState mapState = new MapState();
+        private bool panning;
+        private Camera camera;
+        private Cursor cursor;
+        private EntityPanel entityPanel;
+        private MapBuilder mapBuilder;
         private Button saveMap;
 
-	    public MapState()
-	    {
-	        panning = false;
+        public MapState()
+        {
+            panning = false;
             camera = null;
-	        entityPanel = null;
-	        mapBuilder = null;
+            entityPanel = null;
+            mapBuilder = null;
             saveMap = null;
-	    }
+        }
 
-	    public override void Init(Simulator sim)
-	    {
-	        base.Init(sim);
+        public override void Init(Simulator sim)
+        {
+            base.Init(sim);
 
-	        camera = context.GetCamera();
+            camera = context.GetCamera();
 
-	        context.GetWindow().SetMouseCursorVisible(false);
+            context.GetWindow().GdkWindow.Cursor = context.GetBlankCursor();
 
-	        cursor = new Cursor(context);
+            cursor = new Cursor(context);
 
-	        entityPanel = new EntityPanel(context, cursor, camera, 2);
+            entityPanel = new EntityPanel(context, cursor, camera, 2);
 
-	        mapBuilder = new MapBuilder(context, cursor, camera, entityPanel, 0);
+            mapBuilder = new MapBuilder(context, cursor, 0);
 
             saveMap = new Button(context, Utils.SAVE_MAP);
             saveMap.SetTransformUsage(false);
@@ -48,54 +47,61 @@ namespace RaahnSimulation
 
             AddEntity(saveMap, 2);
             AddEntity(cursor, 3);
-	    }
+        }
 
-	    public override void Update()
-	    {
+        public override void Update()
+        {
             bool mouseOutOfBounds = false;
-            Vector2i mouseworldPos = Mouse.GetPosition(context.GetWindow());
 
-            if (mouseworldPos.X < 0 || mouseworldPos.Y < 0)
+            int mouseX;
+            int mouseY;
+
+            context.GetWindow().GetPointer(out mouseX, out mouseY);
+
+            if (mouseX < 0 || mouseY < 0)
                 mouseOutOfBounds = true;
-            else if (mouseworldPos.X > context.GetWindowWidth() || mouseworldPos.Y > context.GetWindowHeight())
+            else if (mouseX > context.GetWindowWidth() || mouseY > context.GetWindowHeight())
                 mouseOutOfBounds = true;
 
             if (entityPanel.Intersects(cursor.aabb.GetBounds()) || mouseOutOfBounds)
                 panning = false;
-	        else if (panning) //If we just set panning to false, no need to pan. else if is better.
-	        {
-	            Utils.Vector2 deltaPos = cursor.GetDeltaPosition();
-	            camera.Pan(-deltaPos.x, -deltaPos.y);
-	        }
+            else if (panning) //If we just set panning to false, no need to pan. else if is better.
+            {
+                Utils.Vector2 deltaPos = cursor.GetDeltaPosition();
+                camera.Pan(-deltaPos.x, -deltaPos.y);
+            }
 
-	        //Perform camera transformations before updating positions.
+            //Perform camera transformations before updating positions.
             entityPanel.Update();
             mapBuilder.Update();
-	        base.Update();
-	    }
+            base.Update();
+        }
 
         public override void UpdateEvent(Event e)
         {
-            if (e.Type == EventType.MouseWheelMoved)
+            if (e.type == Gdk.EventType.Scroll)
             {
-                if (e.MouseWheel.Delta > 0)
-                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, (double)e.MouseWheel.Delta * Camera.MOUSE_SCROLL_ZOOM);
-                else
-                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, (double)(-e.MouseWheel.Delta) * (1.0 / Camera.MOUSE_SCROLL_ZOOM));
+                if (e.scrollDirection == Gdk.ScrollDirection.Up)
+                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, Camera.MOUSE_SCROLL_ZOOM);
+                else if (e.scrollDirection == Gdk.ScrollDirection.Down)
+                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, (1.0 / Camera.MOUSE_SCROLL_ZOOM));
             }
 
             //Update mapBuilder before checking whether or not to pan.
             mapBuilder.UpdateEvent(e);
 
-            if (e.MouseButton.Button == Mouse.Button.Left)
+            if (e.type == Gdk.EventType.ButtonPress)
             {
-                if (e.Type == EventType.MouseButtonPressed)
+                if (e.button == Utils.GTK_BUTTON_LEFT)
                 {
                     if (!entityPanel.Intersects(cursor.aabb.GetBounds())
-                        && !mapBuilder.Floating() && context.GetWindowHasFocus())
+                        && context.GetWindowHasFocus())
                         panning = true;
                 }
-                else if (e.Type == EventType.MouseButtonReleased)
+            }
+            else if (e.type == Gdk.EventType.ButtonRelease)
+            {
+                if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = false;
             }
 
@@ -103,36 +109,35 @@ namespace RaahnSimulation
             base.UpdateEvent(e);
         }
 
-	    public override void Draw()
-	    {
-	        base.Draw();
-	    }
+        public override void Draw()
+        {
+            base.Draw();
+        }
 
         public void Save(string file)
         {
             mapBuilder.SaveMap(file);
         }
 
-	    public override void Clean()
-	    {
-	        base.Clean();
-	    }
+        public override void Clean()
+        {
+            base.Clean();
+        }
 
-		public static MapState Instance()
-		{
-			return mapState;
-		}
+        public static MapState Instance()
+        {
+            return mapState;
+        }
 
-		public bool GetPanning()
-		{
-			return panning;
-		}
+        public bool GetPanning()
+        {
+            return panning;
+        }
 
         //Saves the map to the file specified by the user.
         public static void SaveMapOnClick(Simulator sim)
         {
             MapState mapState = MapState.Instance();
-            Window mainWindow = sim.GetWindow();
 
             string file;
 
@@ -140,10 +145,6 @@ namespace RaahnSimulation
             saveDialog.AddButton(Utils.SAVE_BUTTON, Gtk.ResponseType.Ok);
             saveDialog.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
             saveDialog.SetCurrentFolder(Utils.MAP_FOLDER);
-
-            //Since SFML.Net and GTK# could not be integrated, only one window
-            //should have focus at a given time, or else things get weird...
-            mainWindow.SetVisible(false);
 
             if (saveDialog.Run() == (int)Gtk.ResponseType.Ok)
             {
@@ -157,10 +158,6 @@ namespace RaahnSimulation
             }
 
             saveDialog.Destroy();
-
-            mainWindow.SetVisible(true);
-            //At least with X11 the window needs to be repositioned.
-            mainWindow.Position = sim.GetDefaultWindowPosition();
         }
-	}
+    }
 }

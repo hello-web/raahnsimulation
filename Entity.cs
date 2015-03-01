@@ -1,21 +1,37 @@
 using System;
+using System.Xml.Serialization;
 using Tao.OpenGl;
-using SFML.Window;
 
 namespace RaahnSimulation
 {
-	public abstract class Entity : Updateable
+    [XmlRoot("Entity")]
+    public class EntityConfig
+    {
+        [XmlElement("X")]
+        public double x;
+
+        [XmlElement("Y")]
+        public double y;
+
+        [XmlElement("Angle")]
+        public double angle;
+
+        [XmlElement("Type")]
+        public string type;
+    }
+
+	public abstract class Entity
 	{
         public enum EntityType
         {
             NONE = -2,
             GENERIC = -1,
-            ROAD = 0
+            WALL = 0
         };
 
         public static readonly string[] ENTITY_TYPE_STRINGS = 
         {
-            "Road"
+            "Wall"
         };
 
 		public const double ROTATE_SPEED = 90.0;
@@ -115,19 +131,7 @@ namespace RaahnSimulation
 
 	    public virtual void Update()
 	    {
-	        Camera cam = context.GetCamera();
-            if (drawingVec == worldPos)
-            {
-                Utils.Vector2 transform = cam.TransformWorld(worldPos);
-                transformedWorldPos.x = transform.x;
-                transformedWorldPos.y = transform.y;
-            }
-            else
-            {
-                Utils.Vector2 transform = cam.UntransformWorld(transformedWorldPos);
-                worldPos.x = transform.x;
-                worldPos.y = transform.y;
-            }
+            UpdateCoordinates();
 
             double deltaAngle = angle - previousAngle;
 
@@ -149,12 +153,6 @@ namespace RaahnSimulation
             }
             else
                 moved = false;
-
-	        center.x = drawingVec.x + (width / 2.0);
-	        center.y = drawingVec.y + (height / 2.0);
-	        //OpenGL uses degress, standard math uses radians.
-	        velocity.x = Math.Cos(Utils.DegToRad(angle)) * speed.x;
-	        velocity.y = Math.Sin(Utils.DegToRad(angle)) * speed.y;
 	    }
 
         public virtual void UpdateEvent(Event e)
@@ -170,6 +168,31 @@ namespace RaahnSimulation
             if (!mesh.IsCurrent())
                 mesh.MakeCurrent();
 	    }
+
+        public void UpdateCoordinates()
+        {
+            Camera cam = context.GetCamera();
+
+            if (drawingVec == worldPos)
+            {
+                Utils.Vector2 transform = cam.TransformWorld(worldPos);
+                transformedWorldPos.x = transform.x;
+                transformedWorldPos.y = transform.y;
+            }
+            else
+            {
+                Utils.Vector2 transform = cam.UntransformWorld(transformedWorldPos);
+                worldPos.x = transform.x;
+                worldPos.y = transform.y;
+            }
+
+            center.x = drawingVec.x + (width / 2.0);
+            center.y = drawingVec.y + (height / 2.0);
+
+            //OpenGL uses degress, standard math uses radians.
+            velocity.x = Math.Cos(Utils.DegToRad(angle)) * speed.x;
+            velocity.y = Math.Sin(Utils.DegToRad(angle)) * speed.y;
+        }
 
         public bool Moved()
         {
