@@ -1,4 +1,4 @@
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -30,8 +30,8 @@ namespace RaahnSimulation
 
 	    public void Transform()
 	    {
-            Gl.glScaled(zoom, zoom, Utils.DISCARD_Z_SCALE);
-            Gl.glTranslated(-vecPos.x, -vecPos.y, Utils.DISCARD_Z_POS);
+            GL.Scale(zoom, zoom, Utils.DISCARD_Z_SCALE);
+            GL.Translate(-vecPos.x, -vecPos.y, Utils.DISCARD_Z_POS);
 	    }
 
 	    public void Pan(double dx, double dy)

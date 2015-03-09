@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Tao.OpenGl;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 using Gtk;
 
 namespace RaahnSimulation
@@ -95,17 +96,14 @@ namespace RaahnSimulation
 	                Clean();
 	                return Utils.EXIT_F;
 	            }
-	        }
 
-	        if (headLess)
+                ChangeState(MenuState.Instance());
+                MainLoop();
+	        }
+            else
 	        {
 	            ChangeState(SimState.Instance());
 	            MainLoopHeadless();
-	        }
-	        else
-	        {
-	            ChangeState(MenuState.Instance());
-	            MainLoop();
 	        }
 
             Clean();
@@ -148,7 +146,7 @@ namespace RaahnSimulation
             Gdk.Pixmap blank = new Gdk.Pixmap(null, 1, 1, 1);
             blankCursor = new Gdk.Cursor(blank, blank, Gdk.Color.Zero, Gdk.Color.Zero, 0, 0);
 
-            mainGLWidget = new GLWidget(InitGraphics, RenderFrame, ResizeFrame);
+            mainGLWidget = new GLWidget(Utils.DEFAULT_GRAPHICS_MODE, InitGraphics, RenderFrame);
 
             simWindow.Add(mainGLWidget);
 
@@ -166,8 +164,9 @@ namespace RaahnSimulation
         private void InitGraphics()
         {
             //Check to make sure OpenGL 1.5 is supported.
-            string glVersion = Gl.glGetString(Gl.GL_VERSION).Substring(0, 3);
-            Console.WriteLine("GL Version " + glVersion);
+            string glVersion = GL.GetString(StringName.Version).Substring(0, 3);
+            Console.Write(Utils.VERBOSE_GL_VERSION);
+            Console.WriteLine(glVersion);
 
             if (double.Parse(glVersion) < Utils.MIN_GL_VERSION)
             {
@@ -176,22 +175,23 @@ namespace RaahnSimulation
                 return;
             }
 
-            Gl.glClearColor(Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, 0.0f);
+            GL.ClearColor(Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, 0.0f);
 
             //Enable blending for alpha values.
-            Gl.glEnable(Gl.GL_BLEND);
-            Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             if (!texMan.LoadTextures())
             {
                 Console.WriteLine(Utils.TEXTURE_LOAD_FAILED);
+                glInitFailed = true;
                 return;
             }
 
-            Gl.glEnableClientState(Gl.GL_VERTEX_ARRAY);
-            Gl.glEnableClientState(Gl.GL_TEXTURE_COORD_ARRAY);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.EnableClientState(ArrayCap.TextureCoordArray);
 
-            lineRect = new Mesh(2, Gl.GL_LINES);
+            lineRect = new Mesh(2, BeginMode.Lines);
 
             float[] lrVertices = new float[]
             {
@@ -211,9 +211,9 @@ namespace RaahnSimulation
 
             lineRect.SetVertices(lrVertices, false);
             lineRect.SetIndices(lrIndices);
-            lineRect.Allocate(Gl.GL_STATIC_DRAW);
+            lineRect.Allocate(BufferUsageHint.StaticDraw);
 
-            quad = new Mesh(2, Gl.GL_TRIANGLES);
+            quad = new Mesh(2, BeginMode.Triangles);
 
             float[] quadVertices = 
             {
@@ -232,10 +232,10 @@ namespace RaahnSimulation
             quad.SetVertices(quadVertices, true);
             quad.SetIndices(quadIndices);
             //Also makes quad's vertex buffer current.
-            quad.Allocate(Gl.GL_STATIC_DRAW);
+            quad.Allocate(BufferUsageHint.StaticDraw);
             quad.MakeCurrent();
 
-            Gl.glViewport(0, 0, (int)windowWidth, (int)windowHeight);
+            GL.Viewport(0, 0, (int)windowWidth, (int)windowHeight);
         }
 
 	    private void MainLoop()
@@ -287,7 +287,7 @@ namespace RaahnSimulation
                     camera.windowWorldRatio.x = (double)windowWidth / Simulator.WORLD_WINDOW_WIDTH;
                     camera.windowWorldRatio.y = (double)windowHeight / Simulator.WORLD_WINDOW_HEIGHT;
 
-                    mainGLWidget.OnConfigure();
+                    ResizeFrame();
                 }
             }
 
@@ -297,22 +297,22 @@ namespace RaahnSimulation
 
         private void ResizeFrame()
         {
-            Gl.glViewport(0, 0, (int)windowWidth, (int)windowHeight);
+            GL.Viewport(0, 0, (int)windowWidth, (int)windowHeight);
         }
 
 	    private void RenderFrame()
 	    {
-	        Gl.glClear(Gl.GL_COLOR_BUFFER_BIT);
+	        GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            Gl.glMatrixMode(Gl.GL_PROJECTION);
+            GL.MatrixMode(MatrixMode.Projection);
 
-            Gl.glLoadIdentity();
+            GL.LoadIdentity();
 
-            Gl.glOrtho(0.0, WORLD_WINDOW_WIDTH, 0.0, WORLD_WINDOW_HEIGHT, -1.0, 1.0);
+            GL.Ortho(0.0, WORLD_WINDOW_WIDTH, 0.0, WORLD_WINDOW_HEIGHT, -1.0, 1.0);
 
-            Gl.glMatrixMode(Gl.GL_MODELVIEW);
+            GL.MatrixMode(MatrixMode.Modelview);
 
-	        Gl.glLoadIdentity();
+	        GL.LoadIdentity();
 
 	        camera.Transform();
 
@@ -423,6 +423,9 @@ namespace RaahnSimulation
                 lineRect.Free();
                 quad.Free();
             }
+
+            //Free the GL context after deleting GL objects.
+            mainGLWidget.Dispose();
 	    }
 
         //Window moved or resized. Must use GLib.ConnectBefore
@@ -595,6 +598,7 @@ namespace RaahnSimulation
 			SaveEvent(e);
 
             Simulator.Instance().running = false;
+            mainGLWidget.Invalidate();
 		}
 
 		private void SaveEvent(Event e)

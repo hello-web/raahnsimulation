@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -62,19 +62,19 @@ namespace RaahnSimulation
 
         public void DebugDraw()
         {
-            Gl.glDisable(Gl.GL_TEXTURE_2D);
+            GL.Disable(EnableCap.Texture2D);
 
-            Gl.glColor4d(0.0, 0.0, 1.0, 0.5);
+            GL.Color4(0.0, 0.0, 1.0, 0.5);
 
-            Gl.glPushMatrix();
+            GL.PushMatrix();
 
             rootNode.DebugDraw();
 
-            Gl.glPopMatrix();
+            GL.PopMatrix();
 
-            Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
+            GL.Color4(1.0, 1.0, 1.0, 1.0);
 
-            Gl.glEnable(Gl.GL_TEXTURE_2D);
+            GL.Enable(EnableCap.Texture2D);
         }
     }
 }

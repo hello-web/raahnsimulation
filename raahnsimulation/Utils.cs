@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Globalization;
+using OpenTK;
+using OpenTK.Graphics;
 
 namespace RaahnSimulation
 {
@@ -289,7 +291,7 @@ namespace RaahnSimulation
         public const string MAP_FOLDER = "Data/Maps/";
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
-		public const string VERSION_STRING = "Version 2.7";
+		public const string VERSION_STRING = "Version 2.8";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
@@ -298,6 +300,8 @@ namespace RaahnSimulation
         public const string CANCEL_BUTTON = "Cancel";
         //File extensions.
         public const string MAP_FILE_EXTENSION = ".xml";
+        //Verbose strings.
+        public const string VERBOSE_GL_VERSION = "GL Version ";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
@@ -307,6 +311,12 @@ namespace RaahnSimulation
         public const string SENSOR_LOAD_ERROR = "The sensor configuration may not have been created correctly.";
         public const string XML_READ_ERROR = "Error while reading XML.";
         public const string XML_WRITE_ERROR = "Error while writing XML.";
+
+        //Some OpenTK values must be initialized before calling Gtk.Application.Init().
+        public readonly static bool RUNNING_X11 = Configuration.RunningOnX11;
+        public readonly static bool RUNNING_WINDOWS = Configuration.RunningOnWindows;
+        public readonly static bool RUNNING_MACOS = Configuration.RunningOnMacOS;
+        public readonly static GraphicsMode DEFAULT_GRAPHICS_MODE = GraphicsMode.Default;
 
 		public static double DegToRad(double deg)
 		{

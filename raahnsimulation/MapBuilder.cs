@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {

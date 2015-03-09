@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -52,8 +52,8 @@ namespace RaahnSimulation
 
             if (sharedMesh == null)
             {
-                sharedMesh = new Mesh(2, Gl.GL_LINE_LOOP);
-                sharedMesh.AllocateEmpty(MAX_VBO_SIZE, MAX_IBO_SIZE, Gl.GL_DYNAMIC_DRAW);
+                sharedMesh = new Mesh(2, BeginMode.LineLoop);
+                sharedMesh.AllocateEmpty(MAX_VBO_SIZE, MAX_IBO_SIZE, BufferUsageHint.DynamicDraw);
             }
 
             sensors = new List<PieSliceSensor>();
@@ -68,7 +68,7 @@ namespace RaahnSimulation
             }
         }
 
-        public static int GetSharedRenderMode()
+        public static BeginMode GetSharedRenderMode()
         {
             return sharedMesh.GetRenderMode();
         }

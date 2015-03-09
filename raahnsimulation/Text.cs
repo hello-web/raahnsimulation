@@ -1,5 +1,5 @@
 using System;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -56,7 +56,7 @@ namespace RaahnSimulation
 	    {
 	        base.Draw();
 
-	        Gl.glColor3d(color.x, color.y, color.z);
+	        GL.Color3(color.x, color.y, color.z);
 
 	        for (int i = 0; i < text.Length; i++)
 	        {
@@ -88,30 +88,30 @@ namespace RaahnSimulation
 	            charCenter.x = (transformedWorldPos.x + (i * spacing)) + (charWidth / 2.0);
 	            charCenter.y = transformedWorldPos.y + (height / 2.0);
 
-	            Gl.glMatrixMode(Gl.GL_TEXTURE);
+	            GL.MatrixMode(MatrixMode.Texture);
 
-	            Gl.glLoadIdentity();
-	            Gl.glTranslated((charTexPos.x * Utils.TEXTURE_CHAR_WIDTH), (charTexPos.y * Utils.TEXTURE_CHAR_HEIGHT), 1);
-	            Gl.glScaled(Utils.TEXTURE_CHAR_WIDTH, Utils.TEXTURE_CHAR_HEIGHT, 1);
+	            GL.LoadIdentity();
+	            GL.Translate((charTexPos.x * Utils.TEXTURE_CHAR_WIDTH), (charTexPos.y * Utils.TEXTURE_CHAR_HEIGHT), 1);
+	            GL.Scale(Utils.TEXTURE_CHAR_WIDTH, Utils.TEXTURE_CHAR_HEIGHT, 1);
 
-	            Gl.glMatrixMode(Gl.GL_MODELVIEW);
+	            GL.MatrixMode(MatrixMode.Modelview);
 
-	            Gl.glPushMatrix();
+	            GL.PushMatrix();
 
-	            Gl.glTranslated(drawingVec.x + (i * spacing), drawingVec.y, Utils.DISCARD_Z_POS);
-	            Gl.glScaled(charWidth, height, Utils.DISCARD_Z_SCALE);
-	            Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+	            GL.Translate(drawingVec.x + (i * spacing), drawingVec.y, Utils.DISCARD_Z_POS);
+	            GL.Scale(charWidth, height, Utils.DISCARD_Z_SCALE);
+	            GL.DrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
 
-	            Gl.glPopMatrix();
+	            GL.PopMatrix();
 	        }
 
-	        Gl.glColor3d(1.0, 1.0, 1.0);
+	        GL.Color3(1.0, 1.0, 1.0);
 
-	        Gl.glMatrixMode(Gl.GL_TEXTURE);
+	        GL.MatrixMode(MatrixMode.Texture);
 
-	        Gl.glLoadIdentity();
+	        GL.LoadIdentity();
 
-	        Gl.glMatrixMode(Gl.GL_MODELVIEW);
+	        GL.MatrixMode(MatrixMode.Modelview);
 	    }
 
         public override void DebugDraw()

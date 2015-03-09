@@ -59,8 +59,13 @@ namespace RaahnSimulation
             raahnCar.transformedWorldPos.y = 0.0;
             raahnCar.Update();
 
-            string mapFilePath = Utils.MAP_FOLDER + experiment.mapFile;
-            EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
+            if (experiment != null)
+            {
+                string mapFilePath = Utils.MAP_FOLDER + experiment.mapFile;
+                EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
+            }
+            else
+                EntityMap = new EntityMap(context, 0, raahnCar, quadTree);
 
             AddEntity(raahnCar, 0);
             AddEntity(cursor, 1);

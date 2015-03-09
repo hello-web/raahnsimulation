@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -72,7 +72,7 @@ namespace RaahnSimulation
             //The first RangeFinderGroup to use line initializes it.
             if (line == null)
             {
-                line = new Mesh(2, Gl.GL_LINES);
+                line = new Mesh(2, BeginMode.Lines);
 
                 float[] vertices = 
                 {
@@ -87,7 +87,7 @@ namespace RaahnSimulation
 
                 line.SetVertices(vertices, false);
                 line.SetIndices(indices);
-                line.Allocate(Gl.GL_STATIC_DRAW);
+                line.Allocate(BufferUsageHint.StaticDraw);
             }
         }
 
@@ -175,33 +175,33 @@ namespace RaahnSimulation
         {
             line.MakeCurrent();
 
-            Gl.glDisable(Gl.GL_TEXTURE_2D);
+            GL.Disable(EnableCap.Texture2D);
 
-            Gl.glColor4d(RANGE_FINDER_COLOR_R, RANGE_FINDER_COLOR_G, RANGE_FINDER_COLOR_B, RANGE_FINDER_COLOR_T);
+            GL.Color4(RANGE_FINDER_COLOR_R, RANGE_FINDER_COLOR_G, RANGE_FINDER_COLOR_B, RANGE_FINDER_COLOR_T);
 
             Utils.Vector2 robotCenter = robot.GetCenter();
 
             for (int i = 0; i < count; i++)
             {
-                Gl.glPushMatrix();
+                GL.PushMatrix();
 
                 double rangeFinderAngle = startAngle + (angleSpacing * i);
 
-                Gl.glTranslated(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
-                Gl.glRotated(robot.angle + rangeFinderAngle, 0.0, 0.0, 1.0);
-                Gl.glTranslated(-robotCenter.x, -robotCenter.y, -Utils.DISCARD_Z_POS);
+                GL.Translate(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
+                GL.Rotate(robot.angle + rangeFinderAngle, 0.0, 0.0, 1.0);
+                GL.Translate(-robotCenter.x, -robotCenter.y, -Utils.DISCARD_Z_POS);
 
-                Gl.glTranslated(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
-                Gl.glScaled(lengths[i], LINE_HEIGHT, Utils.DISCARD_Z_SCALE);
+                GL.Translate(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
+                GL.Scale(lengths[i], LINE_HEIGHT, Utils.DISCARD_Z_SCALE);
 
-                Gl.glDrawElements(line.GetRenderMode(), line.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+                GL.DrawElements(line.GetRenderMode(), line.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
 
-                Gl.glPopMatrix();
+                GL.PopMatrix();
             }
 
-            Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
+            GL.Color4(1.0, 1.0, 1.0, 1.0);
 
-            Gl.glEnable(Gl.GL_TEXTURE_2D);
+            GL.Enable(EnableCap.Texture2D);
         }
 
         public uint GetRangeFinderCount()

@@ -1,6 +1,6 @@
 using System;
 using System.Xml.Serialization;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -302,9 +302,9 @@ namespace RaahnSimulation
 
 	    protected void RotateAroundCenter()
 	    {
-	        Gl.glTranslated(center.x, center.y, Utils.DISCARD_Z_POS);
-	        Gl.glRotated(angle, 0.0, 0.0, 1.0);
-	        Gl.glTranslated(-center.x, -center.y, -Utils.DISCARD_Z_POS);
+	        GL.Translate(center.x, center.y, Utils.DISCARD_Z_POS);
+	        GL.Rotate(angle, 0.0, 0.0, 1.0);
+	        GL.Translate(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 	    }
 	}
 }

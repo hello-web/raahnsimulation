@@ -1,5 +1,5 @@
 using System;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -12,7 +12,7 @@ namespace RaahnSimulation
         private const double COLOR_B = 0.0;
         private const double COLOR_A = 0.0;
 
-        private readonly ushort[] indices = { 0, 1 };
+        private static readonly ushort[] indices = { 0, 1 };
 
         private static Mesh sharedMesh = null;
 
@@ -22,8 +22,8 @@ namespace RaahnSimulation
         {
             if (sharedMesh == null)
             {
-                sharedMesh = new Mesh(2, Gl.GL_LINES);
-                sharedMesh.AllocateEmpty(VBO_SIZE, IBO_SIZE, Gl.GL_STATIC_DRAW);
+                sharedMesh = new Mesh(2, BeginMode.Lines);
+                sharedMesh.AllocateEmpty(VBO_SIZE, IBO_SIZE, BufferUsageHint.StaticDraw);
             }
 
             //Second coordinate is the distance from 0,0.
@@ -50,7 +50,7 @@ namespace RaahnSimulation
 
         public override void Draw()
         {
-            Gl.glColor4d(COLOR_R, COLOR_G, COLOR_B, COLOR_A);
+            GL.Color4(COLOR_R, COLOR_G, COLOR_B, COLOR_A);
 
             //Set the shared mesh resource to the wall's vertices and indices.
             sharedMesh.SetVertices(vertices, false);
@@ -59,10 +59,10 @@ namespace RaahnSimulation
 
             sharedMesh.MakeCurrent();
 
-            Gl.glTranslated(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
-            Gl.glDrawElements(sharedMesh.GetRenderMode(), sharedMesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+            GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+            GL.DrawElements(sharedMesh.GetRenderMode(), sharedMesh.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
 
-            Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
+            GL.Color4(1.0, 1.0, 1.0, 1.0);
         }
     }
 }

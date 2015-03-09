@@ -1,5 +1,5 @@
 using System;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -14,16 +14,16 @@ namespace RaahnSimulation
         //vertexCoordCount refers to the number of coords in a single vertex.
         private int vertexCoordCount;
         private int uvOffset;
-        private int renderMode;
         private uint vb;
         private uint ib;
         private bool allocated;
         private bool usesUV;
         private float[] vertices;
         private ushort[] indices;
+        private BeginMode renderMode;
 
         //coordCount refers to the number of coords in a single vertex.
-        public Mesh(int coordCount, int mode)
+        public Mesh(int coordCount, BeginMode mode)
         {
             vertexCoordCount = coordCount;
             uvOffset = sizeof(float) * vertexCoordCount;
@@ -50,28 +50,28 @@ namespace RaahnSimulation
             indices = i;
         }
 
-        public void SetRenderMode(int mode)
+        public void SetRenderMode(BeginMode mode)
         {
             renderMode = mode;
         }
 
         public void MakeCurrent()
         {
-            Gl.glBindBuffer(Gl.GL_ARRAY_BUFFER, vb);
-            Gl.glBindBuffer(Gl.GL_ELEMENT_ARRAY_BUFFER, ib);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vb);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ib);
 
             if (usesUV)
             {
-                Gl.glVertexPointer(vertexCoordCount, Gl.GL_FLOAT, Utils.TexturedVertexSize, IntPtr.Zero);
-                Gl.glTexCoordPointer(UV_COORD_COUNT, Gl.GL_FLOAT, Utils.TexturedVertexSize, (IntPtr)uvOffset);
+                GL.VertexPointer(vertexCoordCount, VertexPointerType.Float, Utils.TexturedVertexSize, IntPtr.Zero);
+                GL.TexCoordPointer(UV_COORD_COUNT, TexCoordPointerType.Float, Utils.TexturedVertexSize, (IntPtr)uvOffset);
             }
             else
-                Gl.glVertexPointer(vertexCoordCount, Gl.GL_FLOAT, Utils.VertexSize, IntPtr.Zero);
+                GL.VertexPointer(vertexCoordCount, VertexPointerType.Float, Utils.VertexSize, IntPtr.Zero);
 
             currentMesh = this;
         }
 
-        public int GetRenderMode()
+        public BeginMode GetRenderMode()
         {
             return renderMode;
         }
@@ -87,18 +87,18 @@ namespace RaahnSimulation
         }
 
         //Returns false if failed to allocate.
-        public bool Allocate(int usage)
+        public bool Allocate(BufferUsageHint usage)
         {
             if (vertices == null || indices == null || allocated)
                 return false;
 
-            Gl.glGenBuffers(1, out vb);
-            Gl.glBindBuffer(Gl.GL_ARRAY_BUFFER, vb);
-            Gl.glBufferData(Gl.GL_ARRAY_BUFFER, (IntPtr)(sizeof(float) * vertices.Length), vertices, usage);
+            GL.GenBuffers(1, out vb);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vb);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(sizeof(float) * vertices.Length), vertices, usage);
 
-            Gl.glGenBuffers(1, out ib);
-            Gl.glBindBuffer(Gl.GL_ELEMENT_ARRAY_BUFFER, ib);
-            Gl.glBufferData(Gl.GL_ELEMENT_ARRAY_BUFFER, (IntPtr)(sizeof(ushort) * indices.Length), indices, usage);
+            GL.GenBuffers(1, out ib);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ib);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(ushort) * indices.Length), indices, usage);
 
             allocated = true;
 
@@ -111,18 +111,18 @@ namespace RaahnSimulation
             return true;
         }
 
-        public bool AllocateEmpty(uint vboSize, uint iboSize, int usage)
+        public bool AllocateEmpty(uint vboSize, uint iboSize, BufferUsageHint usage)
         {
             if (allocated)
                 return false;
 
-            Gl.glGenBuffers(1, out vb);
-            Gl.glBindBuffer(Gl.GL_ARRAY_BUFFER, vb);
-            Gl.glBufferData(Gl.GL_ARRAY_BUFFER, (IntPtr)(sizeof(float) * vboSize), IntPtr.Zero, usage);
+            GL.GenBuffers(1, out vb);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vb);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(sizeof(float) * vboSize), IntPtr.Zero, usage);
 
-            Gl.glGenBuffers(1, out ib);
-            Gl.glBindBuffer(Gl.GL_ELEMENT_ARRAY_BUFFER, ib);
-            Gl.glBufferData(Gl.GL_ELEMENT_ARRAY_BUFFER, (IntPtr)(sizeof(ushort) * iboSize), IntPtr.Zero, usage);
+            GL.GenBuffers(1, out ib);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ib);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(ushort) * iboSize), IntPtr.Zero, usage);
 
             allocated = true;
 
@@ -137,11 +137,11 @@ namespace RaahnSimulation
 
         public void Update()
         {
-            Gl.glBindBuffer(Gl.GL_ARRAY_BUFFER, vb);
-            Gl.glBufferSubData(Gl.GL_ARRAY_BUFFER, IntPtr.Zero, (IntPtr)(sizeof(float) * vertices.Length), vertices);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vb);
+            GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, (IntPtr)(sizeof(float) * vertices.Length), vertices);
 
-            Gl.glBindBuffer(Gl.GL_ELEMENT_ARRAY_BUFFER, ib);
-            Gl.glBufferSubData(Gl.GL_ELEMENT_ARRAY_BUFFER, IntPtr.Zero, (IntPtr)(sizeof(ushort) * indices.Length), indices);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ib);
+            GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, (IntPtr)(sizeof(ushort) * indices.Length), indices);
 
             //A new VBO and IBO are bound, but glVertexPointer and
             //glTexCoordPointer still have wrong information.
@@ -159,8 +159,8 @@ namespace RaahnSimulation
             if (!allocated)
                 return false;
 
-            Gl.glDeleteBuffers(1, ref vb);
-            Gl.glDeleteBuffers(1, ref ib);
+            GL.DeleteBuffers(1, ref vb);
+            GL.DeleteBuffers(1, ref ib);
 
             allocated = false;
 

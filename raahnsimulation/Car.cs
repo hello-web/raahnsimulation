@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -184,16 +184,16 @@ namespace RaahnSimulation
 	    {
 	        base.Draw();
 
-            Gl.glPushMatrix();
+            GL.PushMatrix();
 
 	        RotateAroundCenter();
 
-	        Gl.glTranslated(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
-	        Gl.glScaled(width, height, Utils.DISCARD_Z_SCALE);
+	        GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+	        GL.Scale(width, height, Utils.DISCARD_Z_SCALE);
 
-	        Gl.glDrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+            GL.DrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
 
-            Gl.glPopMatrix();
+            GL.PopMatrix();
 
             for (int i = 0; i < rangeFinderGroups.Count; i++)
                 rangeFinderGroups[i].Draw();

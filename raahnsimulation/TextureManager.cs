@@ -1,5 +1,5 @@
 using System;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -43,9 +43,9 @@ namespace RaahnSimulation
 
 	    public bool LoadTextures()
 	    {
-	        Gl.glEnable(Gl.GL_TEXTURE_2D);
+	        GL.Enable(EnableCap.Texture2D);
 
-	        Gl.glGenTextures(TEXTURE_COUNT, textures);
+	        GL.GenTextures(TEXTURE_COUNT, textures);
 
 	        for (int i = 0; i < TEXTURE_COUNT; i++)
 	        {
@@ -56,13 +56,13 @@ namespace RaahnSimulation
                 //Flip the image vertically for glTexImage2D.
                 currentImage = currentImage.Flip(false);
 
-				Gl.glBindTexture(Gl.GL_TEXTURE_2D, textures[i]);
-				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MAG_FILTER, Gl.GL_LINEAR);
-				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MIN_FILTER, Gl.GL_LINEAR);
-				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_S, Gl.GL_CLAMP_TO_EDGE);
-				Gl.glTexParameterf(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_T, Gl.GL_CLAMP_TO_EDGE);
-				Gl.glTexImage2D(Gl.GL_TEXTURE_2D, 0, Gl.GL_RGBA, (int)currentImage.Width, (int)currentImage.Height, 0, 
-                                Gl.GL_RGBA, Gl.GL_UNSIGNED_BYTE, currentImage.Pixels);
+				GL.BindTexture(TextureTarget.Texture2D, textures[i]);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, (int)currentImage.Width, 
+                              (int)currentImage.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, currentImage.Pixels);
 	        }
 
             loadedTextures = true;
@@ -74,13 +74,13 @@ namespace RaahnSimulation
         public bool DeleteTextures()
         {
             if (loadedTextures)
-                Gl.glDeleteTextures(TEXTURE_COUNT, textures);
+                GL.DeleteTextures(TEXTURE_COUNT, textures);
             return loadedTextures;
         }
 
 	    public void SetTexture(TextureType t)
 	    {
-			Gl.glBindTexture(Gl.GL_TEXTURE_2D, textures[(uint)t]);
+			GL.BindTexture(TextureTarget.Texture2D, textures[(uint)t]);
 	        currentTexture = t;
 	    }
 

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -188,26 +188,26 @@ namespace RaahnSimulation
             PieSliceSensorGroup.SetSharedMesh(curvePoints.ToArray(), indices.ToArray());
             PieSliceSensorGroup.MakeSharedMeshCurrent();
 
-            Gl.glDisable(Gl.GL_TEXTURE_2D);
+            GL.Disable(EnableCap.Texture2D);
 
-            Gl.glColor4d(color.x, color.y, color.z, transparency);
+            GL.Color4(color.x, color.y, color.z, transparency);
 
-            Gl.glPushMatrix();
+            GL.PushMatrix();
 
-            Gl.glTranslated(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
-            Gl.glRotated(robot.angle + angle, 0.0, 0.0, 1.0);
-            Gl.glTranslated(-robotCenter.x, -robotCenter.y, -Utils.DISCARD_Z_POS);
+            GL.Translate(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
+            GL.Rotate(robot.angle + angle, 0.0, 0.0, 1.0);
+            GL.Translate(-robotCenter.x, -robotCenter.y, -Utils.DISCARD_Z_POS);
 
-            Gl.glTranslated(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
-            Gl.glScaled(radius, radius, Utils.DISCARD_Z_SCALE);
+            GL.Translate(robotCenter.x, robotCenter.y, Utils.DISCARD_Z_POS);
+            GL.Scale(radius, radius, Utils.DISCARD_Z_SCALE);
 
-            Gl.glDrawElements(PieSliceSensorGroup.GetSharedRenderMode(), PieSliceSensorGroup.GetSharedIndexCount(), Gl.GL_UNSIGNED_SHORT, IntPtr.Zero);
+            GL.DrawElements(PieSliceSensorGroup.GetSharedRenderMode(), PieSliceSensorGroup.GetSharedIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
 
-            Gl.glPopMatrix();
+            GL.PopMatrix();
 
-            Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
+            GL.Color4(1.0, 1.0, 1.0, 1.0);
 
-            Gl.glEnable(Gl.GL_TEXTURE_2D);
+            GL.Enable(EnableCap.Texture2D);
         }
 
         public double GetValue()

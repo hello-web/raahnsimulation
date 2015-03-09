@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Tao.OpenGl;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -134,41 +134,41 @@ namespace RaahnSimulation
                 {
                     if (curEntity.visible)
                     {
-                        Gl.glPushMatrix();
+                        GL.PushMatrix();
 
                         Utils.Vector3 color = curEntity.GetColor();
 
-                        Gl.glColor4d(color.x, color.y, color.z, curEntity.GetTransparency());
+                        GL.Color4(color.x, color.y, color.z, curEntity.GetTransparency());
 
                         // Disable camera transformation.
                         if (curEntity.drawingVec == curEntity.worldPos)
-                            Gl.glLoadIdentity();
+                            GL.LoadIdentity();
 
                         curEntity.Draw();
 
-                        Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
+                        GL.Color4(1.0, 1.0, 1.0, 1.0);
 
-                        Gl.glPopMatrix();
+                        GL.PopMatrix();
 
                         if (context.debugging)
                         {
-                            Gl.glPushMatrix();
+                            GL.PushMatrix();
 
-                            Gl.glDisable(Gl.GL_TEXTURE_2D);
+                            GL.Disable(EnableCap.Texture2D);
 
-                            Gl.glColor4d(0.0, 0.0, 0.0, 0.5);
+                            GL.Color4(0.0, 0.0, 0.0, 0.5);
 
                             // Disable camera transformation.
                             if (curEntity.drawingVec == curEntity.worldPos)
-                                Gl.glLoadIdentity();
+                                GL.LoadIdentity();
 
                             curEntity.DebugDraw();
 
-                            Gl.glPopMatrix();
+                            GL.PopMatrix();
 
-                            Gl.glEnable(Gl.GL_TEXTURE_2D);
+                            GL.Enable(EnableCap.Texture2D);
 
-                            Gl.glColor4d(1.0, 1.0, 1.0, 1.0);
+                            GL.Color4(1.0, 1.0, 1.0, 1.0);
                         }
                     }
                 }

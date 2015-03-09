@@ -79,7 +79,9 @@ namespace RaahnSimulation
         {
             bool configChoosen = true;
 
-            Gtk.FileChooserDialog expChooser = new Gtk.FileChooserDialog(Utils.CHOOSE_EXPERIMENT_FILE, null, Gtk.FileChooserAction.Open);
+            Gtk.Window win = sim.GetWindow();
+
+            Gtk.FileChooserDialog expChooser = new Gtk.FileChooserDialog(Utils.CHOOSE_EXPERIMENT_FILE, win, Gtk.FileChooserAction.Open);
             expChooser.AddButton(Utils.OPEN_BUTTON, Gtk.ResponseType.Ok);
             expChooser.AddButton(Utils.CANCEL_BUTTON, Gtk.ResponseType.Cancel);
             expChooser.SetCurrentFolder(Utils.EXPERIMENT_FOLDER);
@@ -98,7 +100,7 @@ namespace RaahnSimulation
                     Console.WriteLine(e.Message);
                     configChoosen = false;
 
-                    Gtk.MessageDialog errorDialog = new Gtk.MessageDialog(null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, 
+                    Gtk.MessageDialog errorDialog = new Gtk.MessageDialog(win, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, 
                                                                           Gtk.ButtonsType.Ok, Utils.XML_READ_ERROR);
                     errorDialog.Run();
                     errorDialog.Destroy();
