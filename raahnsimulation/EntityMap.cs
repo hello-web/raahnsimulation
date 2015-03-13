@@ -100,8 +100,7 @@ namespace RaahnSimulation
 
             if (mapConfig.robotConfig != null)
             {
-                raahnCar.transformedWorldPos.x = mapConfig.robotConfig.x;
-                raahnCar.transformedWorldPos.y = mapConfig.robotConfig.y;
+                raahnCar.SetPosition(mapConfig.robotConfig.x, mapConfig.robotConfig.y);
                 raahnCar.angle = mapConfig.robotConfig.angle;
             }
 
@@ -110,22 +109,28 @@ namespace RaahnSimulation
                 for (int i = 0; i < mapConfig.entites.Length; i++)
                 {
                     Entity newEntity = null;
-                    Entity.EntityType type = Entity.GetTypeFromString(mapConfig.entites[i].type);
+                    Entity.EntityType type = Entity.EntityType.NONE;
+
+                    if (mapConfig.entites[i].type != null)
+                        type = Entity.GetTypeFromString(mapConfig.entites[i].type);
 
                     switch (type)
                     {
                         case Entity.EntityType.WALL:
-                            {
-                                newEntity = new Wall(context);
-                                break;
-                            }
+                        {
+                            newEntity = new Wall(context);
+                            Wall newWall = (Wall)newEntity;
+
+                            newWall.SetRelativeEndPoint(mapConfig.entites[i].relX, mapConfig.entites[i].relY);
+
+                            break;
+                        }
                     }
 
                     if (newEntity == null)
                         continue;
 
-                    newEntity.transformedWorldPos.x = mapConfig.entites[i].x;
-                    newEntity.transformedWorldPos.y = mapConfig.entites[i].y;
+                    newEntity.SetPosition(mapConfig.entites[i].x, mapConfig.entites[i].y);
                     newEntity.angle = mapConfig.entites[i].angle;
 
                     entities.Add(newEntity);

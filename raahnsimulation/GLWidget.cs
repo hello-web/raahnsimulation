@@ -4,6 +4,7 @@ using System.Security;
 using System.Threading;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Platform;
 using Gtk;
@@ -110,7 +111,7 @@ namespace RaahnSimulation
             if (graphicsContext != null)
                 return;
 
-            if (Utils.RUNNING_X11)
+            if (Configuration.RunningOnX11)
             {
                 IntPtr display = gdk_x11_display_get_xdisplay(Display.Handle);
                 IntPtr handle = gdk_x11_drawable_get_xid(GdkWindow.Handle);
@@ -131,12 +132,12 @@ namespace RaahnSimulation
                 windowInfo = Utilities.CreateX11WindowInfo(display, Screen.Number, handle, rootWindow, visualInfo);
                 XFree(visualInfo);
             }
-            else if (Utils.RUNNING_WINDOWS)
+            else if (Configuration.RunningOnWindows)
             {
                 IntPtr handle = gdk_win32_drawable_get_handle(GdkWindow.Handle);
                 windowInfo = Utilities.CreateWindowsWindowInfo(handle);
             }
-            else if (Utils.RUNNING_MACOS)
+            else if (Configuration.RunningOnMacOS)
             {
                 IntPtr handle = gdk_x11_drawable_get_xid(GdkWindow.Handle);
                 windowInfo = Utilities.CreateMacOSCarbonWindowInfo(handle, true, true);

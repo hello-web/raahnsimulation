@@ -84,6 +84,25 @@ namespace RaahnSimulation
                 ul.Copy(copyRect.ul);
                 ur.Copy(copyRect.ur);
             }
+
+            public bool Intersects(double x, double y)
+            {
+                if (x >= left && x <= right)
+                {
+                    if (y >= bottom && y <= top)
+                        return true;
+                }
+                return false;
+            }
+
+            public bool Intersects(Utils.Rect r)
+            {
+                if (r.left >= right || r.right <= left
+                    || r.bottom >= top || r.top <= bottom)
+                    return false;
+                else
+                    return true;
+            }
         }
 
         //Points are structs, vectors are classes.
@@ -188,6 +207,7 @@ namespace RaahnSimulation
                     {
                         bool lowerInBounds = ValueInBounds(lowerBoundY, line.lowerBoundY, line.upperBoundY);
                         bool upperInBounds = ValueInBounds(upperBoundY, line.lowerBoundY, line.upperBoundY);
+
                         if (lowerInBounds && upperInBounds)
                         {
                             intersection.Add(new Point2(lowerBoundX, lowerBoundY));
@@ -259,11 +279,28 @@ namespace RaahnSimulation
             }
         }
 
+        public static Utils.Point2 GetNearestIntersection(List<Utils.Point2> intersections, Utils.Vector2 center)
+        {
+            Utils.Point2 nearest = intersections[0];
+
+            for (int x = 1; x < intersections.Count; x++)
+            {
+                Utils.Point2 currentIntersection = intersections[x];
+                Utils.Point2 centerPoint = new Utils.Point2(center.x, center.y);
+
+                if (Utils.GetDist(nearest, centerPoint) > Utils.GetDist(currentIntersection, centerPoint))
+                    nearest = intersections[x];
+            }
+
+            return nearest;
+        }
+
         public const int TexturedVertexSize = sizeof(float) * 4;
         public const int VertexSize = sizeof(float) * 2;
 		public const int EXIT_S = 0;
 		public const int EXIT_F = 1;
         public const int GTK_BUTTON_LEFT = 1;
+        public const int GTK_BUTTON_RIGHT = 3;
         public const uint CHARACTER_TEX_COLUMN_COUNT = 11;
         public const uint CHARACTER_TEX_ROW_COUNT = 9;
 
@@ -271,8 +308,10 @@ namespace RaahnSimulation
         public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
         public const double INVALID_ACTIVATION = -1.0;
         public const double MIN_GL_VERSION = 1.5;
-		public const double SCREEN_WIDTH_PERCENTAGE = 0.6;
-        public const double SCREEN_HEIGHT_PERCENTAGE = 0.75;
+		public const double DEFAULT_SCREEN_WIDTH_PERCENTAGE = 0.6;
+        public const double DEFAULT_SCREEN_HEIGHT_PERCENTAGE = 0.75;
+        public const double MENU_SCREEN_WIDTH_PERCENTAGE = 0.4;
+        public const double MENU_SCREEN_HEIGHT_PERCENTAGE = 0.5;
 		public const double DISCARD_Z_POS = 0.0;
 		public const double DISCARD_Z_SCALE = 1.0;
 		public const double DEG_TO_RAD = 3.1415926535 / 180.0;
@@ -291,7 +330,7 @@ namespace RaahnSimulation
         public const string MAP_FOLDER = "Data/Maps/";
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
-		public const string VERSION_STRING = "Version 2.8";
+		public const string VERSION_STRING = "Version 2.9";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
@@ -311,12 +350,7 @@ namespace RaahnSimulation
         public const string SENSOR_LOAD_ERROR = "The sensor configuration may not have been created correctly.";
         public const string XML_READ_ERROR = "Error while reading XML.";
         public const string XML_WRITE_ERROR = "Error while writing XML.";
-
-        //Some OpenTK values must be initialized before calling Gtk.Application.Init().
-        public readonly static bool RUNNING_X11 = Configuration.RunningOnX11;
-        public readonly static bool RUNNING_WINDOWS = Configuration.RunningOnWindows;
-        public readonly static bool RUNNING_MACOS = Configuration.RunningOnMacOS;
-        public readonly static GraphicsMode DEFAULT_GRAPHICS_MODE = GraphicsMode.Default;
+        public const string ENTITY_POOL_USED_UP = "No more entities of type {0}, available.";
 
 		public static double DegToRad(double deg)
 		{

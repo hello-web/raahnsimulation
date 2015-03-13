@@ -141,7 +141,7 @@ namespace RaahnSimulation
                         GL.Color4(color.x, color.y, color.z, curEntity.GetTransparency());
 
                         // Disable camera transformation.
-                        if (curEntity.drawingVec == curEntity.worldPos)
+                        if (!curEntity.UsesTransform())
                             GL.LoadIdentity();
 
                         curEntity.Draw();
@@ -159,7 +159,7 @@ namespace RaahnSimulation
                             GL.Color4(0.0, 0.0, 0.0, 0.5);
 
                             // Disable camera transformation.
-                            if (curEntity.drawingVec == curEntity.worldPos)
+                            if (!curEntity.UsesTransform())
                                 GL.LoadIdentity();
 
                             curEntity.DebugDraw();

@@ -16,19 +16,20 @@ namespace RaahnSimulation
 			FLAG = 4,
             TRASH = 5,
             BUTTON = 6,
-            PANEL = 7
+            PANEL = 7,
+            HOLLOW_CIRCLE = 8
 		};
 
 		public const int ROAD_INDEX_OFFSET = 1;
 
-		private string[] TEXTURE_RESOURCES =
+		private readonly string[] TEXTURE_RESOURCES =
 		{
 			"Data/Textures/TopViewCar.png", "Data/Textures/Cursor0.png", "Data/Textures/Cursor1.png", 
             "Data/Textures/CharMap.png", "Data/Textures/raahn.png", "Data/Textures/Trash.png", 
-            "Data/Textures/Button.png", "Data/Textures/Panel.png"
+            "Data/Textures/Button.png", "Data/Textures/Panel.png", "Data/Textures/HollowCircle.png"
 		};
 
-		private const int TEXTURE_COUNT = 8;
+		private const int TEXTURE_COUNT = 9;
 
         private bool loadedTextures;
 		private uint[] textures;

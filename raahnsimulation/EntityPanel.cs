@@ -21,7 +21,7 @@ namespace RaahnSimulation
         private static readonly string[] PANEL_OPTIONS = { P0 };
 
         private uint itemIndex;
-		private List<List<ColorableEntity>> items;
+		private List<List<Entity>> items;
         private Simulator context;
         private State currentState;
 		private Cursor cursor;
@@ -38,16 +38,15 @@ namespace RaahnSimulation
             selectedEntity = null;
             currentState = context.GetState();
 
-            items = new List<List<ColorableEntity>>();
+            items = new List<List<Entity>>();
 
             for (int i = 0; i < PANEL_OPTION_COUNT; i++)
-                items.Add(new List<ColorableEntity>());
+                items.Add(new List<Entity>());
 
             background = new Graphic(context);
             background.SetTransformUsage(false);
             background.SetTexture(TextureManager.TextureType.PANEL);
-            background.worldPos.x = 0.0;
-            background.transformedWorldPos.y = 0.0;
+            background.SetPosition(0.0, 0.0);
 
             double charWidth = Text.CHAR_DEFAULT_WIDTH;
             double charHeight = Text.CHAR_DEFAULT_HEIGHT;
@@ -78,8 +77,9 @@ namespace RaahnSimulation
             double xBorderOffset = trash.GetWidth() * 0.2;
             double yBorderOffset = trash.GetHeight() * 0.1;
 
-            trash.worldPos.x = Simulator.WORLD_WINDOW_WIDTH - trash.GetWidth() - xBorderOffset;
-            trash.worldPos.y = yBorderOffset;
+            double trashX = Simulator.WORLD_WINDOW_WIDTH - trash.GetWidth() - xBorderOffset;
+
+            trash.SetPosition(trashX, yBorderOffset);
 
             currentState.AddEntity(background, layerIndex);
 
@@ -101,11 +101,6 @@ namespace RaahnSimulation
 	        items.Clear();
 	    }
 
-	    public void Update()
-	    {
-
-	    }
-
         public void UpdateEvent(Event e)
         {
             if (e.type == Gdk.EventType.ButtonPress)
@@ -116,7 +111,7 @@ namespace RaahnSimulation
                 {
                     for (int y = 0; y < items[x].Count; y++)
                     {
-                        if (items[x][y].Intersects(cursor.aabb.GetBounds()))
+                        if (items[x][y].aabb.Intersects(cursor.aabb.GetBounds()))
                         {
                             items[x][y].SetColor(0.0, 0.0, 1.0, 0.85);
 
@@ -168,8 +163,8 @@ namespace RaahnSimulation
 
             double zoom = cam.GetZoom();
 
-            double distX = (x - selectedEntity.transformedWorldPos.x) * zoom;
-			double distY = (y - selectedEntity.transformedWorldPos.y) * zoom;
+            double distX = (x - selectedEntity.GetTransformedX()) * zoom;
+			double distY = (y - selectedEntity.GetTransformedY()) * zoom;
 
             return new Utils.Vector2(distX, distY);
 		}

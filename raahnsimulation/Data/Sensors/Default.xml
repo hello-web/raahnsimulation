@@ -5,7 +5,7 @@
 		<Length>420</Length>
 		<AngleOffset>-75</AngleOffset>
 		<AngleBetween>15</AngleBetween>
-		<DetectEntity>Road</DetectEntity>
+		<DetectEntity>Wall</DetectEntity>
 	</RangeFinderGroup>
 
 	<PieSliceSensorGroup>
@@ -15,6 +15,6 @@
 		<AngleBetween>20</AngleBetween>
 		<OuterRadius>400</OuterRadius>
 		<InnerRadius>0</InnerRadius>
-		<DetectEntity>Road</DetectEntity>
+		<DetectEntity>Wall</DetectEntity>
 	</PieSliceSensorGroup>
 </SensorConfig>

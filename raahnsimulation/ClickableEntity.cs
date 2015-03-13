@@ -54,10 +54,10 @@ namespace RaahnSimulation
             Utils.Vector2 mousePosWindowd = new Utils.Vector2(x, y);
             comparisonVec = context.GetCamera().ProjectWindow(mousePosWindowd);
 
-            if (drawingVec == transformedWorldPos)
+            if (UsesTransform())
                 comparisonVec = context.GetCamera().TransformWorld(comparisonVec);
 
-	        if (Intersects(comparisonVec.x, comparisonVec.y))
+	        if (aabb.Intersects(comparisonVec.x, comparisonVec.y))
 	        {
 	            hovering = true;
 

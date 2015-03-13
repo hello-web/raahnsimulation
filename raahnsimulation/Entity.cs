@@ -13,10 +13,16 @@ namespace RaahnSimulation
         [XmlElement("Y")]
         public double y;
 
+        [XmlElement("RelX")]
+        public double relX;
+
+        [XmlElement("RelY")]
+        public double relY;
+
         [XmlElement("Angle")]
         public double angle;
 
-        [XmlElement("Type")]
+        [XmlAttribute("Type")]
         public string type;
     }
 
@@ -26,12 +32,13 @@ namespace RaahnSimulation
         {
             NONE = -2,
             GENERIC = -1,
-            WALL = 0
+            WALL = 0,
+            CAR = 1
         };
 
         public static readonly string[] ENTITY_TYPE_STRINGS = 
         {
-            "Wall"
+            "Wall", "Car"
         };
 
 		public const double ROTATE_SPEED = 90.0;
@@ -41,14 +48,12 @@ namespace RaahnSimulation
         public const double DEFAULT_COLOR_T = 1.0;
 
         public bool visible;
-		public double angle;
-		public Utils.Vector2 transformedWorldPos;
-		public Utils.Vector2 worldPos;
-		public Utils.Vector2 drawingVec;
+		public double angle;		
         public AABB aabb;
         protected double width;
         protected double height;
         protected double transparency;
+        protected Utils.Vector2 drawingVec;
 		protected Simulator context;
         protected Utils.Vector2 center;
 		protected Utils.Vector2 velocity;
@@ -60,6 +65,8 @@ namespace RaahnSimulation
         private bool moved;
         private double previousAngle;
         private Utils.Vector2 previousPos;
+        private Utils.Vector2 transformedWorldPos;
+        private Utils.Vector2 worldPos;
 
 		protected Entity()
 		{
@@ -112,7 +119,7 @@ namespace RaahnSimulation
         {
             int typeInt = (int)entityType;
 
-            if (typeInt > 0 && typeInt < ENTITY_TYPE_STRINGS.Length)
+            if (typeInt >= 0 && typeInt < ENTITY_TYPE_STRINGS.Length)
                 return ENTITY_TYPE_STRINGS[(int)entityType];
             else
                 return null;
@@ -127,6 +134,21 @@ namespace RaahnSimulation
             }
 
             return EntityType.NONE;
+        }
+
+        protected void RotateAroundCenter()
+        {
+            GL.Translate(center.x, center.y, Utils.DISCARD_Z_POS);
+            GL.Rotate(angle, 0.0, 0.0, 1.0);
+            GL.Translate(-center.x, -center.y, -Utils.DISCARD_Z_POS);
+        }
+
+        protected virtual void SetTransformUsage(bool usage)
+        {
+            if (usage)
+                drawingVec = transformedWorldPos;
+            else
+                drawingVec = worldPos;
         }
 
 	    public virtual void Update()
@@ -199,6 +221,11 @@ namespace RaahnSimulation
             return moved;
         }
 
+        public bool UsesTransform()
+        {
+            return drawingVec == transformedWorldPos;
+        }
+
         public double GetWidth()
         {
             return width;
@@ -207,6 +234,26 @@ namespace RaahnSimulation
         public double GetHeight()
         {
             return height;
+        }
+
+        public double GetWorldX()
+        {
+            return worldPos.x;
+        }
+
+        public double GetWorldY()
+        {
+            return worldPos.y;
+        }
+
+        public double GetTransformedX()
+        {
+            return transformedWorldPos.x;
+        }
+
+        public double GetTransformedY()
+        {
+            return transformedWorldPos.y;
         }
 
         public double GetTransparency()
@@ -234,6 +281,20 @@ namespace RaahnSimulation
             return type;
         }
 
+        public virtual void SetPosition(double x, double y)
+        {
+            drawingVec.x = x;
+            drawingVec.y = y;
+        }
+
+        public void SetColor(double r, double g, double b, double t)
+        {
+            color.x = r;
+            color.y = g;
+            color.z = b;
+            transparency = t;
+        }
+
         public virtual void SetWidth(double w)
         {
             width = w;
@@ -256,33 +317,6 @@ namespace RaahnSimulation
             mesh = newMesh;
         }
 
-		public void SetTransformUsage(bool usage)
-		{
-			if (usage)
-				drawingVec = transformedWorldPos;
-			else
-				drawingVec = worldPos;
-		}
-
-		public virtual bool Intersects(double x, double y)
-		{
-			if (x >= aabb.GetBounds().left && x <= aabb.GetBounds().right)
-			{
-				if (y >= aabb.GetBounds().bottom && y <= aabb.GetBounds().top)
-					return true;
-			}
-			return false;
-		}
-
-		public virtual bool Intersects(Utils.Rect r)
-		{
-			if (r.left >= aabb.GetBounds().right || r.right <= aabb.GetBounds().left
-            || r.bottom >= aabb.GetBounds().top || r.top <= aabb.GetBounds().bottom)
-				return false;
-			else
-				return true;
-		}
-
         public virtual void DebugDraw()
         {
             //Handle all generic debug drawing here.
@@ -299,12 +333,5 @@ namespace RaahnSimulation
         {
 
         }
-
-	    protected void RotateAroundCenter()
-	    {
-	        GL.Translate(center.x, center.y, Utils.DISCARD_Z_POS);
-	        GL.Rotate(angle, 0.0, 0.0, 1.0);
-	        GL.Translate(-center.x, -center.y, -Utils.DISCARD_Z_POS);
-	    }
 	}
 }

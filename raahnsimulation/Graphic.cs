@@ -3,10 +3,10 @@ using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
-	public class Graphic : ColorableEntity
+	public class Graphic : Entity
 	{
-		private const double DEFALUT_WIDTH = 768.0;
-		private const double DEFAULT_HEIGHT = 432.0;
+		private const double DEFALUT_WIDTH = 800.0;
+		private const double DEFAULT_HEIGHT = 400.0;
 
 		public Graphic(Simulator sim) : base(sim)
 		{
@@ -40,6 +40,11 @@ namespace RaahnSimulation
         public override void DebugDraw()
         {
             base.DebugDraw();
+        }
+
+        public new void SetTransformUsage(bool usage)
+        {
+            base.SetTransformUsage(usage);
         }
 	}
 }

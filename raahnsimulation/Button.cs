@@ -111,5 +111,10 @@ namespace RaahnSimulation
             texture = TextureManager.TextureType.BUTTON;
             transparency = 1.0;
         }
+
+        public new void SetTransformUsage(bool usage)
+        {
+            base.SetTransformUsage(usage);
+        }
     }
 }

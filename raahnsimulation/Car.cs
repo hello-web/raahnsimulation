@@ -22,7 +22,7 @@ namespace RaahnSimulation
 	public class Car : Entity
 	{
         //Number of controls the network has.
-        private const uint CONTROL_COUNT = 3;
+        private const uint CONTROL_COUNT = 1;
         private const double CONTROL_THRESHOLD = 0.5;
 		private const double CAR_SPEED_X = 960.0;
 		private const double CAR_SPEED_Y = 540.0;
@@ -49,6 +49,7 @@ namespace RaahnSimulation
 	    public Car(Simulator sim, QuadTree tree) : base(sim)
 	    {
 	        texture = TextureManager.TextureType.CAR;
+            type = EntityType.CAR;
 
             quadTree = tree;
 
@@ -124,47 +125,69 @@ namespace RaahnSimulation
         }
 
 	    public override void Update()
-	    {
-            //UpdateBrain();
-
-            /*double output = brain.GetNeuronValue(outputNeuronsId, 0);
-            Console.WriteLine("Ouput 0: {0:0.000000}", output);
-
-            if (output > CONTROL_THRESHOLD)
-                angle += CAR_ROTATE_SPEED * deltaTime;
-
-            output = brain.GetNeuronValue(outputNeuronsId, 1);
-            Console.WriteLine("Ouput 1: {0:0.000000}", output);
-
-            if (output > CONTROL_THRESHOLD)
-                angle -= CAR_ROTATE_SPEED * deltaTime;
-
-            output = brain.GetNeuronValue(outputNeuronsId, 2);
-            Console.WriteLine("Ouput 2: {0:0.000000}", output);
-
-            if (output < CONTROL_THRESHOLD)
-            {
-                transformedWorldPos.x += velocity.x * deltaTime;
-                transformedWorldPos.y += velocity.y * deltaTime;
-            }*/
-
+        {
             double deltaTime = context.GetDeltaTime();
 
-	        if (context.GetLeftKeyDown())
-	            angle += CAR_ROTATE_SPEED * deltaTime;
-	        if (context.GetRightKeyDown())
-	            angle -= CAR_ROTATE_SPEED * deltaTime;
+            //If the left or right arrow key is down, use user control.
+            if (context.GetLeftKeyDown())
+                angle += CAR_ROTATE_SPEED * deltaTime;
+            else if (context.GetRightKeyDown())
+                angle -= CAR_ROTATE_SPEED * deltaTime;
+            else
+            {
+                UpdateBrain();
 
-	        if (context.GetUpKeyDown())
-	        {
-	            transformedWorldPos.x += velocity.x * deltaTime;
-	            transformedWorldPos.y += velocity.y * deltaTime;
-	        }
-	        if (context.GetDownKeyDown())
-	        {
-	            transformedWorldPos.x -= velocity.x * deltaTime;
-	            transformedWorldPos.y -= velocity.y * deltaTime;
-	        }
+                double output = brain.GetNeuronValue(outputNeuronsId, 0);
+                Console.WriteLine("Ouput 0: {0:0.000000}", output);
+
+                if (output > CONTROL_THRESHOLD)
+                    angle += CAR_ROTATE_SPEED * deltaTime;
+                else if (output < CONTROL_THRESHOLD)
+                    angle -= CAR_ROTATE_SPEED * deltaTime;
+            }
+
+            double xMove = velocity.x * deltaTime;
+            double yMove = velocity.y * deltaTime;
+
+            Camera camera = context.GetCamera();
+
+            Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
+            Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
+
+            AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
+            viewBounds.Translate(lowerLeft.x, lowerLeft.y);
+
+            Utils.LineSegment collisionLine = new Utils.LineSegment();
+
+            Utils.Point2 original = new Utils.Point2(center.x, center.y);
+            Utils.Point2 projected = new Utils.Point2(center.x + xMove, center.y + yMove);
+
+            collisionLine.SetUp(original, projected);
+
+            List<Entity> entitiesInBounds = quadTree.Query(viewBounds);
+            bool canMove = true;
+
+            for (int i = 0; i < entitiesInBounds.Count; i++)
+            {
+                if (entitiesInBounds[i].GetEntityType() == EntityType.WALL)
+                {
+                    Utils.LineSegment compare = ((Wall)entitiesInBounds[i]).GetLineSegment();
+                    List<Utils.Point2> intersections = collisionLine.Intersects(compare);
+
+                    //If there is a collision, don't move.
+                    if (intersections.Count > 0)
+                    {
+                        canMove = false;
+                        break;
+                    }
+                }
+            }
+
+            if (canMove)
+            {
+                drawingVec.x += xMove;
+                drawingVec.y += yMove;
+            }
 
             base.Update();
 

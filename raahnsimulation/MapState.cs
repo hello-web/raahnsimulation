@@ -32,7 +32,18 @@ namespace RaahnSimulation
 
             camera = context.GetCamera();
 
-            context.GetWindow().GdkWindow.Cursor = context.GetBlankCursor();
+            Gtk.Window simWindow = context.GetWindow();
+
+            simWindow.GdkWindow.Cursor = context.GetBlankCursor();
+
+            uint newWinWidth = (uint)((double)simWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
+            uint newWinHeight = (uint)((double)simWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
+
+            context.SetWindowSize(newWinWidth, newWinHeight);
+            context.CenterWindow();
+
+            context.SetGLVisible(true);
+            context.ResizeGL(newWinWidth, newWinHeight - Simulator.MENU_OFFSET);
 
             cursor = new Cursor(context);
 
@@ -72,25 +83,34 @@ namespace RaahnSimulation
             }
 
             //Perform camera transformations before updating positions.
-            entityPanel.Update();
-            mapBuilder.Update();
             base.Update();
         }
 
         public override void UpdateEvent(Event e)
         {
+            base.UpdateEvent(e);
+            cursor.Update();
+            //Update mapBuilder before checking whether or not to pan.
+            mapBuilder.UpdateEvent(e);
+            entityPanel.UpdateEvent(e);
+
             if (e.type == Gdk.EventType.Scroll)
             {
                 if (e.scrollDirection == Gdk.ScrollDirection.Up)
-                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, Camera.MOUSE_SCROLL_ZOOM);
+                    camera.ZoomTo(cursor.GetWorldX(), cursor.GetWorldY(), Camera.MOUSE_SCROLL_ZOOM);
                 else if (e.scrollDirection == Gdk.ScrollDirection.Down)
-                    camera.ZoomTo(cursor.worldPos.x, cursor.worldPos.y, (1.0 / Camera.MOUSE_SCROLL_ZOOM));
+                    camera.ZoomTo(cursor.GetWorldX(), cursor.GetWorldY(), (1.0 / Camera.MOUSE_SCROLL_ZOOM));
             }
+            else if (e.type == Gdk.EventType.MotionNotify)
+            {
+                Gtk.Window simWindow = context.GetWindow();
 
-            //Update mapBuilder before checking whether or not to pan.
-            mapBuilder.UpdateEvent(e);
-
-            if (e.type == Gdk.EventType.ButtonPress)
+                if (e.Y < Simulator.MENU_OFFSET)
+                    simWindow.GdkWindow.Cursor = null;
+                else
+                    simWindow.GdkWindow.Cursor = context.GetBlankCursor();
+            }
+            else if (e.type == Gdk.EventType.ButtonPress)
             {
                 if (e.button == Utils.GTK_BUTTON_LEFT)
                 {
@@ -104,13 +124,11 @@ namespace RaahnSimulation
                 if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = false;
             }
-
-            entityPanel.UpdateEvent(e);
-            base.UpdateEvent(e);
         }
 
         public override void Draw()
         {
+            mapBuilder.Draw();
             base.Draw();
         }
 

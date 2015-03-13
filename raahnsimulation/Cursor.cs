@@ -36,10 +36,9 @@ namespace RaahnSimulation
             double windowY = (double)(context.GetWindowHeight() - mouseY);
 
             Utils.Vector2 projection = context.GetCamera().ProjectWindow(windowX, windowY);
-            //Center the cursor around the mouse.
-            projection.x -= (width / 2.0);
-            projection.y -= (height / 2.0);
-            worldPos.Copy(projection);
+
+            drawingVec.x = projection.x;
+            drawingVec.y = projection.y;
 
             if (context.GetLeftMouseButtonDown())
             {
@@ -48,16 +47,16 @@ namespace RaahnSimulation
                     if (mouseX > 0 && mouseY > 0)
                     {
                         texture = TextureManager.TextureType.CURSOR_1;
-                        deltaPos.x = worldPos.x - lastPos.x;
-                        deltaPos.y = worldPos.y - lastPos.y;
+                        deltaPos.x = drawingVec.x - lastPos.x;
+                        deltaPos.y = drawingVec.y - lastPos.y;
                     }
                 }
             }
             else
                 texture = TextureManager.TextureType.CURSOR_0;
 
-            lastPos.x = worldPos.x;
-            lastPos.y = worldPos.y;
+            lastPos.x = drawingVec.x;
+            lastPos.y = drawingVec.y;
 
             base.Update();
         }
@@ -75,7 +74,7 @@ namespace RaahnSimulation
 
             RotateAroundCenter();
 
-            GL.Translate(worldPos.x, worldPos.y, Utils.DISCARD_Z_POS);
+            GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
             GL.Scale(width, height, Utils.DISCARD_Z_SCALE);
             GL.DrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
         }

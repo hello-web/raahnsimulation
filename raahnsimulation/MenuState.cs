@@ -1,58 +1,47 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
+using Gtk;
 
 namespace RaahnSimulation
 {
     public class MenuState : State
     {
         private static MenuState menuState = new MenuState();
-        private Text title;
-        private Text version;
-        private Button startSim;
-        private Button startMap;
-        private ClickableEntity.OnClickType startSimOnClick;
-        private ClickableEntity.OnClickType startMapOnClick;
+        private VBox buttonMenu;
+        private Gtk.Button startSimulation;
+        private Gtk.Button startMap;
 
         public MenuState()
         {
-            startSimOnClick = StartSimOnClick;
-            startMapOnClick = StartMapOnClick;
+
         }
 
         public override void Init(Simulator sim)
         {
             base.Init(sim);
 
-            double charWidth = Text.CHAR_DEFAULT_WIDTH;
-            double charHeight = Text.CHAR_DEFAULT_HEIGHT;
+            context.SetGLVisible(false);
 
-            title = new Text(context, Utils.WINDOW_TITLE);
-            title.SetTransformUsage(false);
-            title.SetCharBounds(Simulator.WORLD_WINDOW_WIDTH / 2.0, Simulator.WORLD_WINDOW_HEIGHT - charHeight, charWidth, charHeight, true);
+            buttonMenu = new VBox();
+            buttonMenu.SetSizeRequest((int)context.GetWindowWidth(), (int)context.GetWindowHeight() - Simulator.MENU_OFFSET);
+            buttonMenu.Spacing = 10;
 
-            version = new Text(context, Utils.VERSION_STRING);
-            version.SetTransformUsage(false);
-            version.SetCharBounds(0.0, 0.0, charWidth, charHeight, false);
+            startSimulation = new Gtk.Button(Utils.START_SIM);
+            startSimulation.Clicked += delegate { StartSimOnClick(); };
 
-            double startSimWidth = charWidth * Utils.START_SIM.Length;
+            startMap = new Gtk.Button(Utils.START_MAP);
+            startMap.Clicked += delegate { StartMapOnClick(); };
 
-            startSim = new Button(context, Utils.START_SIM);
-            startSim.SetTransformUsage(false);
-            startSim.SetBounds(Simulator.WORLD_WINDOW_WIDTH / 2.0, title.worldPos.y - (2.0 * charHeight), startSimWidth, charHeight, true);
-            startSim.SetOnClickListener(startSimOnClick);
+            buttonMenu.Add(startSimulation);
+            buttonMenu.Add(startMap);
 
-            double startMapWidth = charWidth * Utils.START_MAP.Length;
+            Gtk.Fixed mainContainer = context.GetMainContainer();
+            mainContainer.Put(buttonMenu, 0, Simulator.MENU_OFFSET);
 
-            startMap = new Button(context, Utils.START_MAP);
-            startMap.SetTransformUsage(false);
-            startMap.SetBounds(Simulator.WORLD_WINDOW_WIDTH / 2.0, startSim.worldPos.y - (2.0 * charHeight), startMapWidth, charHeight, true);
-            startMap.SetOnClickListener(startMapOnClick);
-
-            AddEntity(title, 0);
-            AddEntity(version, 0);
-            AddEntity(startSim, 0);
-            AddEntity(startMap, 0);
+            buttonMenu.Show();
+            startSimulation.Show();
+            startMap.Show();
         }
 
         public override void Update()
@@ -75,11 +64,11 @@ namespace RaahnSimulation
             return menuState;
         }
 
-        public static void StartSimOnClick(Simulator sim)
+        public void StartSimOnClick()
         {
             bool configChoosen = true;
 
-            Gtk.Window win = sim.GetWindow();
+            Gtk.Window win = context.GetWindow();
 
             Gtk.FileChooserDialog expChooser = new Gtk.FileChooserDialog(Utils.CHOOSE_EXPERIMENT_FILE, win, Gtk.FileChooserAction.Open);
             expChooser.AddButton(Utils.OPEN_BUTTON, Gtk.ResponseType.Ok);
@@ -118,12 +107,20 @@ namespace RaahnSimulation
             if (!configChoosen)
                 return;
 
-            sim.RequestStateChange(Simulator.StateChangeType.PUSH, SimState.Instance());
+            buttonMenu.Visible = false;
+            startSimulation.Visible = false;
+            startMap.Visible = false;
+
+            context.RequestStateChange(Simulator.StateChangeType.PUSH, SimState.Instance());
         }
 
-        public static void StartMapOnClick(Simulator sim)
+        public void StartMapOnClick()
         {
-            sim.RequestStateChange(Simulator.StateChangeType.PUSH, MapState.Instance());
+            buttonMenu.Visible = false;
+            startSimulation.Visible = false;
+            startMap.Visible = false;
+
+            context.RequestStateChange(Simulator.StateChangeType.PUSH, MapState.Instance());
         }
     }
 }

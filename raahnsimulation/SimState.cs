@@ -44,7 +44,18 @@ namespace RaahnSimulation
 
             quadTree = new QuadTree(new AABB(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT));
 
-            context.GetWindow().GdkWindow.Cursor = context.GetBlankCursor();
+            Gtk.Window simWindow = context.GetWindow();
+
+            simWindow.GdkWindow.Cursor = context.GetBlankCursor();
+
+            uint newWinWidth = (uint)((double)simWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
+            uint newWinHeight = (uint)((double)simWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
+
+            context.SetWindowSize(newWinWidth, newWinHeight);
+            context.CenterWindow();
+
+            context.SetGLVisible(true);
+            context.ResizeGL(newWinWidth, newWinHeight - Simulator.MENU_OFFSET);
 
             cursor = new Cursor(context);
 
@@ -55,8 +66,7 @@ namespace RaahnSimulation
 
             raahnCar.SetWidth(CAR_WIDTH);
             raahnCar.SetHeight(CAR_HEIGHT);
-            raahnCar.transformedWorldPos.x = 0.0;
-            raahnCar.transformedWorldPos.y = 0.0;
+            raahnCar.SetPosition(0.0, 0.0);
             raahnCar.Update();
 
             if (experiment != null)
@@ -117,14 +127,14 @@ namespace RaahnSimulation
             {
                 //Only colorable entities are added to the quad tree,
                 //so we can cast it to a colorable entity.
-                ColorableEntity curEntity = (ColorableEntity)entitiesInBounds[i];
+                Entity curEntity = (Entity)entitiesInBounds[i];
 
-                if (raahnCar.Intersects(curEntity.aabb.GetBounds()))
+                if (raahnCar.aabb.Intersects(curEntity.aabb.GetBounds()))
                 {
                     raahnCar.entitiesHovering.Add(curEntity);
                     curEntity.SetColor(HIGHLIGHT_R, HIGHLIGHT_G, HIGHLIGHT_B, HIGHLIGHT_T);
                 }
-                else if (curEntity.Modified())
+                else
                     curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
             }
         }
@@ -142,8 +152,16 @@ namespace RaahnSimulation
                 else if (e.scrollDirection == Gdk.ScrollDirection.Down)
                     camera.ZoomTo(transform.x, transform.y, (1.0 / Camera.MOUSE_SCROLL_ZOOM));
             }
+            else if (e.type == Gdk.EventType.MotionNotify)
+            {
+                Gtk.Window simWindow = context.GetWindow();
 
-            if (e.type == Gdk.EventType.ButtonPress)
+                if (e.Y < Simulator.MENU_OFFSET)
+                    simWindow.GdkWindow.Cursor = null;
+                else
+                    simWindow.GdkWindow.Cursor = context.GetBlankCursor();
+            }
+            else if (e.type == Gdk.EventType.ButtonPress)
             {
                 if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = true;

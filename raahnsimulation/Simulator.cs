@@ -19,6 +19,9 @@ namespace RaahnSimulation
 
         public const uint DEFAULT_WINDOW_WIDTH = 800;
         public const uint DEFAULT_WINDOW_HEIGHT = 600;
+        public const uint MIN_WINDOW_WIDTH = 200;
+        public const uint MIN_WINDOW_HEIGHT = 200;
+        public const int MENU_OFFSET = 30;
         //Scaling down is usually better, if it even matters in this context.
         public const double WORLD_WINDOW_WIDTH = 3840.0;
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
@@ -50,13 +53,15 @@ namespace RaahnSimulation
 		private List<State> states;
         private Queue<Event> eventQueue;
 		private Window simWindow;
+        private Gdk.Cursor blankCursor;
+        private Fixed fixedLayout;
+        private MenuBar menuBar;
         private GLWidget mainGLWidget;
         private Stopwatch stopwatch;
 		private Camera camera;
 		private TextureManager texMan;
 		private State requestedState;
 		private StateChangeType changeType;
-        private Gdk.Cursor blankCursor;
 
 	    public Simulator()
 	    {
@@ -113,17 +118,27 @@ namespace RaahnSimulation
 
 	    private bool Init()
 	    {
+            OpenTK.Toolkit.Init();
             Application.Init();
 
 	        simWindow = new Window(WindowType.Toplevel);
             simWindow.Title = Utils.WINDOW_TITLE;
 
             //Create size based on monitor resolution.
-            windowWidth = (uint)((double)simWindow.Screen.Width * Utils.SCREEN_WIDTH_PERCENTAGE);
-            windowHeight = (uint)((double)simWindow.Screen.Height * Utils.SCREEN_HEIGHT_PERCENTAGE);
+            windowWidth = (uint)((double)simWindow.Screen.Width * Utils.MENU_SCREEN_WIDTH_PERCENTAGE);
+            windowHeight = (uint)((double)simWindow.Screen.Height * Utils.MENU_SCREEN_HEIGHT_PERCENTAGE);
 
             simWindow.Resize((int)windowWidth, (int)windowHeight);
-            simWindow.SetPosition(WindowPosition.Center);
+
+            //Allow shrinking below the dimensions of the child widgets.
+            simWindow.AllowShrink = true;
+
+            //Force a minimum width and height.
+            Gdk.Geometry minDim = new Gdk.Geometry();
+            minDim.MinWidth = (int)MIN_WINDOW_WIDTH;
+            minDim.MinHeight = (int)MIN_WINDOW_HEIGHT;
+
+            simWindow.SetGeometryHints(simWindow, minDim, Gdk.WindowHints.MinSize);
 
             camera = new Camera(this);
 
@@ -143,23 +158,44 @@ namespace RaahnSimulation
             simWindow.FocusOutEvent += OnFocusOut;
             simWindow.DeleteEvent += OnDelete;
 
-            Gdk.Pixmap blank = new Gdk.Pixmap(null, 1, 1, 1);
-            blankCursor = new Gdk.Cursor(blank, blank, Gdk.Color.Zero, Gdk.Color.Zero, 0, 0);
+            InitGUI();
 
-            mainGLWidget = new GLWidget(Utils.DEFAULT_GRAPHICS_MODE, InitGraphics, RenderFrame);
-
-            simWindow.Add(mainGLWidget);
-
-            simWindow.Show();
-
-            //Calling this should invoke InitGraphics.
-            mainGLWidget.Show();
+            CenterWindow();
 
             if (glInitFailed)
                 return false;
 
 	        return true;
 	    }
+
+        private void InitGUI()
+        {
+            Gdk.Pixmap blank = new Gdk.Pixmap(null, 1, 1, 1);
+            blankCursor = new Gdk.Cursor(blank, blank, Gdk.Color.Zero, Gdk.Color.Zero, 0, 0);
+
+            mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, RenderFrame);
+            mainGLWidget.SetSizeRequest((int)windowWidth, (int)(windowHeight - MENU_OFFSET));
+
+            menuBar = new MenuBar();
+
+            MenuItem helpOption = new MenuItem("Help");
+            Menu helpMenu = new Menu();
+            helpOption.Submenu = helpMenu;
+
+            MenuItem aboutItem = new MenuItem("About");
+            aboutItem.Activated += delegate { DisplayAboutDialog(); };
+            helpMenu.Append(aboutItem);
+
+            menuBar.Append(helpOption);
+
+            fixedLayout = new Fixed();
+            fixedLayout.Put(mainGLWidget, 0, MENU_OFFSET);
+            fixedLayout.Put(menuBar, 0, 0);
+
+            simWindow.Add(fixedLayout);
+
+            simWindow.ShowAll();
+        }
 
         private void InitGraphics()
         {
@@ -249,7 +285,9 @@ namespace RaahnSimulation
                     Application.RunIteration();
 
 	            Update();
-                mainGLWidget.RenderFrame();
+
+                if (mainGLWidget.Visible)
+                    mainGLWidget.RenderFrame();
 
 	            if (stateChangeRequested)
 	                HandleStateChangeRequest();
@@ -287,6 +325,7 @@ namespace RaahnSimulation
                     camera.windowWorldRatio.x = (double)windowWidth / Simulator.WORLD_WINDOW_WIDTH;
                     camera.windowWorldRatio.y = (double)windowHeight / Simulator.WORLD_WINDOW_HEIGHT;
 
+                    ResizeGL(windowWidth, windowHeight - MENU_OFFSET);
                     ResizeFrame();
                 }
             }
@@ -427,6 +466,17 @@ namespace RaahnSimulation
             //Free the GL context after deleting GL objects.
             mainGLWidget.Dispose();
 	    }
+
+        private void DisplayAboutDialog()
+        {
+            AboutDialog about = new AboutDialog();
+
+            about.ProgramName = Utils.WINDOW_TITLE;
+            about.Version = Utils.VERSION_STRING;
+
+            about.Run();
+            about.Destroy();
+        }
 
         //Window moved or resized. Must use GLib.ConnectBefore
         //to avoid an event terminating the cycle before this event.
@@ -611,6 +661,26 @@ namespace RaahnSimulation
 			eventQueue.Enqueue(e);
 		}
 
+        public void CenterWindow()
+        {
+            if (simWindow != null)
+            {
+                int centerX = (simWindow.Screen.Width / 2) - ((int)windowWidth / 2);
+                int centerY = (simWindow.Screen.Height / 2) - ((int)windowHeight / 2);
+                simWindow.Move(centerX, centerY);
+            }
+        }
+
+        public void SetGLVisible(bool visible)
+        {
+            mainGLWidget.Visible = visible;
+        }
+
+        public void ResizeGL(uint width, uint height)
+        {
+            mainGLWidget.SetSizeRequest((int)width, (int)height);
+        }
+
         public bool GetHeadLess()
         {
             return headLess;
@@ -676,6 +746,11 @@ namespace RaahnSimulation
             return blankCursor;
         }
 
+        public Gtk.Fixed GetMainContainer()
+        {
+            return fixedLayout;
+        }
+
         public Camera GetCamera()
         {
             return camera;
@@ -693,7 +768,10 @@ namespace RaahnSimulation
 
         public void SetWindowSize(uint width, uint height)
         {
-            simWindow.Resize((int)width, (int)height);
+            windowWidth = width;
+            windowHeight = height;
+
+            simWindow.Resize((int)windowWidth, (int)windowHeight);
         }
 
         public void SetWindowHasFocus(bool focus)

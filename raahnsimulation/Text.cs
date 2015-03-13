@@ -7,7 +7,9 @@ namespace RaahnSimulation
 	{
         public const double SPACING_WIDTH_PERCENTAGE = 0.8;
         public const double CHAR_DEFAULT_WIDTH = 120.0;
-        public const double CHAR_DEFAULT_HEIGHT = 135.0;
+        public const double CHAR_DEFAULT_HEIGHT = 130.0;
+        public const double CHAR_MENU_WIDTH = 150.0;
+        public const double CHAR_MENU_HEIGHT = 200.0;
 
 		private const int ASCII_OFFSET = 32;
 
@@ -85,8 +87,8 @@ namespace RaahnSimulation
 	                charTexPos.y = 0.0;
 	            }
 
-	            charCenter.x = (transformedWorldPos.x + (i * spacing)) + (charWidth / 2.0);
-	            charCenter.y = transformedWorldPos.y + (height / 2.0);
+	            charCenter.x = (GetTransformedX() + (i * spacing)) + (charWidth / 2.0);
+	            charCenter.y = GetTransformedY() + (height / 2.0);
 
 	            GL.MatrixMode(MatrixMode.Texture);
 
@@ -159,6 +161,11 @@ namespace RaahnSimulation
             color.x = r;
             color.y = g;
             color.z = b;
+        }
+
+        public new void SetTransformUsage(bool usage)
+        {
+            base.SetTransformUsage(usage);
         }
 
         public void AppendCharacter(char appendChar)

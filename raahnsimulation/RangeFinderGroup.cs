@@ -94,10 +94,7 @@ namespace RaahnSimulation
         public static void Clean()
         {
             if (line != null)
-            {
-                if (line.Allocated())
-                    line.Free();
-            }
+                line.Free();
         }
 
         public void Configure(double length, double angleOffset, double angleBetween)
@@ -148,12 +145,22 @@ namespace RaahnSimulation
                         //All of the range finders are drawn from the center of the car.
                         rangeFinderLine.SetUp(new Utils.Point2(robotCenter.x, robotCenter.y), new Utils.Point2(endPointX, endPointY));
 
-                        List<Utils.Point2> intersections = entitiesInBounds[j].aabb.IntersectsLineAccurate(rangeFinderLine, new Utils.Point2(robotCenter.x, robotCenter.y));
+                        List<Utils.Point2> intersections;
+
+                        //If the entity is a wall, then there is only one line to check.
+                        if (entitiesInBounds[j].GetEntityType() == Entity.EntityType.WALL)
+                        {
+                            Wall current = (Wall)entitiesInBounds[j];
+                            intersections = rangeFinderLine.Intersects(current.GetLineSegment());
+                        }
+                        else
+                            intersections = entitiesInBounds[j].aabb.IntersectsLineAccurate(rangeFinderLine, 
+                                                            new Utils.Point2(robotCenter.x, robotCenter.y));
 
                         //Make sure there is an intersection.
                         if (intersections.Count > 0)
                         {
-                            Utils.Point2 nearest = GetNearestIntersection(intersections);
+                            Utils.Point2 nearest = Utils.GetNearestIntersection(intersections, robotCenter);
 
                             Utils.Point2 centerPoint = new Utils.Point2(robotCenter.x, robotCenter.y);
 
@@ -216,23 +223,5 @@ namespace RaahnSimulation
             else
                 return activations[(int)index];
         }
-
-        private Utils.Point2 GetNearestIntersection(List<Utils.Point2> intersections)
-        {
-            Utils.Point2 nearest = intersections[0];
-
-            for (int x = 1; x < intersections.Count; x++)
-            {
-                Utils.Point2 currentIntersection = intersections[x];
-                Utils.Vector2 robotCenter = robot.GetCenter();
-                Utils.Point2 centerPoint = new Utils.Point2(robotCenter.x, robotCenter.y);
-
-                if (Utils.GetDist(nearest, centerPoint) > Utils.GetDist(currentIntersection, centerPoint))
-                    nearest = intersections[x];
-            }
-
-            return nearest;
-        }
     }
 }
-

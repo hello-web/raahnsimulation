@@ -3,7 +3,13 @@ Real-Time Autoencoder Augmented Hebbian Network(RAAHN) Simulation
 
 Description
 ===========
-RAAHN simulation is a simulator for testing, developing, and displaying the Real-Time Autoencoder Augmented Hebbian Network algorithm. The simulation consists of a car driving in a simulated environment. It learns how to navigate the environment with modulated hebbian learning (modulation signals influencing hebbian learning, similar to reinforcement learning), and an autoencoder. RAAHN Simulation uses libraahn for a RAAHN implementation. libraahn is developed in parallel with RAAHN simulation.
+RAAHN simulation is a simulator for testing and developing the Real-Time
+Autoencoder Augmented Hebbian Network algorithm. The simulation consists
+of a car driving in a simulated environment. It learns how to navigate
+the environment with modulated hebbian learning (modulation signals
+influencing hebbian learning, similar to reinforcement learning), and an
+autoencoder. RAAHN Simulation uses libraahn for a RAAHN implementation.
+libraahn is developed in parallel with RAAHN simulation.
 
 Hot Keys
 ========
@@ -22,6 +28,7 @@ Right - Rotate the car right.
 Map state
 
 Space - Place the starting point for the car represented by a flag.
+Right Click - Add wall entities.
 
 Building and Running
 ====================

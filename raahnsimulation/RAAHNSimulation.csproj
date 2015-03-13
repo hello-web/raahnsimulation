@@ -58,7 +58,6 @@
     <Compile Include="TextPool.cs" />
     <Compile Include="AABB.cs" />
     <Compile Include="Button.cs" />
-    <Compile Include="ColorableEntity.cs" />
     <Compile Include="QuadTree.cs" />
     <Compile Include="QuadTreeNode.cs" />
     <Compile Include="Mesh.cs" />
@@ -132,6 +131,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Textures\raahn.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Textures\HollowCircle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

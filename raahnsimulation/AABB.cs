@@ -38,13 +38,14 @@ namespace RaahnSimulation
             return false;
         }
 
+        public bool Intersects(double x, double y)
+        {
+            return bounds.Intersects(x, y);
+        }
+
         public bool Intersects(Utils.Rect r)
         {
-            if (r.left >= bounds.right || r.right <= bounds.left
-            || r.bottom >= bounds.top || r.top <= bounds.bottom)
-                return false;
-            else
-                return true;
+            return bounds.Intersects(r);
         }
 
         //Returns the x coordinates at which a line
@@ -68,7 +69,7 @@ namespace RaahnSimulation
             {
                 List<Utils.Point2> currentIntersection = line.Intersects(rectLines[i]);
 
-                //There shouldn't be more than 2 points, but just in case.
+                //It is unlikely that there would be more than 2 points, but just in case.
                 if (currentIntersection.Count > 2)
                 {
                     if (Utils.GetDist(currentIntersection[0], relative) <= Utils.GetDist(currentIntersection[1], relative))
@@ -254,4 +255,3 @@ namespace RaahnSimulation
         }
     }
 }
-
