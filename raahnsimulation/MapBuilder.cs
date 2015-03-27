@@ -27,19 +27,26 @@ namespace RaahnSimulation
         private Utils.Point2 snappingPoint;
         private Simulator context;
         private MapState currentState;
+        private TextureManager texMan;
         //The entity being modified by the user.
         private Entity entityInUse;
         private WallPool wallPool;
 		private Cursor cursor;
         private Camera camera;
 		private Graphic flag;
+        private Mesh quad;
 
         public MapBuilder(Simulator sim, Cursor c, uint stateLayer)
 	    {
             context = sim;
+
             currentState = (MapState)context.GetState();
+
+            texMan = currentState.GetTexMan();
+            quad = State.GetQuad();
+
             cursor = c;
-            camera = context.GetCamera();
+            camera = currentState.GetCamera();
             entityInUse = null;
 
             layer = stateLayer;
@@ -160,12 +167,11 @@ namespace RaahnSimulation
             if (hasSnappingPoint)
             {
                 //Render a textured quad.
-                Mesh quad = Simulator.quad;
                 quad.MakeCurrent();
 
                 GL.Color4(SNAP_COLOR_R, SNAP_COLOR_G, SNAP_COLOR_G, SNAP_COLOR_A);
 
-                context.GetTexMan().SetTexture(TextureManager.TextureType.HOLLOW_CIRCLE);
+                texMan.SetTexture(TextureManager.TextureType.HOLLOW_CIRCLE);
 
                 GL.PushMatrix();
 
@@ -285,10 +291,12 @@ namespace RaahnSimulation
             if (!wallPool.Empty())
             {
                 Wall wall = wallPool.Alloc();
+
                 if (hasSnappingPoint)
                     wall.SetPosition(snappingPoint.x, snappingPoint.y);
                 else
                     wall.SetPosition(cursor.GetTransformedX(), cursor.GetTransformedY() + cursor.GetHeight());
+
                 wall.SetRelativeEndPoint(0.0, 0.0);
 
                 currentState.AddEntity(wall, layer);

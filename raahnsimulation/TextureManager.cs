@@ -32,12 +32,14 @@ namespace RaahnSimulation
 		private const int TEXTURE_COUNT = 9;
 
         private bool loadedTextures;
+        private uint texturesLoaded;
 		private uint[] textures;
 		private TextureType currentTexture;
 
 	    public TextureManager()
 	    {
             loadedTextures = false;
+            texturesLoaded = 0;
 			textures = new uint[TEXTURE_COUNT];
 	        currentTexture = (TextureType)(TEXTURE_COUNT - 1);
 	    }
@@ -54,6 +56,7 @@ namespace RaahnSimulation
 					return false;
 
                 Gdk.Pixbuf currentImage = new Gdk.Pixbuf(TEXTURE_RESOURCES[i]);
+
                 //Flip the image vertically for glTexImage2D.
                 currentImage = currentImage.Flip(false);
 
@@ -64,6 +67,8 @@ namespace RaahnSimulation
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, (int)currentImage.Width, 
                               (int)currentImage.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, currentImage.Pixels);
+
+                texturesLoaded++;
 	        }
 
             loadedTextures = true;
@@ -75,7 +80,8 @@ namespace RaahnSimulation
         public bool DeleteTextures()
         {
             if (loadedTextures)
-                GL.DeleteTextures(TEXTURE_COUNT, textures);
+                GL.DeleteTextures((int)texturesLoaded, textures);
+
             return loadedTextures;
         }
 

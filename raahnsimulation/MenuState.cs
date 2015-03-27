@@ -7,25 +7,47 @@ namespace RaahnSimulation
 {
     public class MenuState : State
     {
+        private const int SPACING = 20;
+        private const uint PADDING = 0;
+
         private static MenuState menuState = new MenuState();
-        private VBox buttonMenu;
+
+        private MenuBar menuBar;
         private Gtk.Button startSimulation;
         private Gtk.Button startMap;
+        private Gtk.Window mainWindow;
 
         public MenuState()
         {
-
+            menuBar = null;
+            startSimulation = null;
+            startMap = null;
+            mainWindow = null;
         }
 
-        public override void Init(Simulator sim)
+        public override bool Init(Simulator sim)
         {
-            base.Init(sim);
+            if (!base.Init(sim))
+                return false;
 
-            context.SetGLVisible(false);
+            mainWindow = context.GetWindow();
 
-            buttonMenu = new VBox();
-            buttonMenu.SetSizeRequest((int)context.GetWindowWidth(), (int)context.GetWindowHeight() - Simulator.MENU_OFFSET);
-            buttonMenu.Spacing = 10;
+            mainContainer = new VBox();
+            VBox mcVbox = (VBox)mainContainer;
+
+            mcVbox.Spacing = SPACING;
+
+            menuBar = new MenuBar();
+
+            MenuItem helpOption = new MenuItem(Utils.MENU_HELP);
+            Menu helpMenu = new Menu();
+            helpOption.Submenu = helpMenu;
+
+            MenuItem aboutItem = new MenuItem(Utils.MENU_ABOUT);
+            aboutItem.Activated += delegate { context.DisplayAboutDialog(); };
+            helpMenu.Append(aboutItem);
+
+            menuBar.Append(helpOption);
 
             startSimulation = new Gtk.Button(Utils.START_SIM);
             startSimulation.Clicked += delegate { StartSimOnClick(); };
@@ -33,15 +55,15 @@ namespace RaahnSimulation
             startMap = new Gtk.Button(Utils.START_MAP);
             startMap.Clicked += delegate { StartMapOnClick(); };
 
-            buttonMenu.Add(startSimulation);
-            buttonMenu.Add(startMap);
+            mcVbox.PackStart(menuBar, false, true, PADDING);
+            mcVbox.PackStart(startSimulation, false, false, PADDING);
+            mcVbox.PackStart(startMap, false, false, PADDING);
 
-            Gtk.Fixed mainContainer = context.GetMainContainer();
-            mainContainer.Put(buttonMenu, 0, Simulator.MENU_OFFSET);
+            mainWindow.Add(mainContainer);
 
-            buttonMenu.Show();
-            startSimulation.Show();
-            startMap.Show();
+            mainContainer.ShowAll();
+
+            return true;
         }
 
         public override void Update()
@@ -107,19 +129,11 @@ namespace RaahnSimulation
             if (!configChoosen)
                 return;
 
-            buttonMenu.Visible = false;
-            startSimulation.Visible = false;
-            startMap.Visible = false;
-
             context.RequestStateChange(Simulator.StateChangeType.PUSH, SimState.Instance());
         }
 
         public void StartMapOnClick()
         {
-            buttonMenu.Visible = false;
-            startSimulation.Visible = false;
-            startMap.Visible = false;
-
             context.RequestStateChange(Simulator.StateChangeType.PUSH, MapState.Instance());
         }
     }

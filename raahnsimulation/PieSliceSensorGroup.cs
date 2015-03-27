@@ -43,12 +43,15 @@ namespace RaahnSimulation
         //Shared mesh is used for drawing the curve points of each pie slice.
         private static Mesh sharedMesh = null;
         private QuadTree quadTree;
+        private Camera camera;
 
         public PieSliceSensorGroup(Simulator sim, Car car, QuadTree tree)
         {
             context = sim;
             robot = car;
             quadTree = tree;
+
+            camera = context.GetState().GetCamera();
 
             if (sharedMesh == null)
             {
@@ -120,8 +123,8 @@ namespace RaahnSimulation
 
         public void Update()
         {
-            Utils.Vector2 lowerLeft = context.GetCamera().TransformWorld(0.0, 0.0);
-            Utils.Vector2 upperRight = context.GetCamera().TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
+            Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
+            Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
 
             AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
             viewBounds.Translate(lowerLeft.x, lowerLeft.y);

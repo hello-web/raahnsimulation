@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using Gtk;
@@ -17,25 +18,16 @@ namespace RaahnSimulation
 			CHANGE = 2
 		}
 
-        public const uint DEFAULT_WINDOW_WIDTH = 800;
-        public const uint DEFAULT_WINDOW_HEIGHT = 600;
         public const uint MIN_WINDOW_WIDTH = 200;
         public const uint MIN_WINDOW_HEIGHT = 200;
-        public const int MENU_OFFSET = 30;
         //Scaling down is usually better, if it even matters in this context.
         public const double WORLD_WINDOW_WIDTH = 3840.0;
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
-
-        //Shared mesh resources.
-        public static Mesh lineRect;
-        public static Mesh quad;
-		private static Simulator simulator = new Simulator();
+        private const int SLEEP_TIME = 5;
 
 		public bool running;
         public bool debugging;
         public bool eventsEnabled;
-        //Events are copied.
-        private bool glInitFailed;
 		private bool headLess;
 		private bool windowHasFocus;
         private bool leftMouseButtonDown;
@@ -54,12 +46,7 @@ namespace RaahnSimulation
         private Queue<Event> eventQueue;
 		private Window simWindow;
         private Gdk.Cursor blankCursor;
-        private Fixed fixedLayout;
-        private MenuBar menuBar;
-        private GLWidget mainGLWidget;
         private Stopwatch stopwatch;
-		private Camera camera;
-		private TextureManager texMan;
 		private State requestedState;
 		private StateChangeType changeType;
 
@@ -70,7 +57,6 @@ namespace RaahnSimulation
 	        deltaTime = 0.0;
 
 	        running = true;
-            glInitFailed = false;
 	        headLess = false;
             debugging = false;
             eventsEnabled = true;
@@ -84,13 +70,7 @@ namespace RaahnSimulation
             stopwatch = new Stopwatch();
 			states = new List<State>();
             eventQueue = new Queue<Event>();
-	        texMan = new TextureManager();
 	    }
-
-		public static Simulator Instance()
-		{
-			return simulator;
-		}
 
 	    public int Execute()
 	    {
@@ -140,8 +120,6 @@ namespace RaahnSimulation
 
             simWindow.SetGeometryHints(simWindow, minDim, Gdk.WindowHints.MinSize);
 
-            camera = new Camera(this);
-
             //Add some event signaling.
             simWindow.Events |= Gdk.EventMask.ButtonPressMask | Gdk.EventMask.ButtonReleaseMask 
                              | Gdk.EventMask.PointerMotionMask | Gdk.EventMask.ScrollMask | Gdk.EventMask.StructureMask;
@@ -158,121 +136,15 @@ namespace RaahnSimulation
             simWindow.FocusOutEvent += OnFocusOut;
             simWindow.DeleteEvent += OnDelete;
 
-            InitGUI();
-
-            CenterWindow();
-
-            if (glInitFailed)
-                return false;
-
-	        return true;
-	    }
-
-        private void InitGUI()
-        {
             Gdk.Pixmap blank = new Gdk.Pixmap(null, 1, 1, 1);
             blankCursor = new Gdk.Cursor(blank, blank, Gdk.Color.Zero, Gdk.Color.Zero, 0, 0);
 
-            mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, RenderFrame);
-            mainGLWidget.SetSizeRequest((int)windowWidth, (int)(windowHeight - MENU_OFFSET));
-
-            menuBar = new MenuBar();
-
-            MenuItem helpOption = new MenuItem("Help");
-            Menu helpMenu = new Menu();
-            helpOption.Submenu = helpMenu;
-
-            MenuItem aboutItem = new MenuItem("About");
-            aboutItem.Activated += delegate { DisplayAboutDialog(); };
-            helpMenu.Append(aboutItem);
-
-            menuBar.Append(helpOption);
-
-            fixedLayout = new Fixed();
-            fixedLayout.Put(mainGLWidget, 0, MENU_OFFSET);
-            fixedLayout.Put(menuBar, 0, 0);
-
-            simWindow.Add(fixedLayout);
-
             simWindow.ShowAll();
-        }
 
-        private void InitGraphics()
-        {
-            //Check to make sure OpenGL 1.5 is supported.
-            string glVersion = GL.GetString(StringName.Version).Substring(0, 3);
-            Console.Write(Utils.VERBOSE_GL_VERSION);
-            Console.WriteLine(glVersion);
+            CenterWindow();
 
-            if (double.Parse(glVersion) < Utils.MIN_GL_VERSION)
-            {
-                glInitFailed = true;
-                Console.WriteLine(Utils.GL_VERSION_UNSUPPORTED);
-                return;
-            }
-
-            GL.ClearColor(Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, Utils.BACKGROUND_COLOR_VALUE, 0.0f);
-
-            //Enable blending for alpha values.
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
-            if (!texMan.LoadTextures())
-            {
-                Console.WriteLine(Utils.TEXTURE_LOAD_FAILED);
-                glInitFailed = true;
-                return;
-            }
-
-            GL.EnableClientState(ArrayCap.VertexArray);
-            GL.EnableClientState(ArrayCap.TextureCoordArray);
-
-            lineRect = new Mesh(2, BeginMode.Lines);
-
-            float[] lrVertices = new float[]
-            {
-                0.0f, 0.0f,
-                1.0f, 0.0f,
-                0.0f, 1.0f,
-                1.0f, 1.0f
-            };
-
-            ushort[] lrIndices =
-            {
-                0, 1,
-                1, 3,
-                3, 2,
-                2, 0
-            };
-
-            lineRect.SetVertices(lrVertices, false);
-            lineRect.SetIndices(lrIndices);
-            lineRect.Allocate(BufferUsageHint.StaticDraw);
-
-            quad = new Mesh(2, BeginMode.Triangles);
-
-            float[] quadVertices = 
-            {
-                0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 1.0f,
-                1.0f, 1.0f, 1.0f, 1.0f
-            };
-
-            ushort[] quadIndices =
-            {
-                0, 1, 2,
-                2, 3, 1
-            };
-
-            quad.SetVertices(quadVertices, true);
-            quad.SetIndices(quadIndices);
-            //Also makes quad's vertex buffer current.
-            quad.Allocate(BufferUsageHint.StaticDraw);
-            quad.MakeCurrent();
-
-            GL.Viewport(0, 0, (int)windowWidth, (int)windowHeight);
-        }
+	        return true;
+	    }
 
 	    private void MainLoop()
 	    {
@@ -286,20 +158,25 @@ namespace RaahnSimulation
 
 	            Update();
 
-                if (mainGLWidget.Visible)
-                    mainGLWidget.RenderFrame();
+                states[states.Count - 1].RenderFrame();
 
-	            if (stateChangeRequested)
-	                HandleStateChangeRequest();
+                if (stateChangeRequested)
+                {
+                    if (!HandleStateChangeRequest())
+                    {
+                        Console.WriteLine(Utils.STATE_CHANGE_ERROR);
+                        running = false;
+                    }
+                }
+
+                Thread.Sleep(SLEEP_TIME);
 	        }
 	    }
 
 	    private void MainLoopHeadless()
 	    {
 	        while (running)
-	        {
 	            states[states.Count - 1].Update();
-	        }
 	    }
 
 	    private void Update()
@@ -316,47 +193,18 @@ namespace RaahnSimulation
                 e = eventQueue.Peek();
                 eventQueue.Dequeue();
 
-                states[states.Count - 1].UpdateEvent(e);
-
                 if (e.type == Gdk.EventType.Configure)
                 {
                     windowWidth = (uint)e.width;
                     windowHeight = (uint)e.height;
-                    camera.windowWorldRatio.x = (double)windowWidth / Simulator.WORLD_WINDOW_WIDTH;
-                    camera.windowWorldRatio.y = (double)windowHeight / Simulator.WORLD_WINDOW_HEIGHT;
-
-                    ResizeGL(windowWidth, windowHeight - MENU_OFFSET);
-                    ResizeFrame();
                 }
+
+                states[states.Count - 1].UpdateEvent(e);
             }
 
             //Regular update per frame.
             states[states.Count - 1].Update();
         }
-
-        private void ResizeFrame()
-        {
-            GL.Viewport(0, 0, (int)windowWidth, (int)windowHeight);
-        }
-
-	    private void RenderFrame()
-	    {
-	        GL.Clear(ClearBufferMask.ColorBufferBit);
-
-            GL.MatrixMode(MatrixMode.Projection);
-
-            GL.LoadIdentity();
-
-            GL.Ortho(0.0, WORLD_WINDOW_WIDTH, 0.0, WORLD_WINDOW_HEIGHT, -1.0, 1.0);
-
-            GL.MatrixMode(MatrixMode.Modelview);
-
-	        GL.LoadIdentity();
-
-	        camera.Transform();
-
-	        states[states.Count - 1].Draw();
-	    }
 
 	    public bool RequestStateChange(StateChangeType sc, State newState)
 		{
@@ -371,13 +219,14 @@ namespace RaahnSimulation
 			return true;
 		}
 
-		private void HandleStateChangeRequest()
+		private bool HandleStateChangeRequest()
 		{
 			switch (changeType)
 			{
 				case StateChangeType.PUSH:
 				{
-					PushState(requestedState);
+                    if (!PushState(requestedState))
+                        return false;
 					break;
 				}
 				case StateChangeType.POP:
@@ -387,7 +236,8 @@ namespace RaahnSimulation
 				}
 				case StateChangeType.CHANGE:
 				{
-					ChangeState(requestedState);
+                    if (!ChangeState(requestedState))
+                        return false;
 					break;
 				}
 				case StateChangeType.NONE:
@@ -399,9 +249,11 @@ namespace RaahnSimulation
 			stateChangeRequested = false;
 			changeType = StateChangeType.NONE;
 			requestedState = null;
+
+            return true;
 		}
 
-	    private void ChangeState(State newState)
+	    private bool ChangeState(State newState)
 	    {
 	        //Stop the current state and change to the new state
 	        if (states.Count > 0)
@@ -411,33 +263,36 @@ namespace RaahnSimulation
 	        }
 
 	        states.Add(newState);
-	        newState.Init(this);
+
+            if (!newState.Init(this))
+                return false;
+
+            return true;
 	    }
 
-	    private void PushState(State newState)
+	    private bool PushState(State newState)
 	    {
 	        if (states.Count > 0)
 	            states[states.Count - 1].Pause();
 
 	        states.Add(newState);
-	        newState.Init(this);
+	        
+            if (!newState.Init(this))
+                return false;
+
+            return true;
 	    }
 
 	    private void PopState()
 	    {
-	        if (states.Count > 0)
-	        {
-	            states[states.Count - 1].Clean();
-	            states.RemoveAt(states.Count - 1);
-	        }
+            if (states.Count > 0)
+            {
+                states[states.Count - 1].Clean();
 
-	        if (states.Count > 0)
-	            states[states.Count - 1].Resume();
-	    }
+                states.RemoveAt(states.Count - 1);
 
-	    public void SetHeadLess(bool value)
-	    {
-	        headLess = value;
+                states[states.Count - 1].Resume();
+            }
 	    }
 
 	    private void Clean()
@@ -453,21 +308,9 @@ namespace RaahnSimulation
 	        }
 	        while (eventQueue.Count > 0)
 	            eventQueue.Dequeue();
-
-            //Deletes textures if loaded.
-            texMan.DeleteTextures();
-
-            if (!glInitFailed)
-            {
-                lineRect.Free();
-                quad.Free();
-            }
-
-            //Free the GL context after deleting GL objects.
-            mainGLWidget.Dispose();
 	    }
 
-        private void DisplayAboutDialog()
+        public void DisplayAboutDialog()
         {
             AboutDialog about = new AboutDialog();
 
@@ -476,6 +319,11 @@ namespace RaahnSimulation
 
             about.Run();
             about.Destroy();
+        }
+
+        public void SetHeadLess(bool value)
+        {
+            headLess = value;
         }
 
         //Window moved or resized. Must use GLib.ConnectBefore
@@ -499,7 +347,8 @@ namespace RaahnSimulation
 		{
             if (ea.Event.Key == Gdk.Key.Escape)
             {
-                Simulator.Instance().running = false;
+                running = false;
+
                 //Don't bother saving the event.
                 return;
             }
@@ -647,8 +496,7 @@ namespace RaahnSimulation
 
 			SaveEvent(e);
 
-            Simulator.Instance().running = false;
-            mainGLWidget.Invalidate();
+            running = false;
 		}
 
 		private void SaveEvent(Event e)
@@ -669,16 +517,6 @@ namespace RaahnSimulation
                 int centerY = (simWindow.Screen.Height / 2) - ((int)windowHeight / 2);
                 simWindow.Move(centerX, centerY);
             }
-        }
-
-        public void SetGLVisible(bool visible)
-        {
-            mainGLWidget.Visible = visible;
-        }
-
-        public void ResizeGL(uint width, uint height)
-        {
-            mainGLWidget.SetSizeRequest((int)width, (int)height);
         }
 
         public bool GetHeadLess()
@@ -744,21 +582,6 @@ namespace RaahnSimulation
         public Gdk.Cursor GetBlankCursor()
         {
             return blankCursor;
-        }
-
-        public Gtk.Fixed GetMainContainer()
-        {
-            return fixedLayout;
-        }
-
-        public Camera GetCamera()
-        {
-            return camera;
-        }
-
-        public TextureManager GetTexMan()
-        {
-            return texMan;
         }
 
         public Stopwatch GetStopwatch()

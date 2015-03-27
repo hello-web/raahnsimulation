@@ -32,7 +32,7 @@ namespace RaahnSimulation
             subNodes = new List<QuadTreeNode>(SUB_NODE_COUNT);
             occupants = new LinkedList<Entity>();
             nodeBounds = new AABB();
-            nodeBounds.SetMesh(Simulator.lineRect);
+            nodeBounds.SetMesh(State.GetLineRect());
 
             nodeBounds.Copy(bounds);
         }

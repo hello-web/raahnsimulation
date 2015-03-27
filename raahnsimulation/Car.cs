@@ -24,10 +24,9 @@ namespace RaahnSimulation
         //Number of controls the network has.
         private const uint CONTROL_COUNT = 1;
         private const double CONTROL_THRESHOLD = 0.5;
-		private const double CAR_SPEED_X = 960.0;
-		private const double CAR_SPEED_Y = 540.0;
-		//120 degrees per second.
-		private const double CAR_ROTATE_SPEED = 120.0;
+        private const double CAR_SPEED_X = 15.0;
+        private const double CAR_SPEED_Y = 12.0;
+		private const double CAR_ROTATE_SPEED = 2.0;
         private const double LEARNING_RATE = 0.2;
 
         public List<Entity> entitiesHovering;
@@ -126,13 +125,11 @@ namespace RaahnSimulation
 
 	    public override void Update()
         {
-            double deltaTime = context.GetDeltaTime();
-
             //If the left or right arrow key is down, use user control.
             if (context.GetLeftKeyDown())
-                angle += CAR_ROTATE_SPEED * deltaTime;
+                angle += CAR_ROTATE_SPEED;
             else if (context.GetRightKeyDown())
-                angle -= CAR_ROTATE_SPEED * deltaTime;
+                angle -= CAR_ROTATE_SPEED;
             else
             {
                 UpdateBrain();
@@ -141,15 +138,10 @@ namespace RaahnSimulation
                 Console.WriteLine("Ouput 0: {0:0.000000}", output);
 
                 if (output > CONTROL_THRESHOLD)
-                    angle += CAR_ROTATE_SPEED * deltaTime;
+                    angle += CAR_ROTATE_SPEED;
                 else if (output < CONTROL_THRESHOLD)
-                    angle -= CAR_ROTATE_SPEED * deltaTime;
+                    angle -= CAR_ROTATE_SPEED;
             }
-
-            double xMove = velocity.x * deltaTime;
-            double yMove = velocity.y * deltaTime;
-
-            Camera camera = context.GetCamera();
 
             Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
             Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
@@ -160,7 +152,7 @@ namespace RaahnSimulation
             Utils.LineSegment collisionLine = new Utils.LineSegment();
 
             Utils.Point2 original = new Utils.Point2(center.x, center.y);
-            Utils.Point2 projected = new Utils.Point2(center.x + xMove, center.y + yMove);
+            Utils.Point2 projected = new Utils.Point2(center.x + velocity.x, center.y + velocity.y);
 
             collisionLine.SetUp(original, projected);
 
@@ -185,8 +177,8 @@ namespace RaahnSimulation
 
             if (canMove)
             {
-                drawingVec.x += xMove;
-                drawingVec.y += yMove;
+                drawingVec.x += velocity.x;
+                drawingVec.y += velocity.y;
             }
 
             base.Update();

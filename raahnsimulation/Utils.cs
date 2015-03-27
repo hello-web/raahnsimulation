@@ -311,7 +311,7 @@ namespace RaahnSimulation
 		public const double DEFAULT_SCREEN_WIDTH_PERCENTAGE = 0.6;
         public const double DEFAULT_SCREEN_HEIGHT_PERCENTAGE = 0.75;
         public const double MENU_SCREEN_WIDTH_PERCENTAGE = 0.4;
-        public const double MENU_SCREEN_HEIGHT_PERCENTAGE = 0.5;
+        public const double MENU_SCREEN_HEIGHT_PERCENTAGE = 0.2;
 		public const double DISCARD_Z_POS = 0.0;
 		public const double DISCARD_Z_SCALE = 1.0;
 		public const double DEG_TO_RAD = 3.1415926535 / 180.0;
@@ -327,10 +327,13 @@ namespace RaahnSimulation
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
         public const string SAVE_MAP = "Save Map";
+        public const string MENU_HELP = "Help";
+        public const string MENU_ABOUT = "About";
+        public const string DELAY_DESCRIPTION = "Delay (Milli)";
         public const string MAP_FOLDER = "Data/Maps/";
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
-		public const string VERSION_STRING = "Version 2.9";
+		public const string VERSION_STRING = "Version 2.9.5";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
@@ -351,6 +354,7 @@ namespace RaahnSimulation
         public const string XML_READ_ERROR = "Error while reading XML.";
         public const string XML_WRITE_ERROR = "Error while writing XML.";
         public const string ENTITY_POOL_USED_UP = "No more entities of type {0}, available.";
+        public const string STATE_CHANGE_ERROR = "Error changing state.";
 
 		public static double DegToRad(double deg)
 		{

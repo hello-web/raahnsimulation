@@ -10,16 +10,24 @@ namespace RaahnSimulation
 
         private Utils.Vector2 lastPos;
         private Utils.Vector2 deltaPos;
+        private GLWidget mainGLWidget;
 
-        public Cursor(Simulator sim) : base(sim)
+        public Cursor(Simulator sim, GLWidget glWidget) : base(sim)
         {
             texture = TextureManager.TextureType.CURSOR_0;
+
             width = CURSOR_WIDTH;
             height = CURSOR_HEIGHT;
+
             aabb.SetSize(width, height);
+
             lastPos = new Utils.Vector2(0.0, 0.0);
             deltaPos = new Utils.Vector2(0.0, 0.0);
+
             SetTransformUsage(false);
+
+            mainGLWidget = glWidget;
+
             Update();
         }
 
@@ -28,14 +36,15 @@ namespace RaahnSimulation
             int mouseX;
             int mouseY;
 
-            context.GetWindow().GetPointer(out mouseX, out mouseY);
+            mainGLWidget.GetPointer(out mouseX, out mouseY);
 
-            //Subtract width / 2 to center the mouse.
-            //Subtract height to draw from top to bottom instread of bottom to top.
+            Gdk.Rectangle glBounds = currentState.GetBounds();
+
+            //Subtract height / 2 to vertically position from the middle of the cursor.
             double windowX = (double)(mouseX);
-            double windowY = (double)(context.GetWindowHeight() - mouseY);
+            double windowY = (double)(glBounds.Height - mouseY - (height / 2.0));
 
-            Utils.Vector2 projection = context.GetCamera().ProjectWindow(windowX, windowY);
+            Utils.Vector2 projection = camera.ProjectWindow(windowX, windowY);
 
             drawingVec.x = projection.x;
             drawingVec.y = projection.y;

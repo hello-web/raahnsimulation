@@ -55,15 +55,20 @@ namespace RaahnSimulation
         protected double transparency;
         protected Utils.Vector2 drawingVec;
 		protected Simulator context;
-        protected Utils.Vector2 center;
-		protected Utils.Vector2 velocity;
-		protected Utils.Vector2 speed;
-        protected Utils.Vector3 color;
+        protected State currentState;
+        protected TextureManager texMan;
+        protected Camera camera;
         protected EntityType type;
 		protected TextureManager.TextureType texture;
         protected Mesh mesh;
+        protected Utils.Vector2 center;
+        protected Utils.Vector2 velocity;
+        protected Utils.Vector2 speed;
+        protected Utils.Vector3 color;
         private bool moved;
         private double previousAngle;
+        private Mesh lineRect;
+        private Mesh quad;
         private Utils.Vector2 previousPos;
         private Utils.Vector2 transformedWorldPos;
         private Utils.Vector2 worldPos;
@@ -75,13 +80,24 @@ namespace RaahnSimulation
 
 	    protected Entity(Simulator sim)
 	    {
+            context = sim;
+
+            currentState = context.GetState();
+
+            texMan = currentState.GetTexMan();
+            camera = currentState.GetCamera();
+
             visible = true;
 
             type = EntityType.GENERIC;
 	        texture = TextureManager.TextureType.NONE;
+
             //Default to quad mesh.
-            mesh = Simulator.quad;
-	        context = sim;
+            mesh = State.GetQuad();
+
+            lineRect = State.GetLineRect();
+            quad = State.GetQuad();
+	        
 	        width = 1.0;
 	        height = 1.0;
 	        angle = 0.0;
@@ -184,8 +200,8 @@ namespace RaahnSimulation
 
 	    public virtual void Draw()
 	    {
-	        if (context.GetTexMan().GetCurrentTexture() != texture)
-	            context.GetTexMan().SetTexture(texture);
+	        if (texMan.GetCurrentTexture() != texture)
+	            texMan.SetTexture(texture);
 
             if (!mesh.IsCurrent())
                 mesh.MakeCurrent();
@@ -193,17 +209,15 @@ namespace RaahnSimulation
 
         public void UpdateCoordinates()
         {
-            Camera cam = context.GetCamera();
-
             if (drawingVec == worldPos)
             {
-                Utils.Vector2 transform = cam.TransformWorld(worldPos);
+                Utils.Vector2 transform = camera.TransformWorld(worldPos);
                 transformedWorldPos.x = transform.x;
                 transformedWorldPos.y = transform.y;
             }
             else
             {
-                Utils.Vector2 transform = cam.UntransformWorld(transformedWorldPos);
+                Utils.Vector2 transform = camera.UntransformWorld(transformedWorldPos);
                 worldPos.x = transform.x;
                 worldPos.y = transform.y;
             }
@@ -320,9 +334,11 @@ namespace RaahnSimulation
         public virtual void DebugDraw()
         {
             //Handle all generic debug drawing here.
-            Simulator.lineRect.MakeCurrent();
+            lineRect.MakeCurrent();
+
             aabb.DebugDraw();
-            Simulator.quad.MakeCurrent();
+
+            quad.MakeCurrent();
         }
 
         //If any clean operations are needed,

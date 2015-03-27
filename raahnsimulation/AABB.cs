@@ -210,7 +210,7 @@ namespace RaahnSimulation
             bounds = new Utils.Rect();
 
             //Default to quad.
-            mesh = Simulator.quad;
+            mesh = State.GetQuad();
         }
 
         private void RotateVector2(Utils.Vector2 vec, double angle)

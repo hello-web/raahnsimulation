@@ -52,7 +52,7 @@ namespace RaahnSimulation
             context = sim;
             robot = car;
             quadTree = tree;
-            camera = context.GetCamera();
+            camera = context.GetState().GetCamera();
 
             count = size;
             defaultLength = 0.0;

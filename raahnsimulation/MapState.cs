@@ -1,17 +1,20 @@
 using System;
+using OpenTK.Graphics;
 
 namespace RaahnSimulation
 {
     public class MapState : State
     {
+        private const int PADDING = 0;
         private const double SAVE_BUTTON_WIDTH = 800.0;
         private const double SAVE_BUTTON_HEIGHT = 150.0;
         private const double SAVE_BUTTON_X = 2500.0;
         private const double SAVE_BUTTON_Y = 50.0;
 
         private static MapState mapState = new MapState();
+
         private bool panning;
-        private Camera camera;
+        private Gtk.MenuBar menuBar;
         private Cursor cursor;
         private EntityPanel entityPanel;
         private MapBuilder mapBuilder;
@@ -20,32 +23,56 @@ namespace RaahnSimulation
         public MapState()
         {
             panning = false;
-            camera = null;
             entityPanel = null;
             mapBuilder = null;
             saveMap = null;
         }
 
-        public override void Init(Simulator sim)
+        public override bool Init(Simulator sim)
         {
-            base.Init(sim);
+            if (!base.Init(sim))
+                return false;
 
-            camera = context.GetCamera();
+            Gtk.Window mainWindow = context.GetWindow();
 
-            Gtk.Window simWindow = context.GetWindow();
+            mainWindow.GdkWindow.Cursor = context.GetBlankCursor();
 
-            simWindow.GdkWindow.Cursor = context.GetBlankCursor();
-
-            uint newWinWidth = (uint)((double)simWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
-            uint newWinHeight = (uint)((double)simWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
+            uint newWinWidth = (uint)((double)mainWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
+            uint newWinHeight = (uint)((double)mainWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
 
             context.SetWindowSize(newWinWidth, newWinHeight);
             context.CenterWindow();
 
-            context.SetGLVisible(true);
-            context.ResizeGL(newWinWidth, newWinHeight - Simulator.MENU_OFFSET);
+            //Initialize the layout.
+            mainContainer = new Gtk.VBox();
+            Gtk.VBox mcVbox = (Gtk.VBox)mainContainer;
 
-            cursor = new Cursor(context);
+            menuBar = new Gtk.MenuBar();
+
+            Gtk.MenuItem helpOption = new Gtk.MenuItem(Utils.MENU_HELP);
+            Gtk.Menu helpMenu = new Gtk.Menu();
+            helpOption.Submenu = helpMenu;
+
+            Gtk.MenuItem aboutItem = new Gtk.MenuItem(Utils.MENU_ABOUT);
+            aboutItem.Activated += delegate { context.DisplayAboutDialog(); };
+            helpMenu.Append(aboutItem);
+
+            menuBar.Append(helpOption);
+
+            //Must be instantiated and added to the window before entites.
+            mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
+
+            mcVbox.PackStart(menuBar, false, true, PADDING);
+            mcVbox.PackStart(mainGLWidget, true, true, PADDING);
+
+            mainWindow.Add(mainContainer);
+
+            mainContainer.ShowAll();
+
+            if (!GetGLInitialized())
+                return false;
+
+            cursor = new Cursor(context, mainGLWidget);
 
             entityPanel = new EntityPanel(context, cursor, camera, 2);
 
@@ -58,6 +85,8 @@ namespace RaahnSimulation
 
             AddEntity(saveMap, 2);
             AddEntity(cursor, 3);
+
+            return true;
         }
 
         public override void Update()
@@ -67,11 +96,13 @@ namespace RaahnSimulation
             int mouseX;
             int mouseY;
 
-            context.GetWindow().GetPointer(out mouseX, out mouseY);
+            mainGLWidget.GetPointer(out mouseX, out mouseY);
+
+            Gdk.Rectangle glBounds = mainGLWidget.Allocation;
 
             if (mouseX < 0 || mouseY < 0)
                 mouseOutOfBounds = true;
-            else if (mouseX > context.GetWindowWidth() || mouseY > context.GetWindowHeight())
+            else if (mouseX > glBounds.Width || mouseY > glBounds.Height)
                 mouseOutOfBounds = true;
 
             if (entityPanel.Intersects(cursor.aabb.GetBounds()) || mouseOutOfBounds)
@@ -104,8 +135,9 @@ namespace RaahnSimulation
             else if (e.type == Gdk.EventType.MotionNotify)
             {
                 Gtk.Window simWindow = context.GetWindow();
+                Gdk.Rectangle glBounds = GetBounds();
 
-                if (e.Y < Simulator.MENU_OFFSET)
+                if (e.Y < glBounds.Y || e.Y > glBounds.Bottom)
                     simWindow.GdkWindow.Cursor = null;
                 else
                     simWindow.GdkWindow.Cursor = context.GetBlankCursor();
@@ -128,8 +160,8 @@ namespace RaahnSimulation
 
         public override void Draw()
         {
-            mapBuilder.Draw();
             base.Draw();
+            mapBuilder.Draw();
         }
 
         public void Save(string file)

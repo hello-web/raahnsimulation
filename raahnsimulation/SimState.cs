@@ -2,11 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using System.Diagnostics;
+using OpenTK.Graphics;
 
 namespace RaahnSimulation
 {
     public class SimState : State
     {
+        public const double DEFAULT_UPDATE_DELAY = 10.0;
+        private const int NO_PADDING = 0;
+        private const int VERTICAL_PADDING = 20;
+        private const int HORIZONTAL_PADDING = 60;
+        private const double DELAY_CHOOSER_MIN = 0.0;
+        private const double DELAY_CHOOSER_MAX = 100.0;
+        private const double DELAY_CHOOSER_STEP = 1.0;
         private const double CAR_WIDTH = 260.0;
         private const double CAR_HEIGHT = 160.0;
         private const double HIGHLIGHT_R = 0.0;
@@ -14,50 +23,98 @@ namespace RaahnSimulation
         private const double HIGHLIGHT_B = 0.0;
         private const double HIGHLIGHT_T = 1.0;
 
+        public static double updateDelay;
         private static SimState simState = new SimState();
 
         //Experiment must be initialized outside of SimState.
         public Experiment experiment;
         private bool panning;
+        private Gtk.MenuBar menuBar;
+        private Gtk.SpinButton delayChooser;
         private QuadTree quadTree;
-        private Camera camera;
         private Cursor cursor;
         private Car raahnCar;
-        private EntityMap EntityMap;
+        private EntityMap entityMap;
+        private Stopwatch timer;
 
         public SimState()
         {
-            experiment = null;
             panning = false;
             experiment = null;
+            experiment = null;
             quadTree = null;
-            camera = null;
             raahnCar = null;
-            EntityMap = null;
+            entityMap = null;
+            timer = null;
+
+            updateDelay = DEFAULT_UPDATE_DELAY;
         }
 
-        public override void Init(Simulator context)
+        public override bool Init(Simulator context)
         {
-            base.Init(context);
+            if (!base.Init(context))
+                return false;
 
-            camera = context.GetCamera();
+            Gtk.Window mainWindow = context.GetWindow();
 
-            quadTree = new QuadTree(new AABB(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT));
+            mainWindow.GdkWindow.Cursor = context.GetBlankCursor();
 
-            Gtk.Window simWindow = context.GetWindow();
-
-            simWindow.GdkWindow.Cursor = context.GetBlankCursor();
-
-            uint newWinWidth = (uint)((double)simWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
-            uint newWinHeight = (uint)((double)simWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
+            uint newWinWidth = (uint)((double)mainWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
+            uint newWinHeight = (uint)((double)mainWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
 
             context.SetWindowSize(newWinWidth, newWinHeight);
             context.CenterWindow();
 
-            context.SetGLVisible(true);
-            context.ResizeGL(newWinWidth, newWinHeight - Simulator.MENU_OFFSET);
+            //Initialize the layout.
+            mainContainer = new Gtk.VBox();
+            Gtk.VBox mcVbox = (Gtk.VBox)mainContainer;
 
-            cursor = new Cursor(context);
+            menuBar = new Gtk.MenuBar();
+
+            Gtk.MenuItem helpOption = new Gtk.MenuItem(Utils.MENU_HELP);
+            Gtk.Menu helpMenu = new Gtk.Menu();
+            helpOption.Submenu = helpMenu;
+
+            Gtk.MenuItem aboutItem = new Gtk.MenuItem(Utils.MENU_ABOUT);
+            aboutItem.Activated += delegate { context.DisplayAboutDialog(); };
+            helpMenu.Append(aboutItem);
+
+            menuBar.Append(helpOption);
+
+            //Must be instantiated and added to the window before entites.
+            mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
+
+            //Controls for the simulation.
+            Gtk.HBox controlBox = new Gtk.HBox();
+
+            //Controls for delay.
+            Gtk.VBox speedControls = new Gtk.VBox();
+
+            Gtk.Label delayLabel = new Gtk.Label(Utils.DELAY_DESCRIPTION);
+
+            delayChooser = new Gtk.SpinButton(DELAY_CHOOSER_MIN, DELAY_CHOOSER_MAX, DELAY_CHOOSER_STEP);
+            delayChooser.Value = updateDelay;
+            delayChooser.ValueChanged += OnDelayChooserChanged;
+
+            speedControls.PackStart(delayLabel, false, false, NO_PADDING);
+            speedControls.PackStart(delayChooser, false, false, VERTICAL_PADDING);
+
+            controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING);
+
+            mcVbox.PackStart(menuBar, false, true, NO_PADDING);
+            mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
+            mcVbox.PackStart(controlBox, false, false, NO_PADDING);
+
+            mainWindow.Add(mainContainer);
+
+            mainContainer.ShowAll();
+
+            if (!GetGLInitialized())
+                return false;
+
+            quadTree = new QuadTree(new AABB(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT));
+
+            cursor = new Cursor(context, mainGLWidget);
 
             raahnCar = new Car(context, quadTree);
 
@@ -72,15 +129,19 @@ namespace RaahnSimulation
             if (experiment != null)
             {
                 string mapFilePath = Utils.MAP_FOLDER + experiment.mapFile;
-                EntityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
+                entityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
             }
             else
-                EntityMap = new EntityMap(context, 0, raahnCar, quadTree);
+                entityMap = new EntityMap(context, 0, raahnCar, quadTree);
 
             AddEntity(raahnCar, 0);
             AddEntity(cursor, 1);
 
             quadTree.AddEntity(raahnCar);
+
+            timer = new Stopwatch();
+
+            return true;
         }
 
         public override void Update()
@@ -90,11 +151,12 @@ namespace RaahnSimulation
             int mouseX;
             int mouseY;
 
-            context.GetWindow().GetPointer(out mouseX, out mouseY);
+            mainGLWidget.GetPointer(out mouseX, out mouseY);
+            Gdk.Rectangle glBounds = mainGLWidget.Allocation;
 
             if (mouseX < 0 || mouseY < 0)
                 panning = false;
-            else if (mouseX > context.GetWindowWidth() || mouseY > context.GetWindowHeight())
+            else if (mouseX > glBounds.Width || mouseY > glBounds.Height)
                 panning = false;
 
             if (panning)
@@ -103,8 +165,18 @@ namespace RaahnSimulation
                 camera.Pan(-deltaPos.x, -deltaPos.y);
             }
 
+            if (timer.IsRunning)
+            {
+                if (timer.ElapsedMilliseconds < updateDelay)
+                    return;
+                else
+                    timer.Reset();
+            }
+            else
+                timer.Start();
+
             base.Update();
-            EntityMap.Update();
+            entityMap.Update();
             quadTree.Update();
 
             Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
@@ -141,6 +213,11 @@ namespace RaahnSimulation
 
         public override void UpdateEvent(Event e)
         {
+            if (e.type == Gdk.EventType.KeyPress)
+            {
+                if (e.key == Gdk.Key.Left || e.key == Gdk.Key.Right)
+                    context.GetWindow().Focus = mainGLWidget;
+            }
             if (e.type == Gdk.EventType.Scroll)
             {
                 double mouseX = (double)e.X;
@@ -155,14 +232,20 @@ namespace RaahnSimulation
             else if (e.type == Gdk.EventType.MotionNotify)
             {
                 Gtk.Window simWindow = context.GetWindow();
+                Gdk.Rectangle glBounds = GetBounds();
 
-                if (e.Y < Simulator.MENU_OFFSET)
+                if (e.Y < glBounds.Y || e.Y > glBounds.Bottom)
                     simWindow.GdkWindow.Cursor = null;
                 else
                     simWindow.GdkWindow.Cursor = context.GetBlankCursor();
             }
             else if (e.type == Gdk.EventType.ButtonPress)
             {
+                Gdk.Rectangle glBounds = GetBounds();
+
+                if (e.Y > glBounds.Y || e.Y < glBounds.Bottom)
+                    context.GetWindow().Focus = mainGLWidget;
+
                 if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = true;
             }
@@ -172,7 +255,7 @@ namespace RaahnSimulation
                     panning = false;
             }
 
-            EntityMap.UpdateEvent(e);
+            entityMap.UpdateEvent(e);
 
             base.UpdateEvent(e);
         }
@@ -182,9 +265,7 @@ namespace RaahnSimulation
             base.Draw();
 
             if (context.debugging)
-            {
                 quadTree.DebugDraw();
-            }
         }
 
         public override void Clean()
@@ -195,6 +276,11 @@ namespace RaahnSimulation
         public static SimState Instance()
         {
             return simState;
+        }
+
+        private void OnDelayChooserChanged(object sender, EventArgs ea)
+        {
+            updateDelay = delayChooser.Value;
         }
     }
 }

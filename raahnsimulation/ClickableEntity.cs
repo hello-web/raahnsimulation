@@ -52,10 +52,10 @@ namespace RaahnSimulation
 
             Utils.Vector2 comparisonVec;
             Utils.Vector2 mousePosWindowd = new Utils.Vector2(x, y);
-            comparisonVec = context.GetCamera().ProjectWindow(mousePosWindowd);
+            comparisonVec = camera.ProjectWindow(mousePosWindowd);
 
             if (UsesTransform())
-                comparisonVec = context.GetCamera().TransformWorld(comparisonVec);
+                comparisonVec = camera.TransformWorld(comparisonVec);
 
 	        if (aabb.Intersects(comparisonVec.x, comparisonVec.y))
 	        {

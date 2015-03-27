@@ -91,6 +91,8 @@ namespace RaahnSimulation
 
         private void Construct(GraphicsMode mode, GLEvent init, GLEvent draw)
         {
+            CanFocus = true;
+
             current = false;
             sharedContextInitialized = false;
             graphicsContextCount = 0;

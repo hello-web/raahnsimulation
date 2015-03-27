@@ -4,7 +4,8 @@ namespace RaahnSimulation
 	{
 		private static int Main(string[] argv)
 		{
-		    Simulator sim = Simulator.Instance();
+            Simulator sim = new Simulator();
+
 		    if (argv.Length > 1)
 		    {
 				int strValue = 0;
