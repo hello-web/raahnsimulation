@@ -10,6 +10,9 @@ namespace RaahnSimulation
         [XmlElement("SensorFile")]
         public string sensorFile;
 
+        [XmlElement("NetworkFile")]
+        public string networkFile;
+
         public Experiment()
         {
         }

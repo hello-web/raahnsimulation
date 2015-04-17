@@ -41,7 +41,6 @@ namespace RaahnSimulation
         {
             panning = false;
             experiment = null;
-            experiment = null;
             quadTree = null;
             raahnCar = null;
             entityMap = null;
@@ -119,7 +118,22 @@ namespace RaahnSimulation
             raahnCar = new Car(context, quadTree);
 
             if (experiment != null)
-                raahnCar.LoadConfig(Utils.SENSOR_FOLDER + experiment.sensorFile);
+            {
+                string sensorPath = null;
+                string networkPath = null;
+
+                if (!string.IsNullOrEmpty(experiment.sensorFile))
+                    sensorPath = Utils.SENSOR_FOLDER + experiment.sensorFile;
+                else
+                    Console.WriteLine(Utils.NO_SENSOR_FILE);
+
+                if (!string.IsNullOrEmpty(experiment.networkFile))
+                    networkPath = Utils.NETWORK_FOLDER + experiment.networkFile;
+                else
+                    Console.WriteLine(Utils.NO_NETWORK_FILE);
+
+                raahnCar.LoadConfig(sensorPath, networkPath);
+            }
 
             raahnCar.SetWidth(CAR_WIDTH);
             raahnCar.SetHeight(CAR_HEIGHT);

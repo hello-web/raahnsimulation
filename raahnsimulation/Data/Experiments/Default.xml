@@ -2,4 +2,5 @@
 <Experiment>
 	<MapFile>Default.xml</MapFile>
 	<SensorFile>Default.xml</SensorFile>
+	<NetworkFile>Default.xml</NetworkFile>
 </Experiment>

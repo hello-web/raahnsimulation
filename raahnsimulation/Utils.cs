@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Globalization;
 using OpenTK;
 using OpenTK.Graphics;
+using Raahn;
 
 namespace RaahnSimulation
 {
@@ -23,6 +24,16 @@ namespace RaahnSimulation
             {
                 x = copyVec.x;
                 y = copyVec.y;
+            }
+
+            public double GetMagnitude()
+            {
+                return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+            }
+
+            public double DotProduct(Vector2 vec)
+            {
+                return (x * vec.x + y * vec.y);
             }
 
             public static Vector2 operator+(Vector2 u, Vector2 v)
@@ -47,6 +58,16 @@ namespace RaahnSimulation
                 x = copyVec.x;
                 y = copyVec.y;
                 z = copyVec.z;
+            }
+
+            public double GetMagnitude()
+            {
+                return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2) + Math.Pow(z, 2));
+            }
+
+            public double DotProduct(Vector3 vec)
+            {
+                return (x * vec.x + y * vec.y + z * vec.z);
             }
         }
 
@@ -323,6 +344,7 @@ namespace RaahnSimulation
 		public const char FILE_COMMENT = '#';
 		public const char FILE_VALUE_SEPERATOR = ' ';
         public const string NULL_ELEMENT = "";
+        public const string OUTPUT_VERBOSE = "Ouput 0: {0:0.000000}";
 		public const string WINDOW_TITLE = "RAAHN Simulation";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
@@ -330,8 +352,11 @@ namespace RaahnSimulation
         public const string MENU_HELP = "Help";
         public const string MENU_ABOUT = "About";
         public const string DELAY_DESCRIPTION = "Delay (Milli)";
+        public const string HEBBIAN_TRAIN = "Hebbian";
+        public const string AUTOENCODER_TRAIN = "Autoencoder";
         public const string MAP_FOLDER = "Data/Maps/";
         public const string SENSOR_FOLDER = "Data/Sensors/";
+        public const string NETWORK_FOLDER = "Data/Networks/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
 		public const string VERSION_STRING = "Version 2.9.5";
         //Dialog strings.
@@ -351,10 +376,22 @@ namespace RaahnSimulation
         public const string FILE_NOT_FOUND = "File: {0} not found.";
         public const string MAP_LOAD_ERROR = "The map may not have been created correctly.";
         public const string SENSOR_LOAD_ERROR = "The sensor configuration may not have been created correctly.";
+        public const string NETWORK_LOAD_ERROR = "The neural network configuration may not have been created correctly.";
         public const string XML_READ_ERROR = "Error while reading XML.";
         public const string XML_WRITE_ERROR = "Error while writing XML.";
         public const string ENTITY_POOL_USED_UP = "No more entities of type {0}, available.";
         public const string STATE_CHANGE_ERROR = "Error changing state.";
+        public const string NO_NEURON_GROUPS = "No neuron groups specified.";
+        public const string NO_CONNECTION_GROUPS = "No connection groups specified.";
+        public const string NO_CONTROL_SCHEME = "No control scheme specified.";
+        public const string NO_MODULATION_SCHEME = "No modulation scheme specified.";
+        public const string NO_SENSOR_FILE = "No sensor file specified.";
+        public const string NO_NETWORK_FILE = "No network file specified.";
+
+        public static readonly string[] NEURON_GROUP_TYPES = 
+        {
+            "Input", "Hidden", "Output"
+        };
 
 		public static double DegToRad(double deg)
 		{
@@ -369,6 +406,26 @@ namespace RaahnSimulation
         public static double GetDist(Point2 point0, Point2 point1)
         {
             return Math.Sqrt(Math.Pow(point1.y - point0.y, 2) + Math.Pow(point1.x - point0.x, 2));
+        }
+
+        public static NeuronGroup.Type GetGroupTypeFromString(string type)
+        {
+            for (int i = 0; i < NEURON_GROUP_TYPES.Length; i++)
+            {
+                if (type.Equals(NEURON_GROUP_TYPES[i]))
+                    return (NeuronGroup.Type)i;
+            }
+
+            return NeuronGroup.Type.NONE;
+        }
+
+        public static ConnectionGroup.TrainFunctionType GetMethodFromString(string method)
+        {
+            if (method.Equals(AUTOENCODER_TRAIN))
+                return TrainingMethod.AutoencoderTrain;
+            //If hebbian or invalid, use hebbian.
+            else
+                return TrainingMethod.HebbianTrain;
         }
     }
 }

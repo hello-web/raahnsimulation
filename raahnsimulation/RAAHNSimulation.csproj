@@ -71,6 +71,9 @@
     <Compile Include="WallPool.cs" />
     <Compile Include="GLWidget.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="RaahnXmlConifg.cs" />
+    <Compile Include="ModulationScheme.cs" />
+    <Compile Include="ControlScheme.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -98,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="Data\Networks\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Experiments\Default.xml">
@@ -134,6 +138,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Textures\HollowCircle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Networks\Default.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

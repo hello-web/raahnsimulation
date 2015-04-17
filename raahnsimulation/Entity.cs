@@ -41,7 +41,6 @@ namespace RaahnSimulation
             "Wall", "Car"
         };
 
-		public const double ROTATE_SPEED = 90.0;
         public const double DEFAULT_COLOR_R = 1.0;
         public const double DEFAULT_COLOR_G = 1.0;
         public const double DEFAULT_COLOR_B = 1.0;
@@ -238,6 +237,11 @@ namespace RaahnSimulation
         public bool UsesTransform()
         {
             return drawingVec == transformedWorldPos;
+        }
+
+        public double GetAngle()
+        {
+            return angle;
         }
 
         public double GetWidth()

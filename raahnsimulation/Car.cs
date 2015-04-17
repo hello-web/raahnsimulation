@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using OpenTK.Graphics.OpenGL;
+using Raahn;
 
 namespace RaahnSimulation
 {
@@ -19,129 +20,50 @@ namespace RaahnSimulation
         public double angle;
     }
 
-	public class Car : Entity
-	{
+    public partial class Car : Entity
+    {
         //Number of controls the network has.
         private const uint CONTROL_COUNT = 1;
         private const double CONTROL_THRESHOLD = 0.5;
-        private const double CAR_SPEED_X = 15.0;
-        private const double CAR_SPEED_Y = 12.0;
-		private const double CAR_ROTATE_SPEED = 2.0;
-        private const double LEARNING_RATE = 0.2;
+        private const double ROTATE_SPEED = 2.0;
+        private const double SPEED_X = 15.0;
+        private const double SPEED_Y = 12.0;
+        //Between 0 and twice ROTATE_SPEED
+        private const double ROTATE_RANGE = 2.0 * ROTATE_SPEED;
 
         public List<Entity> entitiesHovering;
         private bool configLoaded;
         private uint rangeFinderCount;
         private uint pieSliceSensorCount;
-        private uint rToHMod;
-        private uint pToHMod;
-        private uint hToOMod;
         private QuadTree quadTree;
+        private ModulationScheme.SchemeFunction modulationScheme;
+        private ControlScheme.SchemeFunction controlScheme;
+        private List<uint> modulationSignals;
         private List<RangeFinderGroup> rangeFinderGroups;
         private List<PieSliceSensorGroup> pieSliceSensorGroups;
-        private Raahn.NeuralNetwork brain;
-        private Raahn.NeuronGroup.Identifier rangeFinderNeuronsId;
-        private Raahn.NeuronGroup.Identifier pieSliceSensorNeuronsId;
-        private Raahn.NeuronGroup.Identifier hiddenNeuronsId;
-        private Raahn.NeuronGroup.Identifier outputNeuronsId;
+        private NeuralNetwork brain;
 
-	    public Car(Simulator sim, QuadTree tree) : base(sim)
-	    {
-	        texture = TextureManager.TextureType.CAR;
+        public Car(Simulator sim, QuadTree tree) : base(sim)
+        {
+            texture = TextureManager.TextureType.CAR;
             type = EntityType.CAR;
 
             quadTree = tree;
 
+            modulationSignals = new List<uint>();
             rangeFinderGroups = new List<RangeFinderGroup>();
             pieSliceSensorGroups = new List<PieSliceSensorGroup>();
 
-	        speed.x = CAR_SPEED_X;
-	        speed.y = CAR_SPEED_Y;
+            speed.x = SPEED_X;
+            speed.y = SPEED_Y;
 
             entitiesHovering = new List<Entity>();
-
-            brain = new Raahn.NeuralNetwork(LEARNING_RATE);
-	    }
-
-        //Should be called only once after setting up the sensors.
-        private void InitBrain()
-        {
-            rangeFinderNeuronsId.type = Raahn.NeuronGroup.Type.INPUT;
-            pieSliceSensorNeuronsId.type = Raahn.NeuronGroup.Type.INPUT;
-            hiddenNeuronsId.type = Raahn.NeuronGroup.Type.HIDDEN;
-            outputNeuronsId.type = Raahn.NeuronGroup.Type.OUTPUT;
-
-            //Add modulation signals.
-            rToHMod = Raahn.ModulationSignal.AddSignal();
-            pToHMod = Raahn.ModulationSignal.AddSignal();
-            hToOMod = Raahn.ModulationSignal.AddSignal();
-
-            //Just a guess at the sufficient number of hidden neurons for now.
-            uint hiddenCount = (rangeFinderCount + pieSliceSensorCount) / 2;
-
-            //Input groups.
-            //Range finder input neuron group.
-            rangeFinderNeuronsId.index = brain.AddNeuronGroup(rangeFinderCount, rangeFinderNeuronsId.type);
-            //Pie slice sensor input neuron group.
-            pieSliceSensorNeuronsId.index = brain.AddNeuronGroup(pieSliceSensorCount, pieSliceSensorNeuronsId.type);
-
-            //Hidden neuron group.
-            hiddenNeuronsId.index = brain.AddNeuronGroup(hiddenCount, hiddenNeuronsId.type);
-
-            //Output neuron group.
-            outputNeuronsId.index = brain.AddNeuronGroup(CONTROL_COUNT, outputNeuronsId.type);
-
-            brain.ConnectGroups(rangeFinderNeuronsId, hiddenNeuronsId, Raahn.TrainingMethod.HebbianTrain, rToHMod, true);
-            brain.ConnectGroups(pieSliceSensorNeuronsId, hiddenNeuronsId, Raahn.TrainingMethod.HebbianTrain, pToHMod, false);
-            brain.ConnectGroups(hiddenNeuronsId, outputNeuronsId, Raahn.TrainingMethod.HebbianTrain, hToOMod, true);
         }
 
-        public void UpdateBrain()
+        public override void Update()
         {
-            List<double> rInputs = new List<double>((int)rangeFinderCount);
-            List<double> pInputs = new List<double>((int)pieSliceSensorCount);
-
-            for (uint x = 0; x < rangeFinderGroups.Count; x++)
-            {
-                uint currentGroupLength = rangeFinderGroups[(int)x].GetRangeFinderCount();
-
-                for (uint y = 0; y < currentGroupLength; y++)
-                    rInputs.Add(rangeFinderGroups[(int)x].GetRangeFinderValue(y));
-            }
-
-            for (uint x = 0; x < pieSliceSensorGroups.Count; x++)
-            {
-                uint currentGroupLength = pieSliceSensorGroups[(int)x].GetPieSliceSensorCount();
-
-                for (uint y = 0; y < currentGroupLength; y++)
-                    pInputs.Add(pieSliceSensorGroups[(int)x].GetPieSliceSensorValue(y));
-            }
-
-            brain.SetInputs((uint)rangeFinderNeuronsId.index, rInputs.ToArray());
-            brain.SetInputs((uint)pieSliceSensorNeuronsId.index, pInputs.ToArray());
-
-            brain.PropagateSignal();
-        }
-
-	    public override void Update()
-        {
-            //If the left or right arrow key is down, use user control.
-            if (context.GetLeftKeyDown())
-                angle += CAR_ROTATE_SPEED;
-            else if (context.GetRightKeyDown())
-                angle -= CAR_ROTATE_SPEED;
-            else
-            {
-                UpdateBrain();
-
-                double output = brain.GetNeuronValue(outputNeuronsId, 0);
-                Console.WriteLine("Ouput 0: {0:0.000000}", output);
-
-                if (output > CONTROL_THRESHOLD)
-                    angle += CAR_ROTATE_SPEED;
-                else if (output < CONTROL_THRESHOLD)
-                    angle -= CAR_ROTATE_SPEED;
-            }
+            if (controlScheme != null)
+                controlScheme(this);
 
             Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
             Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
@@ -181,6 +103,11 @@ namespace RaahnSimulation
                 drawingVec.y += velocity.y;
             }
 
+            if (modulationScheme != null)
+                modulationScheme(this, entitiesInBounds);
+
+            brain.Train();
+
             base.Update();
 
             for (int i = 0; i < rangeFinderGroups.Count; i++)
@@ -188,23 +115,23 @@ namespace RaahnSimulation
 
             for (int i = 0; i < pieSliceSensorGroups.Count; i++)
                 pieSliceSensorGroups[i].Update();
-	    }
+        }
 
         public override void UpdateEvent(Event e)
         {
             base.UpdateEvent(e);
         }
 
-		public override void Draw()
-	    {
-	        base.Draw();
+        public override void Draw()
+        {
+            base.Draw();
 
             GL.PushMatrix();
 
-	        RotateAroundCenter();
+            RotateAroundCenter();
 
-	        GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
-	        GL.Scale(width, height, Utils.DISCARD_Z_SCALE);
+            GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+            GL.Scale(width, height, Utils.DISCARD_Z_SCALE);
 
             GL.DrawElements(mesh.GetRenderMode(), mesh.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
 
@@ -215,7 +142,7 @@ namespace RaahnSimulation
 
             for (int i = 0; i < pieSliceSensorGroups.Count; i++)
                 pieSliceSensorGroups[i].Draw();
-	    }
+        }
 
         public override void DebugDraw()
         {
@@ -228,8 +155,11 @@ namespace RaahnSimulation
             PieSliceSensorGroup.Clean();
         }
 
-        public bool LoadConfig(string fileName)
+        public bool LoadConfig(string sensorFile, string networkFile)
         {
+            //Even if the XML is invalid, the brain must be initiaized.
+            brain = new NeuralNetwork();
+
             //If a configuration was already loaded delete the
             //VBOs and IBOs used as new ones will be allocated.
             if (configLoaded)
@@ -239,13 +169,42 @@ namespace RaahnSimulation
                 configLoaded = false;
             }
 
-            if (!File.Exists(fileName))
+            if (!string.IsNullOrEmpty(sensorFile))
             {
-                Console.WriteLine(string.Format(Utils.FILE_NOT_FOUND, fileName));
+                if (!InitSensors(sensorFile))
+                    return false;
+            }
+
+            if (!string.IsNullOrEmpty(networkFile))
+            {
+                if (!InitBrain(networkFile))
+                    return false;
+            }
+
+            configLoaded = true;
+
+            return true;
+        }
+
+        public uint GetRangeFinderCount()
+        {
+            return rangeFinderCount;
+        }
+
+        public uint GetPieSliceSensorCount()
+        {
+            return pieSliceSensorCount;
+        }
+
+        private bool InitSensors(string sensorFile)
+        {
+            if (!File.Exists(sensorFile))
+            {
+                Console.WriteLine(string.Format(Utils.FILE_NOT_FOUND, sensorFile));
                 return false;
             }
 
-            TextReader configReader = new StreamReader(fileName);
+            TextReader configReader = new StreamReader(sensorFile);
             SensorConfig sensorConfig = null;
 
             try
@@ -325,31 +284,136 @@ namespace RaahnSimulation
                 }
             }
 
-            InitBrain();
-
-            configLoaded = true;
-
             return true;
         }
 
-        public uint GetRangeFinderCount()
+        private bool InitBrain(string networkFile)
         {
-            uint rangeFinderCount = 0;
+            if (!File.Exists(networkFile))
+            {
+                Console.WriteLine(Utils.FILE_NOT_FOUND, networkFile);
+                return false;
+            }
 
-            for (int i = 0; i < rangeFinderGroups.Count; i++)
-                rangeFinderCount += rangeFinderGroups[i].GetRangeFinderCount();
+            TextReader configReader = new StreamReader(networkFile);
+            NeuralNetworkConfig networkConfig = null;
 
-            return rangeFinderCount;
-        }
+            try
+            {
+                XmlSerializer deserializer = new XmlSerializer(typeof(NeuralNetworkConfig));
+                networkConfig = (NeuralNetworkConfig)deserializer.Deserialize(configReader);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(Utils.XML_READ_ERROR);
+                Console.WriteLine(Utils.NETWORK_LOAD_ERROR);
+                Console.WriteLine(e.Message);
 
-        public uint GetPieSliceSensorCount()
-        {
-            uint pieSliceSensorCount = 0;
+                return false;
+            }
+            finally
+            {
+                configReader.Close();
+            }
 
-            for (int i = 0; i < pieSliceSensorGroups.Count; i++)
-                pieSliceSensorCount += pieSliceSensorGroups[i].GetPieSliceSensorCount();
+            //No neuron groups, connection groups, control scheme, or modulation scheme
+            //return true to continue without 
+            if (networkConfig.neuronGroups == null)
+            {
+                Console.WriteLine(Utils.NO_NEURON_GROUPS);
+                return true;
+            }
 
-            return pieSliceSensorCount;
+            if (networkConfig.connectionGroups == null)
+            {
+                Console.WriteLine(Utils.NO_CONNECTION_GROUPS);
+                return true;
+            }
+
+            if (networkConfig.controlScheme == null)
+            {
+                Console.WriteLine(Utils.NO_CONTROL_SCHEME);
+                return true;
+            }
+
+            if (networkConfig.modulationScheme == null)
+            {
+                Console.WriteLine(Utils.NO_MODULATION_SCHEME);
+                return true;
+            }
+
+            brain.learningRate = networkConfig.learningRate;
+
+            ControlScheme.Scheme cSchemeDescriptor = ControlScheme.GetSchemeFromString(networkConfig.controlScheme);
+            ModulationScheme.Scheme mSchemeDescriptor = ModulationScheme.GetSchemeFromString(networkConfig.modulationScheme);
+
+            if (cSchemeDescriptor == ControlScheme.Scheme.NONE)
+            {
+                Console.WriteLine(Utils.NO_CONTROL_SCHEME);
+                return true;
+            }
+
+            if (mSchemeDescriptor == ModulationScheme.Scheme.NONE)
+            {
+                Console.WriteLine(Utils.NO_MODULATION_SCHEME);
+                return true;
+            }
+
+            controlScheme = ControlScheme.GetSchemeFunction(cSchemeDescriptor);
+            modulationScheme = ModulationScheme.GetSchemeFunction(mSchemeDescriptor);
+
+            if (networkConfig.parameters != null)
+            {
+                ControlScheme.InterpretParameters(networkConfig.parameters, cSchemeDescriptor);
+                ModulationScheme.InterpretParameters(networkConfig.parameters, mSchemeDescriptor);
+            }
+
+            int[] neuronGroupIds = new int[networkConfig.neuronGroups.Length];
+
+            //Add modulation signals.
+            for (uint i = 0; i < networkConfig.neuronGroups.Length; i++)
+            {
+                NeuronGroupConfig nGroupConfig = networkConfig.neuronGroups[(int)i];
+
+                NeuronGroup.Type type = Utils.GetGroupTypeFromString(nGroupConfig.type);
+
+                neuronGroupIds[(int)i] = brain.AddNeuronGroup(nGroupConfig.count, type);
+            }
+
+            for (uint i = 0; i < networkConfig.connectionGroups.Length; i++)
+            {
+                ConnectionConfig cGroupConfig = networkConfig.connectionGroups[(int)i];
+
+                if (cGroupConfig.inputGroupIndex < networkConfig.neuronGroups.Length
+                    && cGroupConfig.outputGroupIndex < networkConfig.neuronGroups.Length)
+                {
+                    NeuronGroup.Identifier inputGroup;
+                    inputGroup.index = neuronGroupIds[(int)cGroupConfig.inputGroupIndex];
+                    string inputTypeString = networkConfig.neuronGroups[(int)cGroupConfig.inputGroupIndex].type;
+                    inputGroup.type = Utils.GetGroupTypeFromString(inputTypeString);
+
+                    NeuronGroup.Identifier outputGroup;
+                    outputGroup.index = neuronGroupIds[(int)cGroupConfig.outputGroupIndex];
+                    string outputTypeString = networkConfig.neuronGroups[(int)cGroupConfig.outputGroupIndex].type;
+                    outputGroup.type = Utils.GetGroupTypeFromString(outputTypeString);
+
+                    ConnectionGroup.TrainFunctionType trainMethod = Utils.GetMethodFromString(cGroupConfig.trainingMethod);
+
+                    if (cGroupConfig.useModulation)
+                    {
+                        uint modSig = 0;
+
+                        modSig = ModulationSignal.AddSignal();
+                        modulationSignals.Add(modSig);
+
+                        brain.ConnectGroups(inputGroup, outputGroup, trainMethod, (int)modSig, cGroupConfig.usebias);
+                    }
+                    else
+                        brain.ConnectGroups(inputGroup, outputGroup, trainMethod, ModulationSignal.INVALID_INDEX, cGroupConfig.usebias);
+                }
+            }
+
+            return true;
         }
 
         private Utils.Point2 GetNearestIntersection(List<Utils.Point2> intersections)
@@ -367,5 +431,5 @@ namespace RaahnSimulation
 
             return nearest;
         }
-	}
+    }
 }

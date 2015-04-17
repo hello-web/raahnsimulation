@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NeuralNetwork>
+	<LearningRate>0.1</LearningRate>
+	
+	<ControlScheme>SensorBasedTurn</ControlScheme>
+	<ModulationScheme>WallAvoidance</ModulationScheme>
+	
+	<NeuronGroup>
+		<Count>11</Count>
+		<Type>Input</Type>
+	</NeuronGroup>
+	
+	<NeuronGroup>
+		<Count>9</Count>
+		<Type>Input</Type>
+	</NeuronGroup>
+	
+	<NeuronGroup>
+		<Count>1</Count>
+		<Type>Output</Type>
+	</NeuronGroup>
+	
+	<ConnectionGroup UseBias="false" UseModulation="true">
+		<InputGroup>0</InputGroup>
+		<OutputGroup>2</OutputGroup>
+		<TrainingMethod>HebbianTrain</TrainingMethod>
+	</ConnectionGroup>
+	
+	<ConnectionGroup UseBias="false" UseModulation="false">
+		<InputGroup>1</InputGroup>
+		<OutputGroup>2</OutputGroup>
+		<TrainingMethod>HebbianTrain</TrainingMethod>
+	</ConnectionGroup>
+	
+	<Parameter>500</Parameter>
+</NeuralNetwork>
