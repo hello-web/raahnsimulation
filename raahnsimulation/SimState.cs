@@ -184,7 +184,7 @@ namespace RaahnSimulation
                 if (timer.ElapsedMilliseconds < updateDelay)
                     return;
                 else
-                    timer.Reset();
+                    timer.Restart();
             }
             else
                 timer.Start();

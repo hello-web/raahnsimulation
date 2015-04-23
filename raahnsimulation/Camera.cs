@@ -52,6 +52,7 @@ namespace RaahnSimulation
             Pan(-x, -y);
         }
 
+        //Transforms world coordinates with camera transformations.
         public Utils.Vector2 TransformWorld(double windowX, double windowY)
         {
             double x = (windowX / zoom) + vecPos.x;
@@ -59,6 +60,7 @@ namespace RaahnSimulation
             return new Utils.Vector2(x, y);
         }
 
+        //Undoes camera transformations on world coordiantes.
         public Utils.Vector2 UntransformWorld(double worldX, double worldY)
         {
             double x = (worldX - vecPos.x) * zoom;
@@ -76,11 +78,13 @@ namespace RaahnSimulation
             return UntransformWorld(tWorld.x, tWorld.y);
         }
 
+        //Projects window coordinates to world coordinates.
         public Utils.Vector2 ProjectWindow(double windowX, double windowY)
         {
             return new Utils.Vector2(windowX / windowWorldRatio.x, windowY / windowWorldRatio.y);
         }
 
+        //Unprojects world coordiantes to window coordinates.
         public Utils.Vector2 UnProjectWorld(double worldX, double worldY)
         {
             return new Utils.Vector2(worldX * windowWorldRatio.x, worldY * windowWorldRatio.y);
@@ -122,6 +126,7 @@ namespace RaahnSimulation
             return transform;
         }
 
+        //Projects window coordinates to world coordinates.
         public Utils.Rect ProjectWindow(Utils.Rect window)
         {
             Utils.Rect transform = new Utils.Rect();
@@ -134,6 +139,7 @@ namespace RaahnSimulation
             return transform;
         }
 
+        //Unprojects world coordiantes to window coordinates.
         public Utils.Rect UnProjectWorld(Utils.Rect world)
         {
             Utils.Rect transform = new Utils.Rect();

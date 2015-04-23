@@ -22,8 +22,8 @@ namespace RaahnSimulation
 
     public partial class Car : Entity
     {
-        //Number of controls the network has.
-        private const uint CONTROL_COUNT = 1;
+        public const double HALF_QUERY_WIDTH = Simulator.WORLD_WINDOW_WIDTH / 2.0;
+        public const double HALF_QUERY_HEIGHT = Simulator.WORLD_WINDOW_HEIGHT / 2.0;
         private const double CONTROL_THRESHOLD = 0.5;
         private const double ROTATE_SPEED = 2.0;
         private const double SPEED_X = 15.0;
@@ -65,8 +65,11 @@ namespace RaahnSimulation
             if (controlScheme != null)
                 controlScheme(this);
 
-            Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
-            Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
+            double worldX = GetWorldX();
+            double worldY = GetWorldY();
+
+            Utils.Vector2 lowerLeft = camera.TransformWorld(worldX - HALF_QUERY_WIDTH, worldY - HALF_QUERY_HEIGHT);
+            Utils.Vector2 upperRight = camera.TransformWorld(worldX + HALF_QUERY_WIDTH, worldY + HALF_QUERY_HEIGHT);
 
             AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
             viewBounds.Translate(lowerLeft.x, lowerLeft.y);

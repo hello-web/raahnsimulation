@@ -115,8 +115,17 @@ namespace RaahnSimulation
 
         public void Update()
         {
-            Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
-            Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
+            double robotWorldX = robot.GetWorldX();
+            double robotWorldY = robot.GetWorldY();
+
+            double llX = robotWorldX - Car.HALF_QUERY_WIDTH;
+            double llY = robotWorldY - Car.HALF_QUERY_HEIGHT;
+
+            double urX = robotWorldX + Car.HALF_QUERY_WIDTH;
+            double urY = robotWorldY + Car.HALF_QUERY_HEIGHT;
+
+            Utils.Vector2 lowerLeft = camera.TransformWorld(llX, llY);
+            Utils.Vector2 upperRight = camera.TransformWorld(urX, urY);
 
             AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
             viewBounds.Translate(lowerLeft.x, lowerLeft.y);
