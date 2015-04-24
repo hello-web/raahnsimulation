@@ -32,6 +32,9 @@ namespace RaahnSimulation
 
         private uint layer;
         private bool loaded;
+        private double defaultCarX;
+        private double defaultCarY;
+        private double defaultCarAngle;
 		private List<Entity> entities;
         private Simulator context;
         private State currentState;
@@ -100,8 +103,12 @@ namespace RaahnSimulation
 
             if (mapConfig.robotConfig != null)
             {
-                raahnCar.SetPosition(mapConfig.robotConfig.x, mapConfig.robotConfig.y);
-                raahnCar.angle = mapConfig.robotConfig.angle;
+                defaultCarX = mapConfig.robotConfig.x;
+                defaultCarY = mapConfig.robotConfig.y;
+                defaultCarAngle = mapConfig.robotConfig.angle;
+
+                raahnCar.SetPosition(defaultCarX, defaultCarY);
+                raahnCar.angle = defaultCarAngle;
             }
 
             if (mapConfig.entites != null)
@@ -157,9 +164,28 @@ namespace RaahnSimulation
 
         }
 
+        public double GetDefaultCarX()
+        {
+            return defaultCarX;
+        }
+
+        public double GetDefaultAngle()
+        {
+            return defaultCarAngle;
+        }
+
+        public double GetDefaultCarY()
+        {
+            return defaultCarY;
+        }
+
         private void Construct(Simulator sim, uint layerIndex, Car car, QuadTree tree)
         {
             loaded = false;
+
+            defaultCarX = 0.0;
+            defaultCarY = 0.0;
+            defaultCarAngle = 0.0;
 
             entities = new List<Entity>();
 

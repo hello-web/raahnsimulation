@@ -29,6 +29,10 @@ namespace RaahnSimulation
         //Experiment must be initialized outside of SimState.
         public Experiment experiment;
         private bool panning;
+        private bool simulationRunning;
+        private double defaultCarX;
+        private double defaultCarY;
+        private double defaultCarAngle;
         private Gtk.MenuBar menuBar;
         private Gtk.SpinButton delayChooser;
         private QuadTree quadTree;
@@ -40,6 +44,7 @@ namespace RaahnSimulation
         public SimState()
         {
             panning = false;
+            simulationRunning = false;
             experiment = null;
             quadTree = null;
             raahnCar = null;
@@ -100,9 +105,30 @@ namespace RaahnSimulation
 
             controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING);
 
+            //Button panel.
+            Gtk.HBox buttonPanel = new Gtk.HBox();
+
+            Gtk.Image playImage = new Gtk.Image(Gtk.Stock.MediaPlay, Gtk.IconSize.Button);
+            Gtk.Image pauseImage = new Gtk.Image(Gtk.Stock.MediaPause, Gtk.IconSize.Button);
+            Gtk.Image restartImage = new Gtk.Image(Gtk.Stock.MediaPrevious, Gtk.IconSize.Button);
+
+            Gtk.Button playButton = new Gtk.Button(playImage);
+            playButton.Clicked += OnPlayClicked;
+
+            Gtk.Button pauseButton = new Gtk.Button(pauseImage);
+            pauseButton.Clicked += OnPauseClicked;
+
+            Gtk.Button restartButton = new Gtk.Button(restartImage);
+            restartButton.Clicked += OnRestartClicked;
+
+            buttonPanel.PackStart(playButton, false, false, NO_PADDING);
+            buttonPanel.PackStart(pauseButton, false, false, NO_PADDING);
+            buttonPanel.PackStart(restartButton, false, false, NO_PADDING);
+
             mcVbox.PackStart(menuBar, false, true, NO_PADDING);
             mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
             mcVbox.PackStart(controlBox, false, false, NO_PADDING);
+            mcVbox.PackStart(buttonPanel, false, false, NO_PADDING);
 
             mainWindow.Add(mainContainer);
 
@@ -138,20 +164,32 @@ namespace RaahnSimulation
             raahnCar.SetWidth(CAR_WIDTH);
             raahnCar.SetHeight(CAR_HEIGHT);
             raahnCar.SetPosition(0.0, 0.0);
-            raahnCar.Update();
 
             if (experiment != null)
             {
                 string mapFilePath = Utils.MAP_FOLDER + experiment.mapFile;
                 entityMap = new EntityMap(context, 0, raahnCar, quadTree, mapFilePath);
+
+                defaultCarX = entityMap.GetDefaultCarX();
+                defaultCarY = entityMap.GetDefaultCarY();
+                defaultCarAngle = entityMap.GetDefaultAngle();
             }
             else
+            {
                 entityMap = new EntityMap(context, 0, raahnCar, quadTree);
+
+                defaultCarX = 0.0;
+                defaultCarY = 0.0;
+                defaultCarAngle = 0.0;
+            }
 
             AddEntity(raahnCar, 0);
             AddEntity(cursor, 1);
 
             quadTree.AddEntity(raahnCar);
+
+            //Update the car with initial map information.
+            raahnCar.UpdateMinimal();
 
             timer = new Stopwatch();
 
@@ -179,49 +217,52 @@ namespace RaahnSimulation
                 camera.Pan(-deltaPos.x, -deltaPos.y);
             }
 
-            if (timer.IsRunning)
+            if (simulationRunning)
             {
-                if (timer.ElapsedMilliseconds < updateDelay)
-                    return;
-                else
-                    timer.Restart();
-            }
-            else
-                timer.Start();
-
-            base.Update();
-            entityMap.Update();
-            quadTree.Update();
-
-            Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
-            Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
-
-            AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
-            viewBounds.Translate(lowerLeft.x, lowerLeft.y);
-
-            List<Entity> entitiesInBounds = quadTree.Query(viewBounds);
-
-            //We want to check if raahnCar intersects anything,
-            //but we should not check if it intersects itself.
-            if (entitiesInBounds.Contains(raahnCar))
-                entitiesInBounds.Remove(raahnCar);
-
-            //Reset the list of entities raahnCar collides with.
-            raahnCar.entitiesHovering.Clear();
-
-            for (int i = 0; i < entitiesInBounds.Count; i++)
-            {
-                //Only colorable entities are added to the quad tree,
-                //so we can cast it to a colorable entity.
-                Entity curEntity = (Entity)entitiesInBounds[i];
-
-                if (raahnCar.aabb.Intersects(curEntity.aabb.GetBounds()))
+                if (timer.IsRunning)
                 {
-                    raahnCar.entitiesHovering.Add(curEntity);
-                    curEntity.SetColor(HIGHLIGHT_R, HIGHLIGHT_G, HIGHLIGHT_B, HIGHLIGHT_T);
+                    if (timer.ElapsedMilliseconds < updateDelay)
+                        return;
+                    else
+                        timer.Restart();
                 }
                 else
-                    curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
+                    timer.Start();
+
+                base.Update();
+                entityMap.Update();
+                quadTree.Update();
+
+                Utils.Vector2 lowerLeft = camera.TransformWorld(0.0, 0.0);
+                Utils.Vector2 upperRight = camera.TransformWorld(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT);
+
+                AABB viewBounds = new AABB(upperRight.x - lowerLeft.x, upperRight.y - lowerLeft.y);
+                viewBounds.Translate(lowerLeft.x, lowerLeft.y);
+
+                List<Entity> entitiesInBounds = quadTree.Query(viewBounds);
+
+                //We want to check if raahnCar intersects anything,
+                //but we should not check if it intersects itself.
+                if (entitiesInBounds.Contains(raahnCar))
+                    entitiesInBounds.Remove(raahnCar);
+
+                //Reset the list of entities raahnCar collides with.
+                raahnCar.entitiesHovering.Clear();
+
+                for (int i = 0; i < entitiesInBounds.Count; i++)
+                {
+                    //Only colorable entities are added to the quad tree,
+                    //so we can cast it to a colorable entity.
+                    Entity curEntity = (Entity)entitiesInBounds[i];
+
+                    if (raahnCar.aabb.Intersects(curEntity.aabb.GetBounds()))
+                    {
+                        raahnCar.entitiesHovering.Add(curEntity);
+                        curEntity.SetColor(HIGHLIGHT_R, HIGHLIGHT_G, HIGHLIGHT_B, HIGHLIGHT_T);
+                    }
+                    else
+                        curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
+                }
             }
         }
 
@@ -295,6 +336,29 @@ namespace RaahnSimulation
         private void OnDelayChooserChanged(object sender, EventArgs ea)
         {
             updateDelay = delayChooser.Value;
+        }
+
+        private void OnPlayClicked(object sender, EventArgs ea)
+        {
+            simulationRunning = true;
+        }
+
+        private void OnPauseClicked(object sender, EventArgs ea)
+        {
+            simulationRunning = false;
+        }
+
+        private void OnRestartClicked(object sender, EventArgs ea)
+        {
+            simulationRunning = false;
+
+            raahnCar.SetPosition(defaultCarX, defaultCarY);
+            raahnCar.angle = defaultCarAngle;
+
+            //Update the car to its original state.
+            raahnCar.UpdateMinimal();
+
+            raahnCar.ResetBrain();
         }
     }
 }

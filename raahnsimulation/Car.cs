@@ -60,6 +60,18 @@ namespace RaahnSimulation
             entitiesHovering = new List<Entity>();
         }
 
+        //Updates only sensors.
+        public void UpdateMinimal()
+        {
+            base.Update();
+
+            for (int i = 0; i < rangeFinderGroups.Count; i++)
+                rangeFinderGroups[i].Update();
+
+            for (int i = 0; i < pieSliceSensorGroups.Count; i++)
+                pieSliceSensorGroups[i].Update();
+        }
+
         public override void Update()
         {
             if (controlScheme != null)
@@ -113,6 +125,7 @@ namespace RaahnSimulation
 
             base.Update();
 
+            //Update sensors.
             for (int i = 0; i < rangeFinderGroups.Count; i++)
                 rangeFinderGroups[i].Update();
 
@@ -156,6 +169,12 @@ namespace RaahnSimulation
         {
             RangeFinderGroup.Clean();
             PieSliceSensorGroup.Clean();
+        }
+
+        public void ResetBrain()
+        {
+            if (brain != null)
+                brain.Reset();
         }
 
         public bool LoadConfig(string sensorFile, string networkFile)
