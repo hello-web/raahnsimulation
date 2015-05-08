@@ -36,9 +36,9 @@ namespace RaahnSimulation
         private uint rangeFinderCount;
         private uint pieSliceSensorCount;
         private QuadTree quadTree;
-        private ModulationScheme.SchemeFunction modulationScheme;
         private ControlScheme.SchemeFunction controlScheme;
-        private List<uint> modulationSignals;
+        private List<List<uint>> modulationSignals;
+        private List<ModulationScheme.SchemeFunction> modulationSchemes;
         private List<RangeFinderGroup> rangeFinderGroups;
         private List<PieSliceSensorGroup> pieSliceSensorGroups;
         private NeuralNetwork brain;
@@ -50,7 +50,8 @@ namespace RaahnSimulation
 
             quadTree = tree;
 
-            modulationSignals = new List<uint>();
+            modulationSignals = new List<List<uint>>();
+            modulationSchemes = new List<ModulationScheme.SchemeFunction>();
             rangeFinderGroups = new List<RangeFinderGroup>();
             pieSliceSensorGroups = new List<PieSliceSensorGroup>();
 
@@ -118,8 +119,8 @@ namespace RaahnSimulation
                 drawingVec.y += velocity.y;
             }
 
-            if (modulationScheme != null)
-                modulationScheme(this, entitiesInBounds);
+            for (int i = 0; i < modulationSchemes.Count; i++)
+                modulationSchemes[i](this, entitiesInBounds, modulationSignals[i]);
 
             brain.Train();
 
@@ -338,8 +339,8 @@ namespace RaahnSimulation
                 configReader.Close();
             }
 
-            //No neuron groups, connection groups, control scheme, or modulation scheme
-            //return true to continue without 
+            //No neuron groups, connection groups, or control scheme.
+            //return true to continue without them.
             if (networkConfig.neuronGroups == null)
             {
                 Console.WriteLine(Utils.NO_NEURON_GROUPS);
@@ -358,41 +359,23 @@ namespace RaahnSimulation
                 return true;
             }
 
-            if (networkConfig.modulationScheme == null)
-            {
-                Console.WriteLine(Utils.NO_MODULATION_SCHEME);
-                return true;
-            }
+            ControlScheme.Scheme cDescriptor = ControlScheme.GetSchemeFromString(networkConfig.controlScheme);
 
-            brain.learningRate = networkConfig.learningRate;
-
-            ControlScheme.Scheme cSchemeDescriptor = ControlScheme.GetSchemeFromString(networkConfig.controlScheme);
-            ModulationScheme.Scheme mSchemeDescriptor = ModulationScheme.GetSchemeFromString(networkConfig.modulationScheme);
-
-            if (cSchemeDescriptor == ControlScheme.Scheme.NONE)
+            if (cDescriptor == ControlScheme.Scheme.NONE)
             {
                 Console.WriteLine(Utils.NO_CONTROL_SCHEME);
                 return true;
             }
 
-            if (mSchemeDescriptor == ModulationScheme.Scheme.NONE)
-            {
-                Console.WriteLine(Utils.NO_MODULATION_SCHEME);
-                return true;
-            }
+            controlScheme = ControlScheme.GetSchemeFunction(cDescriptor);
 
-            controlScheme = ControlScheme.GetSchemeFunction(cSchemeDescriptor);
-            modulationScheme = ModulationScheme.GetSchemeFunction(mSchemeDescriptor);
-
-            if (networkConfig.parameters != null)
-            {
-                ControlScheme.InterpretParameters(networkConfig.parameters, cSchemeDescriptor);
-                ModulationScheme.InterpretParameters(networkConfig.parameters, mSchemeDescriptor);
-            }
+            //Save the modulation descriptions in addition to the functions
+            //because the parameter interpreting function takes the descriptions.
+            List<ModulationScheme.Scheme> mDescriptions = new List<ModulationScheme.Scheme>();
 
             int[] neuronGroupIds = new int[networkConfig.neuronGroups.Length];
 
-            //Add modulation signals.
+            //Add each neuron group.
             for (uint i = 0; i < networkConfig.neuronGroups.Length; i++)
             {
                 NeuronGroupConfig nGroupConfig = networkConfig.neuronGroups[(int)i];
@@ -402,40 +385,103 @@ namespace RaahnSimulation
                 neuronGroupIds[(int)i] = brain.AddNeuronGroup(nGroupConfig.count, type);
             }
 
+            //Add each connection group.
             for (uint i = 0; i < networkConfig.connectionGroups.Length; i++)
             {
                 ConnectionConfig cGroupConfig = networkConfig.connectionGroups[(int)i];
 
-                if (cGroupConfig.inputGroupIndex < networkConfig.neuronGroups.Length
-                    && cGroupConfig.outputGroupIndex < networkConfig.neuronGroups.Length)
+                uint inputGroupIndex = GetIdIndex(cGroupConfig.inputGroupId, networkConfig.neuronGroups);
+                uint outputGroupIndex = GetIdIndex(cGroupConfig.outputGroupId, networkConfig.neuronGroups);
+
+                //Make sure the neuron groups to be connected exist.
+                if (inputGroupIndex < networkConfig.neuronGroups.Length
+                    && outputGroupIndex < networkConfig.neuronGroups.Length)
                 {
                     NeuronGroup.Identifier inputGroup;
-                    inputGroup.index = neuronGroupIds[(int)cGroupConfig.inputGroupIndex];
-                    string inputTypeString = networkConfig.neuronGroups[(int)cGroupConfig.inputGroupIndex].type;
+                    inputGroup.index = neuronGroupIds[(int)inputGroupIndex];
+                    string inputTypeString = networkConfig.neuronGroups[(int)inputGroupIndex].type;
                     inputGroup.type = Utils.GetGroupTypeFromString(inputTypeString);
 
                     NeuronGroup.Identifier outputGroup;
-                    outputGroup.index = neuronGroupIds[(int)cGroupConfig.outputGroupIndex];
-                    string outputTypeString = networkConfig.neuronGroups[(int)cGroupConfig.outputGroupIndex].type;
+                    outputGroup.index = neuronGroupIds[(int)outputGroupIndex];
+                    string outputTypeString = networkConfig.neuronGroups[(int)outputGroupIndex].type;
                     outputGroup.type = Utils.GetGroupTypeFromString(outputTypeString);
 
                     ConnectionGroup.TrainFunctionType trainMethod = Utils.GetMethodFromString(cGroupConfig.trainingMethod);
 
-                    if (cGroupConfig.useModulation)
+                    //Check if a modulation scheme is specified.
+                    ModulationScheme.Scheme mDescriptor;
+
+                    if (!string.IsNullOrEmpty(cGroupConfig.modulationScheme))
+                        mDescriptor = ModulationScheme.GetSchemeFromString(cGroupConfig.modulationScheme);
+                    else
+                        mDescriptor = ModulationScheme.Scheme.NONE;
+
+                    //If a scheme is specified, add a signal for it.
+                    if (mDescriptor != ModulationScheme.Scheme.NONE)
                     {
                         uint modSig = 0;
-
                         modSig = ModulationSignal.AddSignal();
-                        modulationSignals.Add(modSig);
 
-                        brain.ConnectGroups(inputGroup, outputGroup, trainMethod, (int)modSig, cGroupConfig.usebias);
+                        ModulationScheme.SchemeFunction mFunction = ModulationScheme.GetSchemeFunction(mDescriptor);
+
+                        //Check if the modulation scheme function has already 
+                        //been added to the list of modulation scheme functions.
+                        bool hasFunction = false;
+
+                        for (int n = 0; n < modulationSchemes.Count; n++)
+                        {
+                            if (modulationSchemes[n] == mFunction)
+                            {
+                                modulationSignals[n].Add(modSig);
+
+                                hasFunction = true;
+                                break;
+                            }
+                        }
+
+                        //If the modulation scheme function was not added
+                        //add it to the list of scheme functions.
+                        if (!hasFunction)
+                        {
+                            mDescriptions.Add(mDescriptor);
+
+                            modulationSchemes.Add(mFunction);
+                            modulationSignals.Add(new List<uint>());
+
+                            modulationSignals[modulationSignals.Count - 1].Add(modSig);
+                        }
+
+                        brain.ConnectGroups(inputGroup, outputGroup, trainMethod, (int)modSig, 
+                                            cGroupConfig.learningRate, cGroupConfig.useBias);
                     }
                     else
-                        brain.ConnectGroups(inputGroup, outputGroup, trainMethod, ModulationSignal.INVALID_INDEX, cGroupConfig.usebias);
+                        brain.ConnectGroups(inputGroup, outputGroup, trainMethod, ModulationSignal.INVALID_INDEX, 
+                                            cGroupConfig.learningRate, cGroupConfig.useBias);
                 }
             }
 
+            //Interpret the parameters of the network file
+            //for the control scheme and the modulation schemes.
+            if (networkConfig.parameters != null)
+                ControlScheme.InterpretParameters(networkConfig.parameters, cDescriptor);
+
+            for (int i = 0; i < mDescriptions.Count; i++)
+                ModulationScheme.InterpretParameters(networkConfig.parameters, mDescriptions[i]);
+
             return true;
+        }
+
+        private uint GetIdIndex(uint id, NeuronGroupConfig[] neuronGroups)
+        {
+            for (uint i = 0; i < neuronGroups.Length; i++)
+            {
+                if (id == neuronGroups[(int)i].id)
+                    return i;
+            }
+
+            //Return the first index if the id is not found.
+            return 0;
         }
 
         private Utils.Point2 GetNearestIntersection(List<Utils.Point2> intersections)

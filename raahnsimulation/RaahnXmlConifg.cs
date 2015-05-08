@@ -5,14 +5,8 @@ namespace RaahnSimulation
     [XmlRoot("NeuralNetwork")]
     public class NeuralNetworkConfig
     {
-        [XmlElement("LearningRate")]
-        public double learningRate;
-
         [XmlElement("ControlScheme")]
         public string controlScheme;
-
-        [XmlElement("ModulationScheme")]
-        public string modulationScheme;
 
         [XmlElement("Parameter")]
         public string[] parameters;
@@ -27,6 +21,9 @@ namespace RaahnSimulation
     [XmlRoot("NeuronGroup")]
     public class NeuronGroupConfig
     {
+        [XmlAttribute("Id")]
+        public uint id;
+
         [XmlElement("Count")]
         public uint count;
 
@@ -38,24 +35,26 @@ namespace RaahnSimulation
     public class ConnectionConfig
     {
         [XmlElement("InputGroup")]
-        public uint inputGroupIndex;
+        public uint inputGroupId;
 
         [XmlElement("OutputGroup")]
-        public uint outputGroupIndex;
-
-        [XmlAttribute("UseModulation")]
-        public bool useModulation;
+        public uint outputGroupId;
 
         [XmlAttribute("UseBias")]
-        public bool usebias;
+        public bool useBias;
+
+        [XmlElement("LearningRate")]
+        public double learningRate;
 
         [XmlElement("TrainingMethod")]
         public string trainingMethod;
 
+        [XmlElement("ModulationScheme")]
+        public string modulationScheme;
+
         public ConnectionConfig()
         {
-            useModulation = false;
-            usebias = false;
+            useBias = false;
         }
     }
 }
