@@ -12,7 +12,8 @@ namespace RaahnSimulation
         public const double DEFAULT_UPDATE_DELAY = 10.0;
         private const int NO_PADDING = 0;
         private const int VERTICAL_PADDING = 20;
-        private const int HORIZONTAL_PADDING = 60;
+        private const int HORIZONTAL_PADDING_SHORT = 40;
+        private const int HORIZONTAL_PADDING_LONG = 60;
         private const double DELAY_CHOOSER_MIN = 0.0;
         private const double DELAY_CHOOSER_MAX = 100.0;
         private const double DELAY_CHOOSER_STEP = 1.0;
@@ -22,17 +23,22 @@ namespace RaahnSimulation
         private const double HIGHLIGHT_G = 1.0;
         private const double HIGHLIGHT_B = 0.0;
         private const double HIGHLIGHT_T = 1.0;
+        private const string TICK_COUNTER_INITIAL = "0";
+        private const string TICK_FONT_SIZE = "32";
 
         public static double updateDelay;
         private static SimState simState = new SimState();
 
         //Experiment must be initialized outside of SimState.
         public Experiment experiment;
+        //Number of times the agent has been updated.
+        private uint ticksElapsed;
         private bool panning;
         private bool simulationRunning;
         private double defaultCarX;
         private double defaultCarY;
         private double defaultCarAngle;
+        private Gtk.Label tickCounter;
         private Gtk.MenuBar menuBar;
         private Gtk.SpinButton delayChooser;
         private QuadTree quadTree;
@@ -43,6 +49,8 @@ namespace RaahnSimulation
 
         public SimState()
         {
+            ticksElapsed = 0;
+
             panning = false;
             simulationRunning = false;
             experiment = null;
@@ -103,7 +111,13 @@ namespace RaahnSimulation
             speedControls.PackStart(delayLabel, false, false, NO_PADDING);
             speedControls.PackStart(delayChooser, false, false, VERTICAL_PADDING);
 
-            controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING);
+            Pango.FontDescription tickFont = Pango.FontDescription.FromString(TICK_FONT_SIZE);
+
+            Gtk.Label tickCounterDescription = new Gtk.Label(Utils.TICKS_ELAPSED);
+            tickCounterDescription.ModifyFont(tickFont);
+
+            controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING_LONG);
+            controlBox.PackEnd(tickCounterDescription, false, false, HORIZONTAL_PADDING_SHORT);
 
             //Button panel.
             Gtk.HBox buttonPanel = new Gtk.HBox();
@@ -121,9 +135,13 @@ namespace RaahnSimulation
             Gtk.Button restartButton = new Gtk.Button(restartImage);
             restartButton.Clicked += OnRestartClicked;
 
+            tickCounter = new Gtk.Label(TICK_COUNTER_INITIAL);
+            tickCounter.ModifyFont(tickFont);
+
             buttonPanel.PackStart(playButton, false, false, NO_PADDING);
             buttonPanel.PackStart(pauseButton, false, false, NO_PADDING);
             buttonPanel.PackStart(restartButton, false, false, NO_PADDING);
+            buttonPanel.PackEnd(tickCounter, false, false, HORIZONTAL_PADDING_SHORT);
 
             mcVbox.PackStart(menuBar, false, true, NO_PADDING);
             mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
@@ -228,6 +246,9 @@ namespace RaahnSimulation
                 }
                 else
                     timer.Start();
+
+                ticksElapsed++;
+                tickCounter.Text = ticksElapsed.ToString();
 
                 base.Update();
                 entityMap.Update();
@@ -350,6 +371,9 @@ namespace RaahnSimulation
 
         private void OnRestartClicked(object sender, EventArgs ea)
         {
+            ticksElapsed = 0;
+            tickCounter.Text = TICK_COUNTER_INITIAL;
+
             simulationRunning = false;
 
             raahnCar.SetPosition(defaultCarX, defaultCarY);

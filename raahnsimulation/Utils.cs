@@ -349,6 +349,7 @@ namespace RaahnSimulation
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
         public const string SAVE_MAP = "Save Map";
+        public const string TICKS_ELAPSED = "Ticks Elapsed";
         public const string MENU_HELP = "Help";
         public const string MENU_ABOUT = "About";
         public const string DELAY_DESCRIPTION = "Delay (Milli)";
@@ -358,7 +359,7 @@ namespace RaahnSimulation
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string NETWORK_FOLDER = "Data/Networks/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
-		public const string VERSION_STRING = "Version 2.9.5";
+		public const string VERSION_STRING = "Version 3.1";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
