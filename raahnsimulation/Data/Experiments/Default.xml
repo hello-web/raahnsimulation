@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Experiment>
+	<TicksPerRun>500</TicksPerRun>
+	<RunCount>100</RunCount>
 	<MapFile>Default.xml</MapFile>
 	<SensorFile>Default.xml</SensorFile>
 	<NetworkFile>Default.xml</NetworkFile>

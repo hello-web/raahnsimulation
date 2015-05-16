@@ -126,6 +126,19 @@ namespace RaahnSimulation
             }
         }
 
+        public class Option
+        {
+            //Number of arguments the option has.
+            public uint argCount;
+            public string optString;
+
+            public Option(uint aCount, string oString)
+            {
+                argCount = aCount;
+                optString = oString;
+            }
+        }
+
         //Points are structs, vectors are classes.
         public struct Point2
         {
@@ -359,7 +372,8 @@ namespace RaahnSimulation
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string NETWORK_FOLDER = "Data/Networks/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
-		public const string VERSION_STRING = "Version 3.1";
+        public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
+		public const string VERSION_STRING = "Version 3.2";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
@@ -388,10 +402,19 @@ namespace RaahnSimulation
         public const string NO_MODULATION_SCHEME = "No modulation scheme specified.";
         public const string NO_SENSOR_FILE = "No sensor file specified.";
         public const string NO_NETWORK_FILE = "No network file specified.";
+        public const string NO_EXPERIMENT_FILE = "No experiment file specified.";
+        public const string TOO_FEW_ARGS = "Too few arguments specified.";
 
         public static readonly string[] NEURON_GROUP_TYPES = 
         {
             "Input", "Hidden", "Output"
+        };
+
+        //Command line options.
+        public static readonly Option[] OPTIONS = 
+        {
+            new Option(1, "--experiment"),
+            new Option(0, "--headless"),
         };
 
 		public static double DegToRad(double deg)

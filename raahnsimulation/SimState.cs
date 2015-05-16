@@ -26,15 +26,19 @@ namespace RaahnSimulation
         private const string TICK_COUNTER_INITIAL = "0";
         private const string TICK_FONT_SIZE = "32";
 
-        public static double updateDelay;
         private static SimState simState = new SimState();
 
+        public double updateDelay;
         //Experiment must be initialized outside of SimState.
         public Experiment experiment;
+        private uint ticksPerRun;
+        private uint runCount;
         //Number of times the agent has been updated.
         private uint ticksElapsed;
+        private uint runsElapsed;
         private bool panning;
         private bool simulationRunning;
+        private bool headless;
         private double defaultCarX;
         private double defaultCarY;
         private double defaultCarAngle;
@@ -49,10 +53,15 @@ namespace RaahnSimulation
 
         public SimState()
         {
+            ticksPerRun = 0;
+            runCount = 0;
+
             ticksElapsed = 0;
+            runsElapsed = 0;
 
             panning = false;
             simulationRunning = false;
+            headless = false;
             experiment = null;
             quadTree = null;
             raahnCar = null;
@@ -67,102 +76,118 @@ namespace RaahnSimulation
             if (!base.Init(context))
                 return false;
 
-            Gtk.Window mainWindow = context.GetWindow();
+            headless = context.GetHeadLess();
 
-            mainWindow.GdkWindow.Cursor = context.GetBlankCursor();
+            if (headless)
+            {
+                simulationRunning = true;
+                updateDelay = 0.0;
+            }
+            else
+            {
+                Gtk.Window mainWindow = context.GetWindow();
 
-            uint newWinWidth = (uint)((double)mainWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
-            uint newWinHeight = (uint)((double)mainWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
+                mainWindow.GdkWindow.Cursor = context.GetBlankCursor();
 
-            context.SetWindowSize(newWinWidth, newWinHeight);
-            context.CenterWindow();
+                uint newWinWidth = (uint)((double)mainWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
+                uint newWinHeight = (uint)((double)mainWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
 
-            //Initialize the layout.
-            mainContainer = new Gtk.VBox();
-            Gtk.VBox mcVbox = (Gtk.VBox)mainContainer;
+                context.SetWindowSize(newWinWidth, newWinHeight);
+                context.CenterWindow();
 
-            menuBar = new Gtk.MenuBar();
+                //Initialize the layout.
+                mainContainer = new Gtk.VBox();
+                Gtk.VBox mcVbox = (Gtk.VBox)mainContainer;
 
-            Gtk.MenuItem helpOption = new Gtk.MenuItem(Utils.MENU_HELP);
-            Gtk.Menu helpMenu = new Gtk.Menu();
-            helpOption.Submenu = helpMenu;
+                menuBar = new Gtk.MenuBar();
 
-            Gtk.MenuItem aboutItem = new Gtk.MenuItem(Utils.MENU_ABOUT);
-            aboutItem.Activated += delegate { context.DisplayAboutDialog(); };
-            helpMenu.Append(aboutItem);
+                Gtk.MenuItem helpOption = new Gtk.MenuItem(Utils.MENU_HELP);
+                Gtk.Menu helpMenu = new Gtk.Menu();
+                helpOption.Submenu = helpMenu;
 
-            menuBar.Append(helpOption);
+                Gtk.MenuItem aboutItem = new Gtk.MenuItem(Utils.MENU_ABOUT);
+                aboutItem.Activated += delegate
+                {
+                    context.DisplayAboutDialog();
+                };
+                helpMenu.Append(aboutItem);
 
-            //Must be instantiated and added to the window before entites.
-            mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
+                menuBar.Append(helpOption);
 
-            //Controls for the simulation.
-            Gtk.HBox controlBox = new Gtk.HBox();
+                //Must be instantiated and added to the window before entites.
+                mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
 
-            //Controls for delay.
-            Gtk.VBox speedControls = new Gtk.VBox();
+                //Controls for the simulation.
+                Gtk.HBox controlBox = new Gtk.HBox();
 
-            Gtk.Label delayLabel = new Gtk.Label(Utils.DELAY_DESCRIPTION);
+                //Controls for delay.
+                Gtk.VBox speedControls = new Gtk.VBox();
 
-            delayChooser = new Gtk.SpinButton(DELAY_CHOOSER_MIN, DELAY_CHOOSER_MAX, DELAY_CHOOSER_STEP);
-            delayChooser.Value = updateDelay;
-            delayChooser.ValueChanged += OnDelayChooserChanged;
+                Gtk.Label delayLabel = new Gtk.Label(Utils.DELAY_DESCRIPTION);
 
-            speedControls.PackStart(delayLabel, false, false, NO_PADDING);
-            speedControls.PackStart(delayChooser, false, false, VERTICAL_PADDING);
+                delayChooser = new Gtk.SpinButton(DELAY_CHOOSER_MIN, DELAY_CHOOSER_MAX, DELAY_CHOOSER_STEP);
+                delayChooser.Value = updateDelay;
+                delayChooser.ValueChanged += OnDelayChooserChanged;
 
-            Pango.FontDescription tickFont = Pango.FontDescription.FromString(TICK_FONT_SIZE);
+                speedControls.PackStart(delayLabel, false, false, NO_PADDING);
+                speedControls.PackStart(delayChooser, false, false, VERTICAL_PADDING);
 
-            Gtk.Label tickCounterDescription = new Gtk.Label(Utils.TICKS_ELAPSED);
-            tickCounterDescription.ModifyFont(tickFont);
+                Pango.FontDescription tickFont = Pango.FontDescription.FromString(TICK_FONT_SIZE);
 
-            controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING_LONG);
-            controlBox.PackEnd(tickCounterDescription, false, false, HORIZONTAL_PADDING_SHORT);
+                Gtk.Label tickCounterDescription = new Gtk.Label(Utils.TICKS_ELAPSED);
+                tickCounterDescription.ModifyFont(tickFont);
 
-            //Button panel.
-            Gtk.HBox buttonPanel = new Gtk.HBox();
+                controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING_LONG);
+                controlBox.PackEnd(tickCounterDescription, false, false, HORIZONTAL_PADDING_SHORT);
 
-            Gtk.Image playImage = new Gtk.Image(Gtk.Stock.MediaPlay, Gtk.IconSize.Button);
-            Gtk.Image pauseImage = new Gtk.Image(Gtk.Stock.MediaPause, Gtk.IconSize.Button);
-            Gtk.Image restartImage = new Gtk.Image(Gtk.Stock.MediaPrevious, Gtk.IconSize.Button);
+                //Button panel.
+                Gtk.HBox buttonPanel = new Gtk.HBox();
 
-            Gtk.Button playButton = new Gtk.Button(playImage);
-            playButton.Clicked += OnPlayClicked;
+                Gtk.Image playImage = new Gtk.Image(Gtk.Stock.MediaPlay, Gtk.IconSize.Button);
+                Gtk.Image pauseImage = new Gtk.Image(Gtk.Stock.MediaPause, Gtk.IconSize.Button);
+                Gtk.Image restartImage = new Gtk.Image(Gtk.Stock.MediaPrevious, Gtk.IconSize.Button);
 
-            Gtk.Button pauseButton = new Gtk.Button(pauseImage);
-            pauseButton.Clicked += OnPauseClicked;
+                Gtk.Button playButton = new Gtk.Button(playImage);
+                playButton.Clicked += OnPlayClicked;
 
-            Gtk.Button restartButton = new Gtk.Button(restartImage);
-            restartButton.Clicked += OnRestartClicked;
+                Gtk.Button pauseButton = new Gtk.Button(pauseImage);
+                pauseButton.Clicked += OnPauseClicked;
 
-            tickCounter = new Gtk.Label(TICK_COUNTER_INITIAL);
-            tickCounter.ModifyFont(tickFont);
+                Gtk.Button restartButton = new Gtk.Button(restartImage);
+                restartButton.Clicked += OnRestartClicked;
 
-            buttonPanel.PackStart(playButton, false, false, NO_PADDING);
-            buttonPanel.PackStart(pauseButton, false, false, NO_PADDING);
-            buttonPanel.PackStart(restartButton, false, false, NO_PADDING);
-            buttonPanel.PackEnd(tickCounter, false, false, HORIZONTAL_PADDING_SHORT);
+                tickCounter = new Gtk.Label(TICK_COUNTER_INITIAL);
+                tickCounter.ModifyFont(tickFont);
 
-            mcVbox.PackStart(menuBar, false, true, NO_PADDING);
-            mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
-            mcVbox.PackStart(controlBox, false, false, NO_PADDING);
-            mcVbox.PackStart(buttonPanel, false, false, NO_PADDING);
+                buttonPanel.PackStart(playButton, false, false, NO_PADDING);
+                buttonPanel.PackStart(pauseButton, false, false, NO_PADDING);
+                buttonPanel.PackStart(restartButton, false, false, NO_PADDING);
+                buttonPanel.PackEnd(tickCounter, false, false, HORIZONTAL_PADDING_SHORT);
 
-            mainWindow.Add(mainContainer);
+                mcVbox.PackStart(menuBar, false, true, NO_PADDING);
+                mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
+                mcVbox.PackStart(controlBox, false, false, NO_PADDING);
+                mcVbox.PackStart(buttonPanel, false, false, NO_PADDING);
 
-            mainContainer.ShowAll();
+                mainWindow.Add(mainContainer);
 
-            if (!GetGLInitialized())
-                return false;
+                mainContainer.ShowAll();
+
+                if (!GetGLInitialized())
+                    return false;
+
+                cursor = new Cursor(context, mainGLWidget);
+            }
 
             quadTree = new QuadTree(new AABB(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT));
-
-            cursor = new Cursor(context, mainGLWidget);
 
             raahnCar = new Car(context, quadTree);
 
             if (experiment != null)
             {
+                ticksPerRun = experiment.ticksPerRun;
+                runCount = experiment.runCount;
+
                 string sensorPath = null;
                 string networkPath = null;
 
@@ -202,7 +227,9 @@ namespace RaahnSimulation
             }
 
             AddEntity(raahnCar, 0);
-            AddEntity(cursor, 1);
+
+            if (!headless)
+                AddEntity(cursor, 1);
 
             quadTree.AddEntity(raahnCar);
 
@@ -216,18 +243,21 @@ namespace RaahnSimulation
 
         public override void Update()
         {
-            cursor.Update();
+            if (!headless)
+            {
+                cursor.Update();
 
-            int mouseX;
-            int mouseY;
+                int mouseX;
+                int mouseY;
 
-            mainGLWidget.GetPointer(out mouseX, out mouseY);
-            Gdk.Rectangle glBounds = mainGLWidget.Allocation;
+                mainGLWidget.GetPointer(out mouseX, out mouseY);
+                Gdk.Rectangle glBounds = mainGLWidget.Allocation;
 
-            if (mouseX < 0 || mouseY < 0)
-                panning = false;
-            else if (mouseX > glBounds.Width || mouseY > glBounds.Height)
-                panning = false;
+                if (mouseX < 0 || mouseY < 0)
+                    panning = false;
+                else if (mouseX > glBounds.Width || mouseY > glBounds.Height)
+                    panning = false;
+            }
 
             if (panning)
             {
@@ -248,7 +278,9 @@ namespace RaahnSimulation
                     timer.Start();
 
                 ticksElapsed++;
-                tickCounter.Text = ticksElapsed.ToString();
+
+                if (!headless)
+                    tickCounter.Text = ticksElapsed.ToString();
 
                 base.Update();
                 entityMap.Update();
@@ -283,6 +315,19 @@ namespace RaahnSimulation
                     }
                     else
                         curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
+                }
+            }
+
+            if (headless)
+            {
+                if (ticksElapsed >= ticksPerRun)
+                {
+                    runsElapsed++;
+
+                    if (runsElapsed >= runCount)
+                        context.running = false;
+                    else
+                        Reset();
                 }
             }
         }
@@ -349,6 +394,22 @@ namespace RaahnSimulation
             base.Clean();
         }
 
+        private void Reset()
+        {
+            ticksElapsed = 0;
+
+            if (!headless)
+                tickCounter.Text = TICK_COUNTER_INITIAL;
+
+            raahnCar.SetPosition(defaultCarX, defaultCarY);
+            raahnCar.angle = defaultCarAngle;
+
+            //Update the car to its original state.
+            raahnCar.UpdateMinimal();
+
+            raahnCar.ResetBrain();
+        }
+
         public static SimState Instance()
         {
             return simState;
@@ -371,18 +432,9 @@ namespace RaahnSimulation
 
         private void OnRestartClicked(object sender, EventArgs ea)
         {
-            ticksElapsed = 0;
-            tickCounter.Text = TICK_COUNTER_INITIAL;
-
             simulationRunning = false;
 
-            raahnCar.SetPosition(defaultCarX, defaultCarY);
-            raahnCar.angle = defaultCarAngle;
-
-            //Update the car to its original state.
-            raahnCar.UpdateMinimal();
-
-            raahnCar.ResetBrain();
+            Reset();
         }
     }
 }

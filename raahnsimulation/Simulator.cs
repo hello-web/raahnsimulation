@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Xml.Serialization;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using Gtk;
@@ -24,6 +26,13 @@ namespace RaahnSimulation
         public const double WORLD_WINDOW_WIDTH = 3840.0;
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
         private const int SLEEP_TIME = 5;
+
+        public delegate void OptionAction(Simulator sim, List<string> arguments);
+
+        public static readonly OptionAction[] OPTION_ACTIONS = 
+        {
+            ExperimentOption, HeadlessOption
+        };
 
 		public bool running;
         public bool debugging;
@@ -72,24 +81,34 @@ namespace RaahnSimulation
             eventQueue = new Queue<Event>();
 	    }
 
-	    public int Execute()
+	    public int Execute(string[] argv)
 	    {
-	        if (!headLess)
-	        {
-	            if (!Init())
-	            {
-	                Clean();
-	                return Utils.EXIT_F;
-	            }
+            InterpretArgs(argv);
+
+            if (!headLess)
+            {
+                if (!Init())
+                {
+                    Clean();
+                    return Utils.EXIT_F;
+                }
 
                 ChangeState(MenuState.Instance());
                 MainLoop();
-	        }
+            }
+            else if (SimState.Instance().experiment != null)
+            {
+                if (!InitHeadless())
+                {
+                    Clean();
+                    return Utils.EXIT_F;
+                }
+
+                ChangeState(SimState.Instance());
+                MainLoopHeadless();
+            }
             else
-	        {
-	            ChangeState(SimState.Instance());
-	            MainLoopHeadless();
-	        }
+                Console.WriteLine(Utils.NO_EXPERIMENT_FILE);
 
             Clean();
 
@@ -146,6 +165,14 @@ namespace RaahnSimulation
 	        return true;
 	    }
 
+        private bool InitHeadless()
+        {
+            OpenTK.Toolkit.Init();
+            new OpenTK.GameWindow();
+
+            return true;
+        }
+
 	    private void MainLoop()
 	    {
             stopwatch.Start();
@@ -175,8 +202,12 @@ namespace RaahnSimulation
 
 	    private void MainLoopHeadless()
 	    {
-	        while (running)
-	            states[states.Count - 1].Update();
+            stopwatch.Start();
+
+            while (running)
+                UpdateHeadless();
+
+            Console.WriteLine(Utils.TIME_ELAPSED, stopwatch.Elapsed.TotalSeconds);
 	    }
 
 	    private void Update()
@@ -201,6 +232,16 @@ namespace RaahnSimulation
 
                 states[states.Count - 1].UpdateEvent(e);
             }
+
+            //Regular update per frame.
+            states[states.Count - 1].Update();
+        }
+
+        private void UpdateHeadless()
+        {
+            curTime = stopwatch.ElapsedMilliseconds;
+            deltaTime = (double)(curTime - lastTime) / 1000.0;
+            lastTime = curTime;
 
             //Regular update per frame.
             states[states.Count - 1].Update();
@@ -299,7 +340,8 @@ namespace RaahnSimulation
 	    {
             stopwatch.Stop();
 
-            blankCursor.Dispose();
+            if (!headLess)
+                blankCursor.Dispose();
 
 	        while (states.Count > 0)
 	        {
@@ -309,6 +351,72 @@ namespace RaahnSimulation
 	        while (eventQueue.Count > 0)
 	            eventQueue.Dequeue();
 	    }
+
+        private void InterpretArgs(string[] argv)
+        {
+            for (int x = 0; x < argv.Length; x++)
+            {
+                int optionType = -1;
+                List<string> argumentList = null;
+
+                for (int y = 0; y < Utils.OPTIONS.Length; y++)
+                {
+                    if (argv[x].Equals(Utils.OPTIONS[y].optString))
+                    {
+                        if (x + Utils.OPTIONS[y].argCount >= argv.Length)
+                        {
+                            Console.WriteLine(Utils.TOO_FEW_ARGS);
+                            return;
+                        }
+
+                        optionType = y;
+
+                        //Build argument list.
+                        argumentList = new List<string>();
+
+                        for (int z = 0; z < Utils.OPTIONS[y].argCount; z++)
+                            argumentList.Add(argv[x + z + 1]);
+
+                        x += (int)Utils.OPTIONS[y].argCount;
+
+                        break;
+                    }
+                }
+
+                if (optionType > -1)
+                    OPTION_ACTIONS[optionType](this, argumentList);
+            }
+        }
+
+        private static void ExperimentOption(Simulator sim, List<string> arguments)
+        {
+            if (!File.Exists(arguments[0]))
+            {
+                Console.WriteLine(Utils.FILE_NOT_FOUND, arguments[0]);
+                return;
+            }
+
+            TextReader expReader = new StreamReader(arguments[0]);
+
+            try
+            {
+                XmlSerializer deserializer = new XmlSerializer(typeof(Experiment));
+                SimState.Instance().experiment = (Experiment)deserializer.Deserialize(expReader);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                expReader.Close();
+            }
+        }
+
+        private static void HeadlessOption(Simulator sim, List<string> arguments)
+        {
+            sim.SetHeadLess(true);
+        }
 
         public void DisplayAboutDialog()
         {

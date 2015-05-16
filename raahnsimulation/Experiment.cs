@@ -4,6 +4,12 @@ namespace RaahnSimulation
 {
     public class Experiment
     {
+        [XmlElement("TicksPerRun")]
+        public uint ticksPerRun;
+
+        [XmlElement("RunCount")]
+        public uint runCount;
+
         [XmlElement("MapFile")]
         public string mapFile;
 
