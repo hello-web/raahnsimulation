@@ -19,6 +19,9 @@ namespace RaahnSimulation
         [XmlElement("NetworkFile")]
         public string networkFile;
 
+        [XmlElement("PerformanceMeasurement")]
+        public string performanceMeasurement;
+
         public Experiment()
         {
         }

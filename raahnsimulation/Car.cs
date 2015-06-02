@@ -145,7 +145,9 @@ namespace RaahnSimulation
 
             GL.PushMatrix();
 
-            RotateAroundCenter();
+            GL.Translate(center.x, center.y, Utils.DISCARD_Z_POS);
+            GL.Rotate(angle, 0.0, 0.0, 1.0);
+            GL.Translate(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 
             GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
             GL.Scale(width, height, Utils.DISCARD_Z_SCALE);

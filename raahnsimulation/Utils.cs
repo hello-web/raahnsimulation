@@ -361,8 +361,11 @@ namespace RaahnSimulation
 		public const string WINDOW_TITLE = "RAAHN Simulation";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
-        public const string SAVE_MAP = "Save Map";
+        public const string PEFORMANCE = "Peformance";
         public const string TICKS_ELAPSED = "Ticks Elapsed";
+        public const string MAP_CONTROLS_TITLE = "Items";
+        public const string MENU_FILE = "File";
+        public const string MENU_SAVE = "Save";
         public const string MENU_HELP = "Help";
         public const string MENU_ABOUT = "About";
         public const string DELAY_DESCRIPTION = "Delay (Milli)";
@@ -372,18 +375,29 @@ namespace RaahnSimulation
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string NETWORK_FOLDER = "Data/Networks/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
+        public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-		public const string VERSION_STRING = "Version 3.2";
+		public const string VERSION_STRING = "Version 3.3";
+        //Log strings.
+        public const string LOG_SCORE_FILE = "scores.txt";
+        public const string LOG_SCORE_FORMAT = "{0} ";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
         public const string CHOOSE_EXPERIMENT_FILE = "Choose an experiment file.";
         public const string OPEN_BUTTON = "Open";
         public const string SAVE_BUTTON = "Save";
         public const string CANCEL_BUTTON = "Cancel";
+        //Tooltips
+        public const string TOOLTIP_WALL = "Wall";
+        public const string TOOLTIP_POINT = "Point";
         //File extensions.
         public const string MAP_FILE_EXTENSION = ".xml";
         //Verbose strings.
         public const string VERBOSE_GL_VERSION = "GL Version ";
+        public const string VERBOSE_HELP = 
+        "--headless\t\tRun the simulation in headless mode. An experiment file must be specified.\n" +
+        "--experiment\t\t[experimentfile.xml] Uses experimentfile.xml for headless mode runs.\n" +
+        "--help\t\t\tDisplays this help message.";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
@@ -415,6 +429,7 @@ namespace RaahnSimulation
         {
             new Option(1, "--experiment"),
             new Option(0, "--headless"),
+            new Option(0, "--help")
         };
 
 		public static double DegToRad(double deg)

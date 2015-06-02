@@ -42,7 +42,7 @@ namespace RaahnSimulation
 
             //Subtract height / 2 to vertically position from the middle of the cursor.
             double windowX = (double)(mouseX);
-            double windowY = (double)(glBounds.Height - mouseY - (height / 2.0));
+            double windowY = (double)(glBounds.Height - mouseY);
 
             Utils.Vector2 projection = camera.ProjectWindow(windowX, windowY);
 
@@ -81,7 +81,9 @@ namespace RaahnSimulation
 
             GL.LoadIdentity();
 
-            RotateAroundCenter();
+            GL.Translate(center.x, center.y, Utils.DISCARD_Z_POS);
+            GL.Rotate(angle, 0.0, 0.0, 1.0);
+            GL.Translate(-center.x, -center.y, -Utils.DISCARD_Z_POS);
 
             GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
             GL.Scale(width, height, Utils.DISCARD_Z_SCALE);

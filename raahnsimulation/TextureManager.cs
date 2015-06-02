@@ -14,10 +14,8 @@ namespace RaahnSimulation
 			CURSOR_1 = 2,
 			CHAR_MAP = 3,
 			FLAG = 4,
-            TRASH = 5,
-            BUTTON = 6,
-            PANEL = 7,
-            HOLLOW_CIRCLE = 8
+            BUTTON = 5,
+            HOLLOW_CIRCLE = 6
 		};
 
 		public const int ROAD_INDEX_OFFSET = 1;
@@ -25,11 +23,11 @@ namespace RaahnSimulation
 		private readonly string[] TEXTURE_RESOURCES =
 		{
 			"Data/Textures/TopViewCar.png", "Data/Textures/Cursor0.png", "Data/Textures/Cursor1.png", 
-            "Data/Textures/CharMap.png", "Data/Textures/raahn.png", "Data/Textures/Trash.png", 
-            "Data/Textures/Button.png", "Data/Textures/Panel.png", "Data/Textures/HollowCircle.png"
+            "Data/Textures/CharMap.png", "Data/Textures/raahn.png", "Data/Textures/Button.png", 
+            "Data/Textures/HollowCircle.png"
 		};
 
-		private const int TEXTURE_COUNT = 9;
+		private const int TEXTURE_COUNT = 7;
 
         private bool loadedTextures;
         private uint texturesLoaded;

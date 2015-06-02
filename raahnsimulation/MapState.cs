@@ -5,27 +5,26 @@ namespace RaahnSimulation
 {
     public class MapState : State
     {
-        private const int PADDING = 0;
+        private const int NO_PADDING = 0;
+        //Alignment for title text for the controls.
+        private const float CONTROL_TITLE_X = 0.01f;
         private const double SAVE_BUTTON_WIDTH = 800.0;
         private const double SAVE_BUTTON_HEIGHT = 150.0;
         private const double SAVE_BUTTON_X = 2500.0;
         private const double SAVE_BUTTON_Y = 50.0;
+        private const string CONTROL_TITLE_SIZE = "18";
 
         private static MapState mapState = new MapState();
 
         private bool panning;
         private Gtk.MenuBar menuBar;
         private Cursor cursor;
-        private EntityPanel entityPanel;
         private MapBuilder mapBuilder;
-        private Button saveMap;
 
         public MapState()
         {
             panning = false;
-            entityPanel = null;
             mapBuilder = null;
-            saveMap = null;
         }
 
         public override bool Init(Simulator sim)
@@ -49,6 +48,14 @@ namespace RaahnSimulation
 
             menuBar = new Gtk.MenuBar();
 
+            Gtk.MenuItem fileOption = new Gtk.MenuItem(Utils.MENU_FILE);
+            Gtk.Menu fileMenu = new Gtk.Menu();
+            fileOption.Submenu = fileMenu;
+
+            Gtk.MenuItem saveItem = new Gtk.MenuItem(Utils.MENU_SAVE);
+            saveItem.Activated += delegate { SaveMapOnClick(); };
+            fileMenu.Append(saveItem);
+
             Gtk.MenuItem helpOption = new Gtk.MenuItem(Utils.MENU_HELP);
             Gtk.Menu helpMenu = new Gtk.Menu();
             helpOption.Submenu = helpMenu;
@@ -57,13 +64,39 @@ namespace RaahnSimulation
             aboutItem.Activated += delegate { context.DisplayAboutDialog(); };
             helpMenu.Append(aboutItem);
 
+            menuBar.Append(fileOption);
             menuBar.Append(helpOption);
 
             //Must be instantiated and added to the window before entites.
             mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
 
-            mcVbox.PackStart(menuBar, false, true, PADDING);
-            mcVbox.PackStart(mainGLWidget, true, true, PADDING);
+            Gtk.VBox controls = new Gtk.VBox();
+
+            Pango.FontDescription tickFont = Pango.FontDescription.FromString(CONTROL_TITLE_SIZE);
+
+            Gtk.Label controlsTitle = new Gtk.Label(Utils.MAP_CONTROLS_TITLE);
+            controlsTitle.ModifyFont(tickFont);
+            controlsTitle.SetAlignment(CONTROL_TITLE_X, 0.0f);
+
+            Gtk.HBox itemPanel = new Gtk.HBox();
+
+            Gtk.Button wallButton = new Gtk.Button(new Gtk.Image("Data/Icons/Line.png"));
+            wallButton.Clicked += delegate { WallButtonOnClick(); };
+            wallButton.TooltipText = Utils.TOOLTIP_WALL;
+
+            Gtk.Button pointButton = new Gtk.Button(new Gtk.Image("Data/Icons/Point.png"));
+            pointButton.Clicked += delegate { PointButtonOnClick(); };
+            pointButton.TooltipText = Utils.TOOLTIP_POINT;
+
+            itemPanel.PackStart(wallButton, false, false, NO_PADDING);
+            itemPanel.PackStart(pointButton, false, false, NO_PADDING);
+
+            controls.PackStart(controlsTitle, false, false, NO_PADDING);
+            controls.PackStart(itemPanel, false, false, NO_PADDING);
+
+            mcVbox.PackStart(menuBar, false, true, NO_PADDING);
+            mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
+            mcVbox.PackStart(controls, false, false, NO_PADDING);
 
             mainWindow.Add(mainContainer);
 
@@ -74,17 +107,9 @@ namespace RaahnSimulation
 
             cursor = new Cursor(context, mainGLWidget);
 
-            entityPanel = new EntityPanel(context, cursor, camera, 2);
-
             mapBuilder = new MapBuilder(context, cursor, 0);
 
-            saveMap = new Button(context, Utils.SAVE_MAP);
-            saveMap.SetTransformUsage(false);
-            saveMap.SetBounds(SAVE_BUTTON_X, SAVE_BUTTON_Y, SAVE_BUTTON_WIDTH, SAVE_BUTTON_HEIGHT, false);
-            saveMap.SetOnClickListener(SaveMapOnClick);
-
-            AddEntity(saveMap, 2);
-            AddEntity(cursor, 3);
+            AddEntity(cursor, 1);
 
             return true;
         }
@@ -105,7 +130,7 @@ namespace RaahnSimulation
             else if (mouseX > glBounds.Width || mouseY > glBounds.Height)
                 mouseOutOfBounds = true;
 
-            if (entityPanel.Intersects(cursor.aabb.GetBounds()) || mouseOutOfBounds)
+            if (mouseOutOfBounds)
                 panning = false;
             else if (panning) //If we just set panning to false, no need to pan. else if is better.
             {
@@ -123,7 +148,6 @@ namespace RaahnSimulation
             cursor.Update();
             //Update mapBuilder before checking whether or not to pan.
             mapBuilder.UpdateEvent(e);
-            entityPanel.UpdateEvent(e);
 
             if (e.type == Gdk.EventType.Scroll)
             {
@@ -146,8 +170,7 @@ namespace RaahnSimulation
             {
                 if (e.button == Utils.GTK_BUTTON_LEFT)
                 {
-                    if (!entityPanel.Intersects(cursor.aabb.GetBounds())
-                        && context.GetWindowHasFocus())
+                    if (context.GetWindowHasFocus())
                         panning = true;
                 }
             }
@@ -174,18 +197,8 @@ namespace RaahnSimulation
             base.Clean();
         }
 
-        public static MapState Instance()
-        {
-            return mapState;
-        }
-
-        public bool GetPanning()
-        {
-            return panning;
-        }
-
         //Saves the map to the file specified by the user.
-        public static void SaveMapOnClick(Simulator sim)
+        public void SaveMapOnClick()
         {
             MapState mapState = MapState.Instance();
 
@@ -208,6 +221,26 @@ namespace RaahnSimulation
             }
 
             saveDialog.Destroy();
+        }
+
+        public void WallButtonOnClick()
+        {
+            mapBuilder.SetMode(MapBuilder.Mode.WALL);
+        }
+
+        public void PointButtonOnClick()
+        {
+            mapBuilder.SetMode(MapBuilder.Mode.POINT);
+        }
+
+        public static MapState Instance()
+        {
+            return mapState;
+        }
+
+        public bool GetPanning()
+        {
+            return panning;
         }
     }
 }

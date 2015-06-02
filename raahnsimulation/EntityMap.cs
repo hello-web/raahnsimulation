@@ -61,6 +61,16 @@ namespace RaahnSimulation
             }
         }
 
+        public void Update()
+        {
+
+        }
+
+        public void UpdateEvent(Event e)
+        {
+
+        }
+
         public void SetQuadTree(QuadTree tree)
         {
             quadTree = tree;
@@ -118,7 +128,7 @@ namespace RaahnSimulation
                     Entity newEntity = null;
                     Entity.EntityType type = Entity.EntityType.NONE;
 
-                    if (mapConfig.entites[i].type != null)
+                    if (!string.IsNullOrEmpty(mapConfig.entites[i].type))
                         type = Entity.GetTypeFromString(mapConfig.entites[i].type);
 
                     switch (type)
@@ -130,6 +140,11 @@ namespace RaahnSimulation
 
                             newWall.SetRelativeEndPoint(mapConfig.entites[i].relX, mapConfig.entites[i].relY);
 
+                            break;
+                        }
+                        case Entity.EntityType.POINT:
+                        {
+                            newEntity = new Point(context);
                             break;
                         }
                     }
@@ -154,16 +169,6 @@ namespace RaahnSimulation
             return true;
         }
 
-        public void Update()
-        {
-
-        }
-
-        public void UpdateEvent(Event e)
-        {
-
-        }
-
         public double GetDefaultCarX()
         {
             return defaultCarX;
@@ -177,6 +182,19 @@ namespace RaahnSimulation
         public double GetDefaultCarY()
         {
             return defaultCarY;
+        }
+
+        public List<Point> GetPOIs()
+        {
+            List<Point> pois = new List<Point>();
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (entities[i].GetEntityType() == Entity.EntityType.POINT)
+                    pois.Add((Point)entities[i]);
+            }
+
+            return pois;
         }
 
         private void Construct(Simulator sim, uint layerIndex, Car car, QuadTree tree)

@@ -173,4 +173,11 @@
     <RelY>12.5</RelY>
     <Angle>0</Angle>
   </Entity>
+  <Entity Type="Point">
+    <X>1850</X>
+    <Y>1156.2901554404143</Y>
+    <RelX>0</RelX>
+    <RelY>0</RelY>
+    <Angle>0</Angle>
+  </Entity>
 </Map>

@@ -8,6 +8,12 @@ namespace RaahnSimulation
 {
 	public class MapBuilder
 	{
+        public enum Mode
+        {
+            WALL = 0,
+            POINT = 1
+        }
+
         private const uint UNIQUE_ENTITIES = 1;
         private const uint WALL_INDEX = 0;
         private const int XML_INDENT_SPACE = 4;
@@ -31,10 +37,12 @@ namespace RaahnSimulation
         //The entity being modified by the user.
         private Entity entityInUse;
         private WallPool wallPool;
+        private PointPool pointPool;
 		private Cursor cursor;
         private Camera camera;
 		private Graphic flag;
         private Mesh quad;
+        private Mode itemMode;
 
         public MapBuilder(Simulator sim, Cursor c, uint stateLayer)
 	    {
@@ -52,6 +60,7 @@ namespace RaahnSimulation
             layer = stateLayer;
 
             wallPool = new WallPool(context);
+            pointPool = new PointPool(context);
 
             entities = new List<LinkedList<Entity>>();
 
@@ -60,6 +69,7 @@ namespace RaahnSimulation
 
             hasSnappingPoint = false;
             snappingPoint = new Utils.Point2();
+            itemMode = Mode.WALL;
 
 	        flag = new Graphic(context);
             flag.visible = false;
@@ -100,60 +110,89 @@ namespace RaahnSimulation
                     //Add a wall if there is no entity is use.
                     //If there is and it is a wall, stop updating the wall based on the cursor.
                     if (entityInUse == null)
-                        AddWall();
-                    else if (entityInUse.GetEntityType() == Entity.EntityType.WALL)
                     {
-                        if (hasSnappingPoint)
+                        switch (itemMode)
                         {
-                            double xDiff = snappingPoint.x - entityInUse.GetTransformedX();
-                            double yDiff = snappingPoint.y - entityInUse.GetTransformedY();
-
-                            ((Wall)entityInUse).SetRelativeEndPoint(xDiff, yDiff);
+                            case Mode.WALL:
+                            {
+                                AddWall();
+                                break;
+                            }
+                            case Mode.POINT:
+                            {
+                                AddPoint();
+                                break;
+                            }
                         }
-                        
-                        entityInUse = null;
+                    }
+                    else
+                    {
+                        switch (itemMode)
+                        {
+                            case Mode.WALL:
+                            {
+                                if (hasSnappingPoint)
+                                {
+                                    double xDiff = snappingPoint.x - entityInUse.GetTransformedX();
+                                    double yDiff = snappingPoint.y - entityInUse.GetTransformedY();
+
+                                    ((Wall)entityInUse).SetRelativeEndPoint(xDiff, yDiff);
+                                }
+                    
+                                entityInUse = null;
+                                break;
+                            }
+                            case Mode.POINT:
+                            {
+                                break;
+                            }
+                        }
                     }
                 }
             }
             else if (e.type == Gdk.EventType.MotionNotify)
             {
-                hasSnappingPoint = false;
-
-                foreach (Entity curWall in entities[(int)WALL_INDEX])
+                if (itemMode == Mode.WALL)
                 {
-                    //Do not use the points of the current wall for snapping.
-                    if (curWall == entityInUse)
-                        continue;
+                    hasSnappingPoint = false;
 
-                    Utils.Rect compareRect = camera.TransformWorld(cursor.aabb.GetBounds());
-
-                    //Center around the top left of the cursor.
-                    double horizontalOffset = cursor.GetWidth() / 2.0;
-                    double verticalOffset = cursor.GetHeight() / 2.0;
-
-                    compareRect.left -= horizontalOffset;
-                    compareRect.right -= horizontalOffset;
-                    compareRect.bottom += verticalOffset;
-                    compareRect.top += verticalOffset;
-
-                    double startX = curWall.GetTransformedX();
-                    double startY = curWall.GetTransformedY();
-                    Utils.Point2 endPoint = ((Wall)curWall).GetEndPoint();
-
-                    //After the first snapping point is found, stop.
-                    if (compareRect.Intersects(startX, startY))
+                    foreach (Entity curWall in entities[(int)WALL_INDEX])
                     {
-                        snappingPoint.x = startX;
-                        snappingPoint.y = startY;
-                        hasSnappingPoint = true;
-                        break;
-                    }
-                    else if (compareRect.Intersects(endPoint.x, endPoint.y))
-                    {
-                        snappingPoint.x = endPoint.x;
-                        snappingPoint.y = endPoint.y;
-                        hasSnappingPoint = true;
-                        break;
+                        //Do not use the points of the current wall for snapping.
+                        //Only use walls.
+                        if (curWall == entityInUse || curWall.GetEntityType() != Entity.EntityType.WALL)
+                            continue;
+
+                        Utils.Rect compareRect = camera.TransformWorld(cursor.aabb.GetBounds());
+
+                        //Center around the top left of the cursor.
+                        double horizontalOffset = cursor.GetWidth() / 2.0;
+                        double verticalOffset = cursor.GetHeight() / 2.0;
+
+                        compareRect.left -= horizontalOffset;
+                        compareRect.right -= horizontalOffset;
+                        compareRect.bottom += verticalOffset;
+                        compareRect.top += verticalOffset;
+
+                        double startX = curWall.GetTransformedX();
+                        double startY = curWall.GetTransformedY();
+                        Utils.Point2 endPoint = ((Wall)curWall).GetEndPoint();
+
+                        //After the first snapping point is found, stop.
+                        if (compareRect.Intersects(startX, startY))
+                        {
+                            snappingPoint.x = startX;
+                            snappingPoint.y = startY;
+                            hasSnappingPoint = true;
+                            break;
+                        }
+                        else if (compareRect.Intersects(endPoint.x, endPoint.y))
+                        {
+                            snappingPoint.x = endPoint.x;
+                            snappingPoint.y = endPoint.y;
+                            hasSnappingPoint = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -187,6 +226,13 @@ namespace RaahnSimulation
 
                 GL.Color4(1.0, 1.0, 1.0, 1.0);
             }
+        }
+
+        public void SetMode(Mode mode)
+        {
+            //Do not switch modes while an entity is being added.
+            if (entityInUse == null)
+                itemMode = mode;
         }
 
         public bool SaveMap(string file)
@@ -307,6 +353,21 @@ namespace RaahnSimulation
                 Console.WriteLine(Utils.ENTITY_POOL_USED_UP, Entity.ENTITY_TYPE_STRINGS[(int)Entity.EntityType.WALL]);
         }
 
+        private void AddPoint()
+        {
+            if (!wallPool.Empty())
+            {
+                Point point = pointPool.Alloc();
+
+                point.SetPosition(cursor.GetTransformedX(), cursor.GetTransformedY() + cursor.GetHeight());
+
+                currentState.AddEntity(point, layer);
+                entities[(int)WALL_INDEX].AddLast(point);
+            }
+            else
+                Console.WriteLine(Utils.ENTITY_POOL_USED_UP, Entity.ENTITY_TYPE_STRINGS[(int)Entity.EntityType.POINT]);
+        }
+
         private void RemoveEntityFromList(Entity entity, int listIndex)
         {
             entities[listIndex].Remove(entity);
@@ -315,9 +376,9 @@ namespace RaahnSimulation
 
         private void UpdateEntityInUse(Event e)
         {
-            switch (entityInUse.GetEntityType())
+            switch (itemMode)
             {
-                case Entity.EntityType.WALL:
+                case Mode.WALL:
                 {
                     if (e.type == Gdk.EventType.MotionNotify)
                     {
@@ -327,6 +388,10 @@ namespace RaahnSimulation
                         ((Wall)entityInUse).SetRelativeEndPoint(xDiff, yDiff);
                     }
 
+                    break;
+                }
+                case Mode.POINT:
+                {
                     break;
                 }
             }

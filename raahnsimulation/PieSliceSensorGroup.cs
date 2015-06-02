@@ -37,11 +37,12 @@ namespace RaahnSimulation
         //Enough indices for a line between each vertex.
         public const uint MAX_IBO_SIZE = 722;
 
+        //Shared mesh is used for drawing the curve points of each pie slice.
+        private static Mesh sharedMesh = null;
+
         private List<PieSliceSensor> sensors;
         private Simulator context;
         private Car robot;
-        //Shared mesh is used for drawing the curve points of each pie slice.
-        private static Mesh sharedMesh = null;
         private QuadTree quadTree;
         private Camera camera;
 

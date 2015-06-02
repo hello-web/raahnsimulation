@@ -33,12 +33,13 @@ namespace RaahnSimulation
             NONE = -2,
             GENERIC = -1,
             WALL = 0,
-            CAR = 1
+            CAR = 1,
+            POINT = 2
         };
 
         public static readonly string[] ENTITY_TYPE_STRINGS = 
         {
-            "Wall", "Car"
+            "Wall", "Car", "Point"
         };
 
         public const double DEFAULT_COLOR_R = 1.0;
@@ -149,13 +150,6 @@ namespace RaahnSimulation
             }
 
             return EntityType.NONE;
-        }
-
-        protected void RotateAroundCenter()
-        {
-            GL.Translate(center.x, center.y, Utils.DISCARD_Z_POS);
-            GL.Rotate(angle, 0.0, 0.0, 1.0);
-            GL.Translate(-center.x, -center.y, -Utils.DISCARD_Z_POS);
         }
 
         protected virtual void SetTransformUsage(bool usage)

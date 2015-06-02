@@ -2,7 +2,10 @@
 <Experiment>
 	<TicksPerRun>500</TicksPerRun>
 	<RunCount>100</RunCount>
+	
 	<MapFile>Default.xml</MapFile>
 	<SensorFile>Default.xml</SensorFile>
 	<NetworkFile>Default.xml</NetworkFile>
+	
+	<PerformanceMeasurement>LapsPerformance</PerformanceMeasurement>
 </Experiment>

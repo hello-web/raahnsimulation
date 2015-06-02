@@ -41,7 +41,6 @@
     <Compile Include="ClickableEntity.cs" />
     <Compile Include="Cursor.cs" />
     <Compile Include="Entity.cs" />
-    <Compile Include="EntityPanel.cs" />
     <Compile Include="Graphic.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MapBuilder.cs" />
@@ -74,6 +73,10 @@
     <Compile Include="RaahnXmlConifg.cs" />
     <Compile Include="ModulationScheme.cs" />
     <Compile Include="ControlScheme.cs" />
+    <Compile Include="PerformanceMeasurement.cs" />
+    <Compile Include="LapsMeasurement.cs" />
+    <Compile Include="Point.cs" />
+    <Compile Include="PointPool.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -106,6 +109,7 @@
   <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="Data\Networks\" />
+    <Folder Include="Data\Icons\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Experiments\Default.xml">
@@ -129,13 +133,7 @@
     <None Include="Data\Textures\Cursor1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Textures\Panel.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Data\Textures\TopViewCar.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Textures\Trash.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Textures\raahn.png">
@@ -145,6 +143,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Networks\Default.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Icons\Line.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Icons\Point.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

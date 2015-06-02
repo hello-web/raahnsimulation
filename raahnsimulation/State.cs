@@ -159,7 +159,7 @@ namespace RaahnSimulation
                     camera.windowWorldRatio.x = (double)widget.Width / Simulator.WORLD_WINDOW_WIDTH;
                     camera.windowWorldRatio.y = (double)widget.Height / Simulator.WORLD_WINDOW_HEIGHT;
 
-                    GL.Viewport(widget.X, widget.Y, widget.Width, widget.Height);
+                    GL.Viewport(0, 0, widget.Width, widget.Height);
                 }
             }
 
@@ -396,9 +396,8 @@ namespace RaahnSimulation
             quad.MakeCurrent();
 
             Gdk.Rectangle widgetBox = mainGLWidget.Allocation;
-            int y = (int)context.GetWindowWidth() - (widgetBox.Y - widgetBox.Height);
 
-            GL.Viewport(widgetBox.X, y, widgetBox.Width, widgetBox.Height);
+            GL.Viewport(0, 0, widgetBox.Width, widgetBox.Height);
 
             glInitialized = true;
         }

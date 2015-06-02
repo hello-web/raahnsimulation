@@ -27,11 +27,11 @@ namespace RaahnSimulation
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
         private const int SLEEP_TIME = 5;
 
-        public delegate void OptionAction(Simulator sim, List<string> arguments);
+        public delegate bool OptionAction(Simulator sim, List<string> arguments);
 
         public static readonly OptionAction[] OPTION_ACTIONS = 
         {
-            ExperimentOption, HeadlessOption
+            ExperimentOption, HeadlessOption, HelpOption
         };
 
 		public bool running;
@@ -83,7 +83,9 @@ namespace RaahnSimulation
 
 	    public int Execute(string[] argv)
 	    {
-            InterpretArgs(argv);
+            //If InterpretArgs returns false, don't continue.
+            if (!InterpretArgs(argv))
+                return Utils.EXIT_S;
 
             if (!headLess)
             {
@@ -352,7 +354,7 @@ namespace RaahnSimulation
 	            eventQueue.Dequeue();
 	    }
 
-        private void InterpretArgs(string[] argv)
+        private bool InterpretArgs(string[] argv)
         {
             for (int x = 0; x < argv.Length; x++)
             {
@@ -366,7 +368,7 @@ namespace RaahnSimulation
                         if (x + Utils.OPTIONS[y].argCount >= argv.Length)
                         {
                             Console.WriteLine(Utils.TOO_FEW_ARGS);
-                            return;
+                            return false;
                         }
 
                         optionType = y;
@@ -384,16 +386,21 @@ namespace RaahnSimulation
                 }
 
                 if (optionType > -1)
-                    OPTION_ACTIONS[optionType](this, argumentList);
+                {
+                    if (!OPTION_ACTIONS[optionType](this, argumentList))
+                        return false;
+                }
             }
+
+            return true;
         }
 
-        private static void ExperimentOption(Simulator sim, List<string> arguments)
+        private static bool ExperimentOption(Simulator sim, List<string> arguments)
         {
             if (!File.Exists(arguments[0]))
             {
                 Console.WriteLine(Utils.FILE_NOT_FOUND, arguments[0]);
-                return;
+                return false;
             }
 
             TextReader expReader = new StreamReader(arguments[0]);
@@ -406,16 +413,26 @@ namespace RaahnSimulation
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                return false;
             }
             finally
             {
                 expReader.Close();
             }
+
+            return true;
         }
 
-        private static void HeadlessOption(Simulator sim, List<string> arguments)
+        private static bool HeadlessOption(Simulator sim, List<string> arguments)
         {
             sim.SetHeadLess(true);
+            return true;
+        }
+
+        private static bool HelpOption(Simulator sim, List<string> arguments)
+        {
+            Console.WriteLine(Utils.VERBOSE_HELP);
+            return false;
         }
 
         public void DisplayAboutDialog()

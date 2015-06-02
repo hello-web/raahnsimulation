@@ -12,7 +12,7 @@ namespace RaahnSimulation
         private const double COLOR_B = 0.0;
         private const double COLOR_A = 1.0;
 
-        private static readonly ushort[] indices = { 0, 1 };
+        private static readonly ushort[] INDICES = { 0, 1 };
 
         private static Mesh sharedMesh = null;
 
@@ -76,12 +76,13 @@ namespace RaahnSimulation
 
             //Set the shared mesh resource to the wall's vertices and indices.
             sharedMesh.SetVertices(vertices, false);
-            sharedMesh.SetIndices(indices);
+            sharedMesh.SetIndices(INDICES);
             sharedMesh.Update();
 
             sharedMesh.MakeCurrent();
 
             GL.Translate(drawingVec.x, drawingVec.y, Utils.DISCARD_Z_POS);
+
             GL.DrawElements(sharedMesh.GetRenderMode(), sharedMesh.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
 
             GL.Color4(1.0, 1.0, 1.0, 1.0);

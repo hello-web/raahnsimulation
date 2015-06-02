@@ -14,6 +14,7 @@ namespace RaahnSimulation
         private const int VERTICAL_PADDING = 20;
         private const int HORIZONTAL_PADDING_SHORT = 40;
         private const int HORIZONTAL_PADDING_LONG = 60;
+        private const int PERFORMANCE_HORIZONTAL_PADDING = 95;
         private const double DELAY_CHOOSER_MIN = 0.0;
         private const double DELAY_CHOOSER_MAX = 100.0;
         private const double DELAY_CHOOSER_STEP = 1.0;
@@ -23,8 +24,8 @@ namespace RaahnSimulation
         private const double HIGHLIGHT_G = 1.0;
         private const double HIGHLIGHT_B = 0.0;
         private const double HIGHLIGHT_T = 1.0;
-        private const string TICK_COUNTER_INITIAL = "0";
-        private const string TICK_FONT_SIZE = "32";
+        private const string DISPLAY_INITIAL = "0";
+        private const string DISPLAY_FONT_SIZE = "32";
 
         private static SimState simState = new SimState();
 
@@ -43,9 +44,11 @@ namespace RaahnSimulation
         private double defaultCarY;
         private double defaultCarAngle;
         private Gtk.Label tickCounter;
+        private Gtk.Label performanceDisplay;
         private Gtk.MenuBar menuBar;
         private Gtk.SpinButton delayChooser;
         private QuadTree quadTree;
+        private PerformanceMeasurement performance;
         private Cursor cursor;
         private Car raahnCar;
         private EntityMap entityMap;
@@ -64,6 +67,7 @@ namespace RaahnSimulation
             headless = false;
             experiment = null;
             quadTree = null;
+            performance = null;
             raahnCar = null;
             entityMap = null;
             timer = null;
@@ -106,10 +110,7 @@ namespace RaahnSimulation
                 helpOption.Submenu = helpMenu;
 
                 Gtk.MenuItem aboutItem = new Gtk.MenuItem(Utils.MENU_ABOUT);
-                aboutItem.Activated += delegate
-                {
-                    context.DisplayAboutDialog();
-                };
+                aboutItem.Activated += delegate { context.DisplayAboutDialog(); };
                 helpMenu.Append(aboutItem);
 
                 menuBar.Append(helpOption);
@@ -132,12 +133,16 @@ namespace RaahnSimulation
                 speedControls.PackStart(delayLabel, false, false, NO_PADDING);
                 speedControls.PackStart(delayChooser, false, false, VERTICAL_PADDING);
 
-                Pango.FontDescription tickFont = Pango.FontDescription.FromString(TICK_FONT_SIZE);
+                Pango.FontDescription displayFont = Pango.FontDescription.FromString(DISPLAY_FONT_SIZE);
 
                 Gtk.Label tickCounterDescription = new Gtk.Label(Utils.TICKS_ELAPSED);
-                tickCounterDescription.ModifyFont(tickFont);
+                tickCounterDescription.ModifyFont(displayFont);
+
+                Gtk.Label performanceDescription = new Gtk.Label(Utils.PEFORMANCE);
+                performanceDescription.ModifyFont(displayFont);
 
                 controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING_LONG);
+                controlBox.PackStart(performanceDescription, false, false, NO_PADDING);
                 controlBox.PackEnd(tickCounterDescription, false, false, HORIZONTAL_PADDING_SHORT);
 
                 //Button panel.
@@ -156,12 +161,16 @@ namespace RaahnSimulation
                 Gtk.Button restartButton = new Gtk.Button(restartImage);
                 restartButton.Clicked += OnRestartClicked;
 
-                tickCounter = new Gtk.Label(TICK_COUNTER_INITIAL);
-                tickCounter.ModifyFont(tickFont);
+                tickCounter = new Gtk.Label(DISPLAY_INITIAL);
+                tickCounter.ModifyFont(displayFont);
+
+                performanceDisplay = new Gtk.Label(DISPLAY_INITIAL);
+                performanceDisplay.ModifyFont(displayFont);
 
                 buttonPanel.PackStart(playButton, false, false, NO_PADDING);
                 buttonPanel.PackStart(pauseButton, false, false, NO_PADDING);
                 buttonPanel.PackStart(restartButton, false, false, NO_PADDING);
+                buttonPanel.PackStart(performanceDisplay, false, false, PERFORMANCE_HORIZONTAL_PADDING);
                 buttonPanel.PackEnd(tickCounter, false, false, HORIZONTAL_PADDING_SHORT);
 
                 mcVbox.PackStart(menuBar, false, true, NO_PADDING);
@@ -236,6 +245,24 @@ namespace RaahnSimulation
             //Update the car with initial map information.
             raahnCar.UpdateMinimal();
 
+            //raahnCar must be updated before creating the performance measurement.
+            if (experiment != null)
+            {
+                if (!string.IsNullOrEmpty(experiment.performanceMeasurement))
+                {
+                    PerformanceMeasurement.Method method = PerformanceMeasurement.GetMethodFromString(experiment.performanceMeasurement);
+
+                    if (method != PerformanceMeasurement.Method.NONE)
+                        performance = PerformanceMeasurement.CreateFromMethod(method, raahnCar);
+                }
+            }
+
+            //Default to LapsMeasurement if none specified.
+            if (performance == null)
+                performance = new LapsMeasurement(raahnCar);
+
+            performance.InterpretPOIs(entityMap.GetPOIs());
+
             timer = new Stopwatch();
 
             return true;
@@ -279,9 +306,6 @@ namespace RaahnSimulation
 
                 ticksElapsed++;
 
-                if (!headless)
-                    tickCounter.Text = ticksElapsed.ToString();
-
                 base.Update();
                 entityMap.Update();
                 quadTree.Update();
@@ -316,16 +340,29 @@ namespace RaahnSimulation
                     else
                         curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
                 }
+
+                performance.Update();
+
+                if (!headless)
+                {
+                    tickCounter.Text = ticksElapsed.ToString();
+                    performanceDisplay.Text = string.Format("{0:0.00}", performance.GetScore());
+                }
             }
 
             if (headless)
             {
                 if (ticksElapsed >= ticksPerRun)
                 {
+                    performance.RecordScores();
+
                     runsElapsed++;
 
                     if (runsElapsed >= runCount)
+                    {
+                        performance.LogScoreHistory();
                         context.running = false;
+                    }
                     else
                         Reset();
                 }
@@ -396,10 +433,13 @@ namespace RaahnSimulation
 
         private void Reset()
         {
-            ticksElapsed = 0;
-
             if (!headless)
-                tickCounter.Text = TICK_COUNTER_INITIAL;
+            {
+                tickCounter.Text = DISPLAY_INITIAL;
+                performanceDisplay.Text = DISPLAY_INITIAL;
+            }
+
+            ticksElapsed = 0;
 
             raahnCar.SetPosition(defaultCarX, defaultCarY);
             raahnCar.angle = defaultCarAngle;
@@ -408,6 +448,8 @@ namespace RaahnSimulation
             raahnCar.UpdateMinimal();
 
             raahnCar.ResetBrain();
+
+            performance.Reset();
         }
 
         public static SimState Instance()
