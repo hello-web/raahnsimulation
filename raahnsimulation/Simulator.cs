@@ -342,9 +342,6 @@ namespace RaahnSimulation
 	    {
             stopwatch.Stop();
 
-            if (!headLess)
-                blankCursor.Dispose();
-
 	        while (states.Count > 0)
 	        {
 	            states[states.Count - 1].Clean();
@@ -352,6 +349,9 @@ namespace RaahnSimulation
 	        }
 	        while (eventQueue.Count > 0)
 	            eventQueue.Dequeue();
+
+            if (!headLess)
+                blankCursor.Dispose();
 	    }
 
         private bool InterpretArgs(string[] argv)
@@ -463,7 +463,7 @@ namespace RaahnSimulation
             e.width = ea.Event.Width;
             e.height = ea.Event.Height;
 
-			SaveEvent(e);
+            SaveEvent(e);
 		}
 
         //Space not registered without GLib.ConnectBefore
@@ -551,6 +551,7 @@ namespace RaahnSimulation
             e.button = ea.Event.Button;
             e.X = ea.Event.X;
             e.Y = ea.Event.Y;
+            e.window = (Gtk.Window)sender;
 
             if (ea.Event.Button == Utils.GTK_BUTTON_LEFT)
                 leftMouseButtonDown = true;
@@ -566,6 +567,7 @@ namespace RaahnSimulation
             e.button = ea.Event.Button;
             e.X = ea.Event.X;
             e.Y = ea.Event.Y;
+            e.window = (Gtk.Window)sender;
 
             if (ea.Event.Button == Utils.GTK_BUTTON_LEFT)
                 leftMouseButtonDown = false;
@@ -580,6 +582,7 @@ namespace RaahnSimulation
             e.type = Gdk.EventType.MotionNotify;
             e.X = ea.Event.X;
             e.Y = ea.Event.Y;
+            e.window = (Gtk.Window)sender;
 
             SaveEvent(e);
         }
@@ -592,6 +595,7 @@ namespace RaahnSimulation
             e.scrollDirection = ea.Event.Direction;
             e.X = ea.Event.X;
             e.Y = ea.Event.Y;
+            e.window = (Gtk.Window)sender;
 
             SaveEvent(e);
         }
@@ -600,6 +604,7 @@ namespace RaahnSimulation
 		{
             Event e = new Event();
             e.type = Gdk.EventType.FocusChange;
+            e.window = (Gtk.Window)sender;
 
 			SaveEvent(e);
 		}
@@ -608,6 +613,7 @@ namespace RaahnSimulation
 		{
             Event e = new Event();
             e.type = Gdk.EventType.FocusChange;
+            e.window = (Gtk.Window)sender;
 
             leftMouseButtonDown = false;
 
@@ -618,6 +624,7 @@ namespace RaahnSimulation
 		{
             Event e = new Event();
             e.type = Gdk.EventType.Delete;
+            e.window = (Gtk.Window)sender;
 
 			SaveEvent(e);
 

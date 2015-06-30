@@ -13,6 +13,7 @@ namespace RaahnSimulation
         public Gdk.Key key;
         public Gdk.ScrollDirection scrollDirection;
         public Gdk.EventType type;
+        public Gtk.Window window;
     }
 }
 

@@ -9,6 +9,11 @@
 	</NeuronGroup>
 	
 	<NeuronGroup Id="1">
+		<Count>5</Count>
+		<Type>Hidden</Type>
+	</NeuronGroup>
+	
+	<NeuronGroup Id="2">
 		<Count>1</Count>
 		<Type>Output</Type>
 	</NeuronGroup>
@@ -16,6 +21,13 @@
 	<ConnectionGroup UseBias="false">
 		<InputGroup>0</InputGroup>
 		<OutputGroup>1</OutputGroup>
+		<LearningRate>0.1</LearningRate>
+		<TrainingMethod>AutoencoderTrain</TrainingMethod>
+	</ConnectionGroup>
+	
+	<ConnectionGroup UseBias="false">
+		<InputGroup>1</InputGroup>
+		<OutputGroup>2</OutputGroup>
 		<LearningRate>0.1</LearningRate>
 		<TrainingMethod>HebbianTrain</TrainingMethod>
 		<ModulationScheme>WallAvoidance</ModulationScheme>

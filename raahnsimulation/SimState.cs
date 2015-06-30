@@ -4,6 +4,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Diagnostics;
 using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -49,6 +50,7 @@ namespace RaahnSimulation
         private Gtk.SpinButton delayChooser;
         private QuadTree quadTree;
         private PerformanceMeasurement performance;
+        private NetworkVisualizer networkVisualizer;
         private Cursor cursor;
         private Car raahnCar;
         private EntityMap entityMap;
@@ -68,6 +70,7 @@ namespace RaahnSimulation
             experiment = null;
             quadTree = null;
             performance = null;
+            networkVisualizer = null;
             raahnCar = null;
             entityMap = null;
             timer = null;
@@ -103,7 +106,17 @@ namespace RaahnSimulation
                 mainContainer = new Gtk.VBox();
                 Gtk.VBox mcVbox = (Gtk.VBox)mainContainer;
 
+                networkVisualizer = new NetworkVisualizer();
+
                 menuBar = new Gtk.MenuBar();
+
+                Gtk.MenuItem viewOption = new Gtk.MenuItem(Utils.MENU_VIEW);
+                Gtk.Menu viewMenu = new Gtk.Menu();
+                viewOption.Submenu = viewMenu;
+
+                Gtk.MenuItem viewVisualizer = new Gtk.MenuItem(Utils.MENU_VISUALIZER);
+                viewVisualizer.Activated += delegate { networkVisualizer.Display(); };
+                viewMenu.Append(viewVisualizer);
 
                 Gtk.MenuItem helpOption = new Gtk.MenuItem(Utils.MENU_HELP);
                 Gtk.Menu helpMenu = new Gtk.Menu();
@@ -113,6 +126,7 @@ namespace RaahnSimulation
                 aboutItem.Activated += delegate { context.DisplayAboutDialog(); };
                 helpMenu.Append(aboutItem);
 
+                menuBar.Append(viewOption);
                 menuBar.Append(helpOption);
 
                 //Must be instantiated and added to the window before entites.
@@ -211,6 +225,9 @@ namespace RaahnSimulation
                     Console.WriteLine(Utils.NO_NETWORK_FILE);
 
                 raahnCar.LoadConfig(sensorPath, networkPath);
+
+                if (!headless)
+                    networkVisualizer.LoadNetwork(raahnCar.GetBrain(), raahnCar.GetNeuronGroupIds());
             }
 
             raahnCar.SetWidth(CAR_WIDTH);
@@ -284,6 +301,8 @@ namespace RaahnSimulation
                     panning = false;
                 else if (mouseX > glBounds.Width || mouseY > glBounds.Height)
                     panning = false;
+
+                networkVisualizer.UpdateWindow();
             }
 
             if (panning)
@@ -406,11 +425,19 @@ namespace RaahnSimulation
 
                 if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = true;
+                else if (e.button == Utils.GTK_BUTTON_RIGHT && networkVisualizer.IsOpen())
+                    networkVisualizer.Close();
+
             }
             else if (e.type == Gdk.EventType.ButtonRelease)
             {
                 if (e.button == Utils.GTK_BUTTON_LEFT)
                     panning = false;
+            }
+            else if (e.type == Gdk.EventType.Delete)
+            {
+                if (e.window == context.GetWindow() && networkVisualizer.IsOpen())
+                    networkVisualizer.Close();
             }
 
             entityMap.UpdateEvent(e);
@@ -429,6 +456,11 @@ namespace RaahnSimulation
         public override void Clean()
         {
             base.Clean();
+        }
+
+        public static SimState Instance()
+        {
+            return simState;
         }
 
         private void Reset()
@@ -450,11 +482,6 @@ namespace RaahnSimulation
             raahnCar.ResetBrain();
 
             performance.Reset();
-        }
-
-        public static SimState Instance()
-        {
-            return simState;
         }
 
         private void OnDelayChooserChanged(object sender, EventArgs ea)

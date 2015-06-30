@@ -346,6 +346,8 @@ namespace RaahnSimulation
         public const double DEFAULT_SCREEN_HEIGHT_PERCENTAGE = 0.75;
         public const double MENU_SCREEN_WIDTH_PERCENTAGE = 0.4;
         public const double MENU_SCREEN_HEIGHT_PERCENTAGE = 0.2;
+        public const double VISUALIZER_SCREEN_WIDTH_PERCENTAGE = 0.4;
+        public const double VISUALIZER_SCREEN_HEIGHT_PERCENTAGE = 0.5;
 		public const double DISCARD_Z_POS = 0.0;
 		public const double DISCARD_Z_SCALE = 1.0;
 		public const double DEG_TO_RAD = 3.1415926535 / 180.0;
@@ -359,6 +361,7 @@ namespace RaahnSimulation
         public const string NULL_ELEMENT = "";
         public const string OUTPUT_VERBOSE = "Ouput 0: {0:0.000000}";
 		public const string WINDOW_TITLE = "RAAHN Simulation";
+        public const string WINDOW_VISUALIZER_TITLE = "Network Visualizer";
 		public const string START_SIM = "Start RAAHN simulation";
 		public const string START_MAP = "Create a new map";
         public const string PEFORMANCE = "Peformance";
@@ -366,6 +369,8 @@ namespace RaahnSimulation
         public const string MAP_CONTROLS_TITLE = "Items";
         public const string MENU_FILE = "File";
         public const string MENU_SAVE = "Save";
+        public const string MENU_VIEW = "View";
+        public const string MENU_VISUALIZER = "Network Visualizer";
         public const string MENU_HELP = "Help";
         public const string MENU_ABOUT = "About";
         public const string DELAY_DESCRIPTION = "Delay (Milli)";
@@ -377,7 +382,7 @@ namespace RaahnSimulation
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-		public const string VERSION_STRING = "Version 3.3";
+		public const string VERSION_STRING = "Version 3.5";
         //Log strings.
         public const string LOG_SCORE_FILE = "scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";
@@ -410,6 +415,7 @@ namespace RaahnSimulation
         public const string XML_WRITE_ERROR = "Error while writing XML.";
         public const string ENTITY_POOL_USED_UP = "No more entities of type {0}, available.";
         public const string STATE_CHANGE_ERROR = "Error changing state.";
+        public const string NO_INPUT_LAYER = "No input layer specified.";
         public const string NO_NEURON_GROUPS = "No neuron groups specified.";
         public const string NO_CONNECTION_GROUPS = "No connection groups specified.";
         public const string NO_CONTROL_SCHEME = "No control scheme specified.";

@@ -24,6 +24,7 @@ namespace RaahnSimulation
     {
         public const double HALF_QUERY_WIDTH = Simulator.WORLD_WINDOW_WIDTH / 2.0;
         public const double HALF_QUERY_HEIGHT = Simulator.WORLD_WINDOW_HEIGHT / 2.0;
+        private const int UNIQUE_GROUP_TYPES = 3;
         private const double CONTROL_THRESHOLD = 0.5;
         private const double ROTATE_SPEED = 2.0;
         private const double SPEED_X = 15.0;
@@ -38,6 +39,7 @@ namespace RaahnSimulation
         private QuadTree quadTree;
         private ControlScheme.SchemeFunction controlScheme;
         private List<List<uint>> modulationSignals;
+        private List<List<int>> orderdGroupIds;
         private List<ModulationScheme.SchemeFunction> modulationSchemes;
         private List<RangeFinderGroup> rangeFinderGroups;
         private List<PieSliceSensorGroup> pieSliceSensorGroups;
@@ -59,6 +61,12 @@ namespace RaahnSimulation
             speed.y = SPEED_Y;
 
             entitiesHovering = new List<Entity>();
+
+            //3 types of ids, input, hidden, output
+            orderdGroupIds = new List<List<int>>(UNIQUE_GROUP_TYPES);
+
+            for (int i = 0; i < UNIQUE_GROUP_TYPES; i++)
+                orderdGroupIds.Add(new List<int>());
         }
 
         //Updates only sensors.
@@ -221,6 +229,16 @@ namespace RaahnSimulation
             return pieSliceSensorCount;
         }
 
+        public List<List<int>> GetNeuronGroupIds()
+        {
+            return orderdGroupIds;
+        }
+
+        public NeuralNetwork GetBrain()
+        {
+            return brain;
+        }
+
         private bool InitSensors(string sensorFile)
         {
             if (!File.Exists(sensorFile))
@@ -361,6 +379,9 @@ namespace RaahnSimulation
                 return true;
             }
 
+            if (networkConfig.weightCap != 0.0)
+                brain.SetWeightCap(networkConfig.weightCap);
+
             ControlScheme.Scheme cDescriptor = ControlScheme.GetSchemeFromString(networkConfig.controlScheme);
 
             if (cDescriptor == ControlScheme.Scheme.NONE)
@@ -375,25 +396,37 @@ namespace RaahnSimulation
             //because the parameter interpreting function takes the descriptions.
             List<ModulationScheme.Scheme> mDescriptions = new List<ModulationScheme.Scheme>();
 
-            int[] neuronGroupIds = new int[networkConfig.neuronGroups.Length];
+            List<NeuronGroupConfig> neuronGroups = new List<NeuronGroupConfig>(networkConfig.neuronGroups.Length);
+            List<int> neuronGroupIds = new List<int>(networkConfig.neuronGroups.Length);
+
+            for (int i = 0; i < networkConfig.neuronGroups.Length; i++)
+                neuronGroups.Add(networkConfig.neuronGroups[i]);
 
             //Add each neuron group.
-            for (uint i = 0; i < networkConfig.neuronGroups.Length; i++)
+            for (int i = 0; i < neuronGroups.Count; i++)
             {
-                NeuronGroupConfig nGroupConfig = networkConfig.neuronGroups[(int)i];
+                NeuronGroupConfig nGroupConfig = neuronGroups[(int)i];
 
                 NeuronGroup.Type type = Utils.GetGroupTypeFromString(nGroupConfig.type);
 
-                neuronGroupIds[(int)i] = brain.AddNeuronGroup(nGroupConfig.count, type);
+                if (type == NeuronGroup.Type.NONE)
+                    neuronGroups.RemoveAt(i);
+                else
+                {
+                    int index = brain.AddNeuronGroup(nGroupConfig.count, type);
+
+                    neuronGroupIds.Add(index);
+                    orderdGroupIds[(int)type].Add(index);
+                }
             }
 
             //Add each connection group.
-            for (uint i = 0; i < networkConfig.connectionGroups.Length; i++)
+            for (int i = 0; i < networkConfig.connectionGroups.Length; i++)
             {
-                ConnectionConfig cGroupConfig = networkConfig.connectionGroups[(int)i];
+                ConnectionConfig cGroupConfig = networkConfig.connectionGroups[i];
 
-                uint inputGroupIndex = GetIdIndex(cGroupConfig.inputGroupId, networkConfig.neuronGroups);
-                uint outputGroupIndex = GetIdIndex(cGroupConfig.outputGroupId, networkConfig.neuronGroups);
+                uint inputGroupIndex = GetIdIndex(cGroupConfig.inputGroupId, neuronGroups);
+                uint outputGroupIndex = GetIdIndex(cGroupConfig.outputGroupId, neuronGroups);
 
                 //Make sure the neuron groups to be connected exist.
                 if (inputGroupIndex < networkConfig.neuronGroups.Length
@@ -401,12 +434,12 @@ namespace RaahnSimulation
                 {
                     NeuronGroup.Identifier inputGroup;
                     inputGroup.index = neuronGroupIds[(int)inputGroupIndex];
-                    string inputTypeString = networkConfig.neuronGroups[(int)inputGroupIndex].type;
+                    string inputTypeString = neuronGroups[(int)inputGroupIndex].type;
                     inputGroup.type = Utils.GetGroupTypeFromString(inputTypeString);
 
                     NeuronGroup.Identifier outputGroup;
                     outputGroup.index = neuronGroupIds[(int)outputGroupIndex];
-                    string outputTypeString = networkConfig.neuronGroups[(int)outputGroupIndex].type;
+                    string outputTypeString = neuronGroups[(int)outputGroupIndex].type;
                     outputGroup.type = Utils.GetGroupTypeFromString(outputTypeString);
 
                     ConnectionGroup.TrainFunctionType trainMethod = Utils.GetMethodFromString(cGroupConfig.trainingMethod);
@@ -474,9 +507,9 @@ namespace RaahnSimulation
             return true;
         }
 
-        private uint GetIdIndex(uint id, NeuronGroupConfig[] neuronGroups)
+        private uint GetIdIndex(uint id, List<NeuronGroupConfig> neuronGroups)
         {
-            for (uint i = 0; i < neuronGroups.Length; i++)
+            for (uint i = 0; i < neuronGroups.Count; i++)
             {
                 if (id == neuronGroups[(int)i].id)
                     return i;

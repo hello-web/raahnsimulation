@@ -5,7 +5,7 @@
 	
 	<MapFile>Default.xml</MapFile>
 	<SensorFile>Default.xml</SensorFile>
-	<NetworkFile>Default.xml</NetworkFile>
+	<NetworkFile>DefaultAutoencoder.xml</NetworkFile>
 	
 	<PerformanceMeasurement>LapsPerformance</PerformanceMeasurement>
 </Experiment>

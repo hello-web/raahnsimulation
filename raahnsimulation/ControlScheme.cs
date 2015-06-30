@@ -10,7 +10,8 @@ namespace RaahnSimulation
             public enum Scheme
             {
                 NONE = -1,
-                SENSOR_BASED_TURN = 0
+                SENSOR_CONTROL = 0,
+                RANGE_FINDER_CONTROL = 1
             }
 
             private const uint DEFAULT_SCHEME_INDEX = 0;
@@ -21,12 +22,12 @@ namespace RaahnSimulation
 
             public static readonly SchemeFunction[] SCHEMES = 
             {
-                SensorBasedTurn
+                SensorControl, RangeFinderControl
             };
 
             public static readonly string[] SCHEME_STRINGS = 
             {
-                "SensorBasedTurn"
+                "SensorControl", "RangeFinderControl"
             };
 
             public static void InterpretParameters(string[] parameters, Scheme scheme)
@@ -34,7 +35,11 @@ namespace RaahnSimulation
                 //Interpret parameters specific to each scheme, if any.
                 switch (scheme)
                 {
-                    case Scheme.SENSOR_BASED_TURN:
+                    case Scheme.SENSOR_CONTROL:
+                    {
+                        break;
+                    }
+                    case Scheme.RANGE_FINDER_CONTROL:
                     {
                         break;
                     }
@@ -62,7 +67,8 @@ namespace RaahnSimulation
                     return null;
             }
 
-            public static void SensorBasedTurn(Car car)
+            //Uses both range finders and pie slice sensors.
+            public static void SensorControl(Car car)
             {
                 //Set the inputs.
                 List<double> rInputs = new List<double>((int)car.rangeFinderCount);
@@ -86,6 +92,35 @@ namespace RaahnSimulation
 
                 car.brain.SetInputs(RANGE_FINDER_GROUP_INDEX, rInputs.ToArray());
                 car.brain.SetInputs(PIE_SLICE_SENSOR_GROUP_INDEX, pInputs.ToArray());
+
+                car.brain.PropagateSignal();
+
+                double output = car.brain.GetOutputValue(0, 0);
+                Console.WriteLine(Utils.OUTPUT_VERBOSE, output);
+
+                //If the left or right arrow key is down, use user control.
+                if (car.context.GetLeftKeyDown())
+                    car.angle += ROTATE_SPEED;
+                else if (car.context.GetRightKeyDown())
+                    car.angle -= ROTATE_SPEED;
+                else
+                    car.angle += (output * ROTATE_RANGE) - ROTATE_SPEED;
+            }
+
+            public static void RangeFinderControl(Car car)
+            {
+                //Set the inputs.
+                List<double> rInputs = new List<double>((int)car.rangeFinderCount);
+
+                for (uint x = 0; x < car.rangeFinderGroups.Count; x++)
+                {
+                    uint currentGroupLength = car.rangeFinderGroups[(int)x].GetRangeFinderCount();
+
+                    for (uint y = 0; y < currentGroupLength; y++)
+                        rInputs.Add(car.rangeFinderGroups[(int)x].GetRangeFinderValue(y));
+                }
+
+                car.brain.SetInputs(RANGE_FINDER_GROUP_INDEX, rInputs.ToArray());
 
                 car.brain.PropagateSignal();
 

@@ -7,4 +7,13 @@
 		<AngleBetween>15</AngleBetween>
 		<DetectEntity>Wall</DetectEntity>
 	</RangeFinderGroup>
+
+	<PieSliceSensorGroup>
+		<Count>9</Count>
+		<MaxDetection>3</MaxDetection>
+		<AngleOffset>-90</AngleOffset>
+		<AngleBetween>20</AngleBetween>
+		<OuterRadius>400</OuterRadius>
+		<InnerRadius>0</InnerRadius>
+	</PieSliceSensorGroup>
 </SensorConfig>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <NeuralNetwork>
-	<ControlScheme>RangeFinderControl</ControlScheme>
-	<WeightCap>100</WeightCap>
+	<ControlScheme>SensorControl</ControlScheme>
 	
 	<NeuronGroup Id="0">
 		<Count>11</Count>
@@ -9,16 +8,28 @@
 	</NeuronGroup>
 	
 	<NeuronGroup Id="1">
+		<Count>9</Count>
+		<Type>Input</Type>
+	</NeuronGroup>
+	
+	<NeuronGroup Id="2">
 		<Count>1</Count>
 		<Type>Output</Type>
 	</NeuronGroup>
 	
 	<ConnectionGroup UseBias="false">
 		<InputGroup>0</InputGroup>
-		<OutputGroup>1</OutputGroup>
+		<OutputGroup>2</OutputGroup>
 		<LearningRate>0.1</LearningRate>
 		<TrainingMethod>HebbianTrain</TrainingMethod>
 		<ModulationScheme>WallAvoidance</ModulationScheme>
+	</ConnectionGroup>
+	
+	<ConnectionGroup UseBias="false">
+		<InputGroup>1</InputGroup>
+		<OutputGroup>2</OutputGroup>
+		<LearningRate>0.1</LearningRate>
+		<TrainingMethod>HebbianTrain</TrainingMethod>
 	</ConnectionGroup>
 	
 	<Parameter>500</Parameter>

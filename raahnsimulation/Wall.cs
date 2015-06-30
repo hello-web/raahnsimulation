@@ -37,6 +37,9 @@ namespace RaahnSimulation
                 0.0f, 0.0f
             };
 
+            sharedMesh.SetVertices(vertices, false);
+            sharedMesh.SetIndices(INDICES);
+
             line = new Utils.LineSegment();
 
             type = EntityType.WALL;

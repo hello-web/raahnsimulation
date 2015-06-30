@@ -5,6 +5,9 @@ namespace RaahnSimulation
     [XmlRoot("NeuralNetwork")]
     public class NeuralNetworkConfig
     {
+        [XmlElement("WeightCap")]
+        public double weightCap;
+
         [XmlElement("ControlScheme")]
         public string controlScheme;
 
