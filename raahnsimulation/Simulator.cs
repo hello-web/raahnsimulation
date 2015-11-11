@@ -25,7 +25,6 @@ namespace RaahnSimulation
         //Scaling down is usually better, if it even matters in this context.
         public const double WORLD_WINDOW_WIDTH = 3840.0;
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
-        private const int SLEEP_TIME = 5;
 
         public delegate bool OptionAction(Simulator sim, List<string> arguments);
 
@@ -197,13 +196,13 @@ namespace RaahnSimulation
                         running = false;
                     }
                 }
-
-                Thread.Sleep(SLEEP_TIME);
 	        }
 	    }
 
 	    private void MainLoopHeadless()
 	    {
+            Console.WriteLine(Utils.VERBOSE_SIM_START);
+
             stopwatch.Start();
 
             while (running)
@@ -397,13 +396,21 @@ namespace RaahnSimulation
 
         private static bool ExperimentOption(Simulator sim, List<string> arguments)
         {
-            if (!File.Exists(arguments[0]))
+            string file = arguments[0];
+
+            //Default to using the local path. If not there, use the experiment folder.
+            if (!File.Exists(file))
             {
-                Console.WriteLine(Utils.FILE_NOT_FOUND, arguments[0]);
-                return false;
+                file = Utils.EXPERIMENT_FOLDER + arguments[0];
+
+                if (!File.Exists(file))
+                {
+                    Console.WriteLine(Utils.FILE_NOT_FOUND, arguments[0]);
+                    return false;
+                }
             }
 
-            TextReader expReader = new StreamReader(arguments[0]);
+            TextReader expReader = new StreamReader(file);
 
             try
             {

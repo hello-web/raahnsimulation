@@ -15,8 +15,6 @@ namespace RaahnSimulation
             }
 
             private const uint DEFAULT_SCHEME_INDEX = 0;
-            private const uint RANGE_FINDER_GROUP_INDEX = 0;
-            private const uint PIE_SLICE_SENSOR_GROUP_INDEX = 0;
 
             public delegate void SchemeFunction(Car car);
 
@@ -39,7 +37,7 @@ namespace RaahnSimulation
                     {
                         break;
                     }
-                    case Scheme.RANGE_FINDER_CONTROL:
+                        case Scheme.RANGE_FINDER_CONTROL:
                     {
                         break;
                     }
@@ -71,15 +69,14 @@ namespace RaahnSimulation
             public static void SensorControl(Car car)
             {
                 //Set the inputs.
-                List<double> rInputs = new List<double>((int)car.rangeFinderCount);
-                List<double> pInputs = new List<double>((int)car.pieSliceSensorCount);
+                List<double> inputs = new List<double>((int)(car.rangeFinderCount + car.pieSliceSensorCount));
 
                 for (uint x = 0; x < car.rangeFinderGroups.Count; x++)
                 {
                     uint currentGroupLength = car.rangeFinderGroups[(int)x].GetRangeFinderCount();
 
                     for (uint y = 0; y < currentGroupLength; y++)
-                        rInputs.Add(car.rangeFinderGroups[(int)x].GetRangeFinderValue(y));
+                        inputs.Add(car.rangeFinderGroups[(int)x].GetRangeFinderValue(y));
                 }
 
                 for (uint x = 0; x < car.pieSliceSensorGroups.Count; x++)
@@ -87,13 +84,14 @@ namespace RaahnSimulation
                     uint currentGroupLength = car.pieSliceSensorGroups[(int)x].GetPieSliceSensorCount();
 
                     for (uint y = 0; y < currentGroupLength; y++)
-                        pInputs.Add(car.pieSliceSensorGroups[(int)x].GetPieSliceSensorValue(y));
+                        inputs.Add(car.pieSliceSensorGroups[(int)x].GetPieSliceSensorValue(y));
                 }
 
-                car.brain.SetInputs(RANGE_FINDER_GROUP_INDEX, rInputs.ToArray());
-                car.brain.SetInputs(PIE_SLICE_SENSOR_GROUP_INDEX, pInputs.ToArray());
+                car.brain.AddSample(inputs);
 
                 car.brain.PropagateSignal();
+
+                car.brain.AddOutputNoise();
 
                 double output = car.brain.GetOutputValue(0, 0);
                 Console.WriteLine(Utils.OUTPUT_VERBOSE, output);
@@ -110,30 +108,31 @@ namespace RaahnSimulation
             public static void RangeFinderControl(Car car)
             {
                 //Set the inputs.
-                List<double> rInputs = new List<double>((int)car.rangeFinderCount);
+                List<double> inputs = new List<double>((int)car.rangeFinderCount);
 
                 for (uint x = 0; x < car.rangeFinderGroups.Count; x++)
                 {
                     uint currentGroupLength = car.rangeFinderGroups[(int)x].GetRangeFinderCount();
 
                     for (uint y = 0; y < currentGroupLength; y++)
-                        rInputs.Add(car.rangeFinderGroups[(int)x].GetRangeFinderValue(y));
+                        inputs.Add(car.rangeFinderGroups[(int)x].GetRangeFinderValue(y));
                 }
 
-                car.brain.SetInputs(RANGE_FINDER_GROUP_INDEX, rInputs.ToArray());
+                car.brain.AddSample(inputs);
 
                 car.brain.PropagateSignal();
 
-                double output = car.brain.GetOutputValue(0, 0);
-                Console.WriteLine(Utils.OUTPUT_VERBOSE, output);
+                car.brain.AddOutputNoise();
 
                 //If the left or right arrow key is down, use user control.
                 if (car.context.GetLeftKeyDown())
-                    car.angle += ROTATE_SPEED;
+                    car.brain.SetOutput(0, 0, Car.MAX_ROTATE);
                 else if (car.context.GetRightKeyDown())
-                    car.angle -= ROTATE_SPEED;
-                else
-                    car.angle += (output * ROTATE_RANGE) - ROTATE_SPEED;
+                    car.brain.SetOutput(0, 0, Car.MIN_ROTATE);
+
+                double output = car.brain.GetOutputValue(0, 0);
+
+                car.angle += (output * ROTATE_RANGE) - ROTATE_SPEED;
             }
         }
     }

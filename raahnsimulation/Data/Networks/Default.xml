@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <NeuralNetwork>
 	<ControlScheme>RangeFinderControl</ControlScheme>
-	<WeightCap>100</WeightCap>
-	
+	<WeightCap>10</WeightCap>
+	<HistoryBufferSize>1</HistoryBufferSize>
+	<NoiseMagnitude>0.2</NoiseMagnitude>
+	<NoiseLowerBound>-0.1</NoiseLowerBound>
+
 	<NeuronGroup Id="0">
 		<Count>11</Count>
 		<Type>Input</Type>
 	</NeuronGroup>
-	
+
 	<NeuronGroup Id="1">
 		<Count>1</Count>
 		<Type>Output</Type>
 	</NeuronGroup>
-	
+
 	<ConnectionGroup UseBias="false">
 		<InputGroup>0</InputGroup>
 		<OutputGroup>1</OutputGroup>
-		<LearningRate>0.1</LearningRate>
-		<TrainingMethod>HebbianTrain</TrainingMethod>
+		<LearningRate>5.0</LearningRate>
+		<TrainingMethod>Hebbian</TrainingMethod>
 		<ModulationScheme>WallAvoidance</ModulationScheme>
 	</ConnectionGroup>
-	
-	<Parameter>500</Parameter>
+
+	<Parameter>700</Parameter>
 </NeuralNetwork>

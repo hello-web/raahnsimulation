@@ -5,13 +5,8 @@ namespace RaahnSimulation
 {
     public class MapState : State
     {
-        private const int NO_PADDING = 0;
         //Alignment for title text for the controls.
         private const float CONTROL_TITLE_X = 0.01f;
-        private const double SAVE_BUTTON_WIDTH = 800.0;
-        private const double SAVE_BUTTON_HEIGHT = 150.0;
-        private const double SAVE_BUTTON_X = 2500.0;
-        private const double SAVE_BUTTON_Y = 50.0;
         private const string CONTROL_TITLE_SIZE = "18";
 
         private static MapState mapState = new MapState();
@@ -67,8 +62,12 @@ namespace RaahnSimulation
             menuBar.Append(fileOption);
             menuBar.Append(helpOption);
 
+            Gtk.Frame mapFrame = new Gtk.Frame(Utils.MAP_FRAME);
+
             //Must be instantiated and added to the window before entites.
             mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
+
+            mapFrame.Add(mainGLWidget);
 
             Gtk.VBox controls = new Gtk.VBox();
 
@@ -88,15 +87,15 @@ namespace RaahnSimulation
             pointButton.Clicked += delegate { PointButtonOnClick(); };
             pointButton.TooltipText = Utils.TOOLTIP_POINT;
 
-            itemPanel.PackStart(wallButton, false, false, NO_PADDING);
-            itemPanel.PackStart(pointButton, false, false, NO_PADDING);
+            itemPanel.PackStart(wallButton, false, false, Utils.NO_PADDING);
+            itemPanel.PackStart(pointButton, false, false, Utils.NO_PADDING);
 
-            controls.PackStart(controlsTitle, false, false, NO_PADDING);
-            controls.PackStart(itemPanel, false, false, NO_PADDING);
+            controls.PackStart(controlsTitle, false, false, Utils.NO_PADDING);
+            controls.PackStart(itemPanel, false, false, Utils.NO_PADDING);
 
-            mcVbox.PackStart(menuBar, false, true, NO_PADDING);
-            mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
-            mcVbox.PackStart(controls, false, false, NO_PADDING);
+            mcVbox.PackStart(menuBar, false, true, Utils.NO_PADDING);
+            mcVbox.PackStart(mapFrame, true, true, Utils.NO_PADDING);
+            mcVbox.PackStart(controls, false, false, Utils.NO_PADDING);
 
             mainWindow.Add(mainContainer);
 

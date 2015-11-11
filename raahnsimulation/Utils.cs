@@ -8,8 +8,8 @@ using Raahn;
 
 namespace RaahnSimulation
 {
-	public class Utils
-	{
+    public class Utils
+    {
         public class Vector2
         {
             public double x, y;
@@ -331,10 +331,11 @@ namespace RaahnSimulation
 
         public const int TexturedVertexSize = sizeof(float) * 4;
         public const int VertexSize = sizeof(float) * 2;
-		public const int EXIT_S = 0;
-		public const int EXIT_F = 1;
+        public const int EXIT_S = 0;
+        public const int EXIT_F = 1;
         public const int GTK_BUTTON_LEFT = 1;
         public const int GTK_BUTTON_RIGHT = 3;
+        public const int NO_PADDING = 0;
         public const uint CHARACTER_TEX_COLUMN_COUNT = 11;
         public const uint CHARACTER_TEX_ROW_COUNT = 9;
 
@@ -342,30 +343,33 @@ namespace RaahnSimulation
         public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
         public const double INVALID_ACTIVATION = -1.0;
         public const double MIN_GL_VERSION = 1.5;
-		public const double DEFAULT_SCREEN_WIDTH_PERCENTAGE = 0.6;
-        public const double DEFAULT_SCREEN_HEIGHT_PERCENTAGE = 0.75;
+        public const double DEFAULT_SCREEN_WIDTH_PERCENTAGE = 0.6;
+        public const double DEFAULT_SCREEN_HEIGHT_PERCENTAGE = 0.7;
         public const double MENU_SCREEN_WIDTH_PERCENTAGE = 0.4;
         public const double MENU_SCREEN_HEIGHT_PERCENTAGE = 0.2;
         public const double VISUALIZER_SCREEN_WIDTH_PERCENTAGE = 0.4;
         public const double VISUALIZER_SCREEN_HEIGHT_PERCENTAGE = 0.5;
-		public const double DISCARD_Z_POS = 0.0;
-		public const double DISCARD_Z_SCALE = 1.0;
-		public const double DEG_TO_RAD = 3.1415926535 / 180.0;
+        public const double DISCARD_Z_POS = 0.0;
+        public const double DISCARD_Z_SCALE = 1.0;
+        public const double DEG_TO_RAD = 3.1415926535 / 180.0;
         public const double TEXTURE_CHAR_WIDTH = 1.0 / CHARACTER_TEX_COLUMN_COUNT;
         public const double TEXTURE_CHAR_HEIGHT = 1.0 / CHARACTER_TEX_ROW_COUNT;
         //Chosen as it works for slope calculations for line segments.
         public const double EPSILON = 0.00000002;
 
-		public const char FILE_COMMENT = '#';
-		public const char FILE_VALUE_SEPERATOR = ' ';
+        public const char FILE_COMMENT = '#';
+        public const char FILE_VALUE_SEPERATOR = ' ';
         public const string NULL_ELEMENT = "";
         public const string OUTPUT_VERBOSE = "Ouput 0: {0:0.000000}";
-		public const string WINDOW_TITLE = "RAAHN Simulation";
+        public const string WINDOW_TITLE = "RAAHN Simulation";
         public const string WINDOW_VISUALIZER_TITLE = "Network Visualizer";
-		public const string START_SIM = "Start RAAHN simulation";
-		public const string START_MAP = "Create a new map";
+        public const string START_SIM = "Start RAAHN simulation";
+        public const string START_MAP = "Create a new map";
         public const string PEFORMANCE = "Peformance";
         public const string TICKS_ELAPSED = "Ticks Elapsed";
+        public const string DELAY_DESCRIPTION = "Delay (Milli)";
+        public const string SIMULATION_FRAME = "Simulation";
+        public const string MAP_FRAME = "Map";
         public const string MAP_CONTROLS_TITLE = "Items";
         public const string MENU_FILE = "File";
         public const string MENU_SAVE = "Save";
@@ -373,7 +377,8 @@ namespace RaahnSimulation
         public const string MENU_VISUALIZER = "Network Visualizer";
         public const string MENU_HELP = "Help";
         public const string MENU_ABOUT = "About";
-        public const string DELAY_DESCRIPTION = "Delay (Milli)";
+        public const string MODULATION_DESCRIPTION = "Index#, Modulation:";
+        public const string MODULATION_FRAME = "Modulation";
         public const string HEBBIAN_TRAIN = "Hebbian";
         public const string AUTOENCODER_TRAIN = "Autoencoder";
         public const string MAP_FOLDER = "Data/Maps/";
@@ -382,9 +387,9 @@ namespace RaahnSimulation
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-		public const string VERSION_STRING = "Version 3.5";
+        public const string VERSION_STRING = "Version 20151110";
         //Log strings.
-        public const string LOG_SCORE_FILE = "scores.txt";
+        public const string LOG_SCORE_FILE = "Scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";
         //Dialog strings.
         public const string SAVE_FILE = "Choose a file name and location.";
@@ -398,11 +403,13 @@ namespace RaahnSimulation
         //File extensions.
         public const string MAP_FILE_EXTENSION = ".xml";
         //Verbose strings.
+        public const string VERBOSE_SIM_START = "RAAHNSimulation " + VERSION_STRING + "\n" +
+            "Simulation started.";
         public const string VERBOSE_GL_VERSION = "GL Version ";
         public const string VERBOSE_HELP = 
-        "--headless\t\tRun the simulation in headless mode. An experiment file must be specified.\n" +
-        "--experiment\t\t[experimentfile.xml] Uses experimentfile.xml for headless mode runs.\n" +
-        "--help\t\t\tDisplays this help message.";
+            "--headless\t\tRun the simulation in headless mode. An experiment file must be specified.\n" +
+                "--experiment\t\t[experimentfile.xml] Uses experimentfile.xml for headless mode runs.\n" +
+                "--help\t\t\tDisplays this help message.";
         //Error strings.
         public const string TEXTURE_LOAD_FAILED = "Failed to load textures.";
         public const string GL_VERSION_UNSUPPORTED = "GL 1.5 not supported.";
@@ -438,10 +445,10 @@ namespace RaahnSimulation
             new Option(0, "--help")
         };
 
-		public static double DegToRad(double deg)
-		{
-			return deg * DEG_TO_RAD;
-		}
+        public static double DegToRad(double deg)
+        {
+            return deg * DEG_TO_RAD;
+        }
 
         public static double RadToDeg(double deg)
         {
@@ -453,24 +460,24 @@ namespace RaahnSimulation
             return Math.Sqrt(Math.Pow(point1.y - point0.y, 2) + Math.Pow(point1.x - point0.x, 2));
         }
 
-        public static NeuronGroup.Type GetGroupTypeFromString(string type)
+        public static NeuralNetwork.NeuronGroup.Type GetGroupTypeFromString(string type)
         {
             for (int i = 0; i < NEURON_GROUP_TYPES.Length; i++)
             {
                 if (type.Equals(NEURON_GROUP_TYPES[i]))
-                    return (NeuronGroup.Type)i;
+                    return (NeuralNetwork.NeuronGroup.Type)i;
             }
 
-            return NeuronGroup.Type.NONE;
+            return NeuralNetwork.NeuronGroup.Type.NONE;
         }
 
-        public static ConnectionGroup.TrainFunctionType GetMethodFromString(string method)
+        public static NeuralNetwork.ConnectionGroup.TrainFunctionType GetMethodFromString(string method)
         {
             if (method.Equals(AUTOENCODER_TRAIN))
-                return TrainingMethod.AutoencoderTrain;
+                return NeuralNetwork.TrainingMethod.AutoencoderTrain;
             //If hebbian or invalid, use hebbian.
             else
-                return TrainingMethod.HebbianTrain;
+                return NeuralNetwork.TrainingMethod.HebbianTrain;
         }
     }
 }

@@ -26,8 +26,6 @@ Scroll - Zoom in and out.
 
 Simulation state
 
-Up - Move the car foward in the direction of its velocity
-Down - Move the car backward in the direction of its velocity.
 Left - Rotate the car left.
 Right - Rotate the car right.
 

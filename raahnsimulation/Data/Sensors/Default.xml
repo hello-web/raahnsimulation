@@ -2,9 +2,9 @@
 <SensorConfig>
 	<RangeFinderGroup>
 		<Count>11</Count>
-		<Length>440</Length>
-		<AngleOffset>-75</AngleOffset>
-		<AngleBetween>15</AngleBetween>
+		<Length>350</Length>
+		<AngleOffset>-90</AngleOffset>
+		<AngleBetween>18</AngleBetween>
 		<DetectEntity>Wall</DetectEntity>
 	</RangeFinderGroup>
 </SensorConfig>

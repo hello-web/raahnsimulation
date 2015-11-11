@@ -15,7 +15,7 @@ namespace RaahnSimulation
             public int id;
             public uint neuronCount;
             public double y;
-            public NeuronGroup.Type type;
+            public NeuralNetwork.NeuronGroup.Type type;
             //Neuron values.
             public List<double> values;
             public List<double> xValues;
@@ -43,7 +43,11 @@ namespace RaahnSimulation
 
         private delegate void DrawFunction();
 
-        private const int INPUT_INDEX = (int)NeuronGroup.Type.INPUT;
+        private const int INPUT_INDEX = (int)NeuralNetwork.NeuronGroup.Type.INPUT;
+        private const int MODULATION_ITEM_MIN = 0;
+        private const int MODULATION_ITEM_STEP = 1;
+        private const int MODULATION_FRAME_PADDING = 5;
+        private const int MODULATION_PADDING = 10;
         private const float MAX_NEURON_SIZE = 25.0f;
         private const float MAX_CONNECTION_WIDTH = 10.0f;
         private const float ARROW_WIDTH = 5.0f;
@@ -63,6 +67,7 @@ namespace RaahnSimulation
         private int glWidgetHeight;
         private uint visualizerWidth;
         private uint visualizerHeight;
+        private uint modSigCount;
         private double weightCap;
         private double maxNeuronValue;
         private double activationUpperBound;
@@ -72,6 +77,9 @@ namespace RaahnSimulation
         private float[] lineVertices = { 0.0f, 0.0f, 0.0f, 0.0f };
         private Gtk.Window visualizerWindow;
         private GLWidget visualizerGLWidget;
+        private Gtk.Label modulationDesc;
+        private Gtk.Label modulationDisplay;
+        private Gtk.SpinButton modulationItem;
         private NeuralNetwork network;
         private Mesh point;
         private Mesh line;
@@ -89,6 +97,8 @@ namespace RaahnSimulation
             //Default to sigmoid bounds.
             activationUpperBound = 1.0;
             activationLowerBound = 0.0;
+
+            modSigCount = 0;
 
             visualizerWindow = null;
             network = null;
@@ -136,9 +146,36 @@ namespace RaahnSimulation
             visualizerWindow.ConfigureEvent += OnConfigure;
             visualizerWindow.DeleteEvent += Clean;
 
+            Gtk.VBox mainContainer = new Gtk.VBox();
+
             visualizerGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
 
-            visualizerWindow.Add(visualizerGLWidget);
+            Gtk.Frame modulationControls = new Gtk.Frame(Utils.MODULATION_FRAME);
+
+            Gtk.HBox modulationHBox = new Gtk.HBox();
+
+            modulationControls.Add(modulationHBox);
+
+            //Get the max value for modulationItem.
+            modSigCount = ModulationSignal.GetSignalCount();
+            uint modItemMax = 0;
+
+            //If there is at least one modulation signal, get the last index.
+            if (modSigCount > 0)
+                modItemMax = modSigCount - 1;
+
+            modulationDesc = new Gtk.Label(Utils.MODULATION_DESCRIPTION);
+            modulationItem = new Gtk.SpinButton(MODULATION_ITEM_MIN, modItemMax, MODULATION_ITEM_STEP);
+            modulationDisplay = new Gtk.Label();
+
+            modulationHBox.PackStart(modulationItem, false, false, Utils.NO_PADDING);
+            modulationHBox.PackStart(modulationDesc, false, false, Utils.NO_PADDING);
+            modulationHBox.PackStart(modulationDisplay, false, false, MODULATION_PADDING);
+
+            mainContainer.PackStart(visualizerGLWidget, true, true, Utils.NO_PADDING);
+            mainContainer.PackStart(modulationControls, false, false, MODULATION_FRAME_PADDING);
+
+            visualizerWindow.Add(mainContainer);
 
             visualizerWindow.ShowAll();
         }
@@ -189,8 +226,8 @@ namespace RaahnSimulation
 
             for (int i = 0; i < groupIds[INPUT_INDEX].Count; i++)
             {
-                NeuronGroup.Identifier ident;
-                ident.type = NeuronGroup.Type.INPUT;
+                NeuralNetwork.NeuronGroup.Identifier ident;
+                ident.type = NeuralNetwork.NeuronGroup.Type.INPUT;
                 ident.index = groupIds[INPUT_INDEX][i];
 
                 NeuronGroupDescription nGroup = new NeuronGroupDescription();
@@ -211,14 +248,14 @@ namespace RaahnSimulation
                 for (int y = 0; y < neuronLayers[x].Count; y++)
                 {
                     //Output layers do not have any outgoing connections.
-                    if (neuronLayers[x][y].type == NeuronGroup.Type.OUTPUT)
+                    if (neuronLayers[x][y].type == NeuralNetwork.NeuronGroup.Type.OUTPUT)
                         continue;
 
-                    NeuronGroup.Identifier groupFrom;
+                    NeuralNetwork.NeuronGroup.Identifier groupFrom;
                     groupFrom.type = neuronLayers[x][y].type;
                     groupFrom.index = neuronLayers[x][y].id;
                     
-                    List<NeuronGroup.Identifier> groupsConnected = network.GetGroupsConnected(groupFrom);
+                    List<NeuralNetwork.NeuronGroup.Identifier> groupsConnected = network.GetGroupsConnected(groupFrom);
 
                     for (int z = 0; z < groupsConnected.Count; z++)
                     {
@@ -252,11 +289,11 @@ namespace RaahnSimulation
             {
                 for (int y = 0; y < neuronLayers[x].Count; y++)
                 {
-                    NeuronGroup.Identifier groupFrom;
+                    NeuralNetwork.NeuronGroup.Identifier groupFrom;
                     groupFrom.type = neuronLayers[x][y].type;
                     groupFrom.index = neuronLayers[x][y].id;
 
-                    List<NeuronGroup.Identifier> groupsConnected = network.GetGroupsConnected(groupFrom);
+                    List<NeuralNetwork.NeuronGroup.Identifier> groupsConnected = network.GetGroupsConnected(groupFrom);
 
                     for (int a = 0; a < neuronLayers.Count; a++)
                     {
@@ -266,7 +303,7 @@ namespace RaahnSimulation
                             if (a == x && b == y)
                                 continue;
 
-                            NeuronGroup.Identifier toGroup;
+                            NeuralNetwork.NeuronGroup.Identifier toGroup;
                             toGroup.type = neuronLayers[a][b].type;
                             toGroup.index = neuronLayers[a][b].id;
 
@@ -328,6 +365,9 @@ namespace RaahnSimulation
 
         private void Update()
         {
+            if (modSigCount > 0)
+                modulationDisplay.Text = Raahn.ModulationSignal.GetSignal((int)modulationItem.Value).ToString();
+
             if (network == null)
                 return;
 
@@ -335,7 +375,7 @@ namespace RaahnSimulation
             {
                 for (int y = 0; y < neuronLayers[x].Count; y++)
                 {
-                    NeuronGroup.Identifier fromGroup;
+                    NeuralNetwork.NeuronGroup.Identifier fromGroup;
                     fromGroup.type = neuronLayers[x][y].type;
                     fromGroup.index = neuronLayers[x][y].id;
 
@@ -346,7 +386,7 @@ namespace RaahnSimulation
 
                     for (int a = 0; a < neuronLayers[x][y].connectionsGroups.Count; a++)
                     {
-                        NeuronGroup.Identifier toGroup;
+                        NeuralNetwork.NeuronGroup.Identifier toGroup;
                         toGroup.type = neuronLayers[x][y].connectionsGroups[a].toGroup.type;
                         toGroup.index = neuronLayers[x][y].connectionsGroups[a].toGroup.id;
 
@@ -649,7 +689,7 @@ namespace RaahnSimulation
         }
 
         //Used to prevent the same group from being added to a layer.
-        private bool LayerContains(NeuronGroup.Identifier ident, List<NeuronGroupDescription> layer)
+        private bool LayerContains(NeuralNetwork.NeuronGroup.Identifier ident, List<NeuronGroupDescription> layer)
         {
             for (int i = 0; i < layer.Count; i++)
             {
@@ -661,7 +701,7 @@ namespace RaahnSimulation
         }
 
         //Used to reposition a group into a new layer.
-        private NeuronGroupDescription RemoveRepeat(NeuronGroup.Identifier ident, List<List<NeuronGroupDescription>> layers)
+        private NeuronGroupDescription RemoveRepeat(NeuralNetwork.NeuronGroup.Identifier ident, List<List<NeuronGroupDescription>> layers)
         {
             for (int x = 0; x < layers.Count; x++)
             {

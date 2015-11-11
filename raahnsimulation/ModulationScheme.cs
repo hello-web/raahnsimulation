@@ -73,13 +73,10 @@ namespace RaahnSimulation
 
             public static void WallAvoidance(Car car, List<Entity> entitiesInBounds, List<uint> modSigs)
             {
-                double angle = car.GetAngle();
-                Utils.Vector2 center = car.GetCenter();
+                double xViewDist = car.center.x + Math.Cos(Utils.DegToRad(car.angle)) * viewDistance;
+                double yViewDist = car.center.y + Math.Sin(Utils.DegToRad(car.angle)) * viewDistance;
 
-                double xViewDist = center.x + Math.Cos(Utils.DegToRad(angle)) * viewDistance;
-                double yViewDist = center.y + Math.Sin(Utils.DegToRad(angle)) * viewDistance;
-
-                Utils.Point2 original = new Utils.Point2(center.x, center.y);
+                Utils.Point2 original = new Utils.Point2(car.center.x, car.center.y);
                 Utils.Point2 viewEndPoint = new Utils.Point2(xViewDist, yViewDist);
 
                 Utils.LineSegment viewLine = new Utils.LineSegment();
@@ -122,7 +119,7 @@ namespace RaahnSimulation
                     return;
                 }
 
-                Utils.Vector2 viewVector = new Utils.Vector2(viewEndPoint.x - center.x, viewEndPoint.y - center.y);
+                Utils.Vector2 viewVector = new Utils.Vector2(viewEndPoint.x - car.center.x, viewEndPoint.y - car.center.y);
                 Utils.Vector2 lineVector = new Utils.Vector2(nearestWall.GetRelativeX(), nearestWall.GetRelativeY());
 
                 double dotProduct = viewVector.DotProduct(lineVector);
@@ -140,19 +137,12 @@ namespace RaahnSimulation
                 double modulation = MODULATION_STENGTH;
 
                 if (angleBetween > PERPENDICULAR)
-                {
                     modulation *= delta / Car.ROTATE_SPEED;
-
-                    for (int i = 0; i < modSigs.Count; i++)
-                        ModulationSignal.SetSignal(modSigs[i], modulation);
-                }
                 else
-                {
                     modulation *= -delta / Car.ROTATE_SPEED;
 
-                    for (int i = 0; i < modSigs.Count; i++)
-                        ModulationSignal.SetSignal(modSigs[i], modulation);
-                }
+                for (int i = 0; i < modSigs.Count; i++)
+                    ModulationSignal.SetSignal(modSigs[i], modulation);
 
                 lastAngleBetween = angleBetween;
             }

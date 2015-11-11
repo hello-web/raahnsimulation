@@ -29,6 +29,8 @@ namespace RaahnSimulation
         private const double ROTATE_SPEED = 2.0;
         private const double SPEED_X = 15.0;
         private const double SPEED_Y = 12.0;
+        private const double MAX_ROTATE = 1.0;
+        private const double MIN_ROTATE = 0.0;
         //Between 0 and twice ROTATE_SPEED
         private const double ROTATE_RANGE = 2.0 * ROTATE_SPEED;
 
@@ -38,6 +40,7 @@ namespace RaahnSimulation
         private uint pieSliceSensorCount;
         private QuadTree quadTree;
         private ControlScheme.SchemeFunction controlScheme;
+        //Each list corresponds to a modulation scheme.
         private List<List<uint>> modulationSignals;
         private List<List<int>> orderdGroupIds;
         private List<ModulationScheme.SchemeFunction> modulationSchemes;
@@ -86,6 +89,8 @@ namespace RaahnSimulation
             if (controlScheme != null)
                 controlScheme(this);
 
+            base.Update();
+
             double worldX = GetWorldX();
             double worldY = GetWorldY();
 
@@ -131,8 +136,6 @@ namespace RaahnSimulation
                 modulationSchemes[i](this, entitiesInBounds, modulationSignals[i]);
 
             brain.Train();
-
-            base.Update();
 
             //Update sensors.
             for (int i = 0; i < rangeFinderGroups.Count; i++)
@@ -190,8 +193,7 @@ namespace RaahnSimulation
 
         public bool LoadConfig(string sensorFile, string networkFile)
         {
-            //Even if the XML is invalid, the brain must be initiaized.
-            brain = new NeuralNetwork();
+            bool loadSucceeded = true;
 
             //If a configuration was already loaded delete the
             //VBOs and IBOs used as new ones will be allocated.
@@ -205,18 +207,18 @@ namespace RaahnSimulation
             if (!string.IsNullOrEmpty(sensorFile))
             {
                 if (!InitSensors(sensorFile))
-                    return false;
+                    loadSucceeded = false;
             }
 
             if (!string.IsNullOrEmpty(networkFile))
             {
                 if (!InitBrain(networkFile))
-                    return false;
+                    loadSucceeded = false;
             }
 
             configLoaded = true;
 
-            return true;
+            return loadSucceeded;
         }
 
         public uint GetRangeFinderCount()
@@ -335,6 +337,10 @@ namespace RaahnSimulation
             if (!File.Exists(networkFile))
             {
                 Console.WriteLine(Utils.FILE_NOT_FOUND, networkFile);
+
+                //brain must be instantiated before leaving.
+                brain = new NeuralNetwork();
+
                 return false;
             }
 
@@ -352,6 +358,8 @@ namespace RaahnSimulation
                 Console.WriteLine(Utils.NETWORK_LOAD_ERROR);
                 Console.WriteLine(e.Message);
 
+                brain = new NeuralNetwork();
+
                 return false;
             }
             finally
@@ -359,24 +367,31 @@ namespace RaahnSimulation
                 configReader.Close();
             }
 
+            if (networkConfig.historyBufferSize > 0)
+                brain = new NeuralNetwork(networkConfig.historyBufferSize);
+            else
+                brain = new NeuralNetwork();
+
+            brain.noiseMagnitude = networkConfig.noiseMagnitude;
+            brain.noiseLowerBound = networkConfig.noiseLowerBound;
+
             //No neuron groups, connection groups, or control scheme.
-            //return true to continue without them.
             if (networkConfig.neuronGroups == null)
             {
                 Console.WriteLine(Utils.NO_NEURON_GROUPS);
-                return true;
+                return false;
             }
 
             if (networkConfig.connectionGroups == null)
             {
                 Console.WriteLine(Utils.NO_CONNECTION_GROUPS);
-                return true;
+                return false;
             }
 
             if (networkConfig.controlScheme == null)
             {
                 Console.WriteLine(Utils.NO_CONTROL_SCHEME);
-                return true;
+                return false;
             }
 
             if (networkConfig.weightCap != 0.0)
@@ -387,7 +402,7 @@ namespace RaahnSimulation
             if (cDescriptor == ControlScheme.Scheme.NONE)
             {
                 Console.WriteLine(Utils.NO_CONTROL_SCHEME);
-                return true;
+                return false;
             }
 
             controlScheme = ControlScheme.GetSchemeFunction(cDescriptor);
@@ -407,9 +422,9 @@ namespace RaahnSimulation
             {
                 NeuronGroupConfig nGroupConfig = neuronGroups[(int)i];
 
-                NeuronGroup.Type type = Utils.GetGroupTypeFromString(nGroupConfig.type);
+                NeuralNetwork.NeuronGroup.Type type = Utils.GetGroupTypeFromString(nGroupConfig.type);
 
-                if (type == NeuronGroup.Type.NONE)
+                if (type == NeuralNetwork.NeuronGroup.Type.NONE)
                     neuronGroups.RemoveAt(i);
                 else
                 {
@@ -432,17 +447,17 @@ namespace RaahnSimulation
                 if (inputGroupIndex < networkConfig.neuronGroups.Length
                     && outputGroupIndex < networkConfig.neuronGroups.Length)
                 {
-                    NeuronGroup.Identifier inputGroup;
+                    NeuralNetwork.NeuronGroup.Identifier inputGroup;
                     inputGroup.index = neuronGroupIds[(int)inputGroupIndex];
                     string inputTypeString = neuronGroups[(int)inputGroupIndex].type;
                     inputGroup.type = Utils.GetGroupTypeFromString(inputTypeString);
 
-                    NeuronGroup.Identifier outputGroup;
+                    NeuralNetwork.NeuronGroup.Identifier outputGroup;
                     outputGroup.index = neuronGroupIds[(int)outputGroupIndex];
                     string outputTypeString = neuronGroups[(int)outputGroupIndex].type;
                     outputGroup.type = Utils.GetGroupTypeFromString(outputTypeString);
 
-                    ConnectionGroup.TrainFunctionType trainMethod = Utils.GetMethodFromString(cGroupConfig.trainingMethod);
+                    NeuralNetwork.ConnectionGroup.TrainFunctionType trainMethod = Utils.GetMethodFromString(cGroupConfig.trainingMethod);
 
                     //Check if a modulation scheme is specified.
                     ModulationScheme.Scheme mDescriptor;
@@ -455,8 +470,7 @@ namespace RaahnSimulation
                     //If a scheme is specified, add a signal for it.
                     if (mDescriptor != ModulationScheme.Scheme.NONE)
                     {
-                        uint modSig = 0;
-                        modSig = ModulationSignal.AddSignal();
+                        uint modSig = ModulationSignal.AddSignal();
 
                         ModulationScheme.SchemeFunction mFunction = ModulationScheme.GetSchemeFunction(mDescriptor);
 
@@ -488,11 +502,11 @@ namespace RaahnSimulation
                         }
 
                         brain.ConnectGroups(inputGroup, outputGroup, trainMethod, (int)modSig, 
-                                            cGroupConfig.learningRate, cGroupConfig.useBias);
+                                            cGroupConfig.samplesPerTick, cGroupConfig.learningRate, cGroupConfig.useBias);
                     }
                     else
                         brain.ConnectGroups(inputGroup, outputGroup, trainMethod, ModulationSignal.INVALID_INDEX, 
-                                            cGroupConfig.learningRate, cGroupConfig.useBias);
+                                            cGroupConfig.samplesPerTick, cGroupConfig.learningRate, cGroupConfig.useBias);
                 }
             }
 

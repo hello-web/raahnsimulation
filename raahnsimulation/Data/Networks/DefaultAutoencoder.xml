@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <NeuralNetwork>
 	<ControlScheme>RangeFinderControl</ControlScheme>
-	<WeightCap>100</WeightCap>
+	<HistoryBufferSize>350</HistoryBufferSize>
+	<WeightCap>10</WeightCap>
+	<NoiseMagnitude>0.2</NoiseMagnitude>
+	<NoiseLowerBound>-0.1</NoiseLowerBound>
 	
 	<NeuronGroup Id="0">
 		<Count>11</Count>
@@ -9,7 +12,7 @@
 	</NeuronGroup>
 	
 	<NeuronGroup Id="1">
-		<Count>5</Count>
+		<Count>9</Count>
 		<Type>Hidden</Type>
 	</NeuronGroup>
 	
@@ -18,20 +21,21 @@
 		<Type>Output</Type>
 	</NeuronGroup>
 	
-	<ConnectionGroup UseBias="false">
+	<ConnectionGroup UseBias="true">
 		<InputGroup>0</InputGroup>
 		<OutputGroup>1</OutputGroup>
+		<SamplesPerTick>20</SamplesPerTick>
 		<LearningRate>0.1</LearningRate>
-		<TrainingMethod>AutoencoderTrain</TrainingMethod>
+		<TrainingMethod>Autoencoder</TrainingMethod>
 	</ConnectionGroup>
 	
 	<ConnectionGroup UseBias="false">
 		<InputGroup>1</InputGroup>
 		<OutputGroup>2</OutputGroup>
-		<LearningRate>0.1</LearningRate>
-		<TrainingMethod>HebbianTrain</TrainingMethod>
+		<LearningRate>5.0</LearningRate>
+		<TrainingMethod>Hebbian</TrainingMethod>
 		<ModulationScheme>WallAvoidance</ModulationScheme>
 	</ConnectionGroup>
 	
-	<Parameter>500</Parameter>
+	<Parameter>700</Parameter>
 </NeuralNetwork>

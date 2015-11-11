@@ -11,7 +11,6 @@ namespace RaahnSimulation
     public class SimState : State
     {
         public const double DEFAULT_UPDATE_DELAY = 10.0;
-        private const int NO_PADDING = 0;
         private const int VERTICAL_PADDING = 20;
         private const int HORIZONTAL_PADDING_SHORT = 40;
         private const int HORIZONTAL_PADDING_LONG = 60;
@@ -27,6 +26,7 @@ namespace RaahnSimulation
         private const double HIGHLIGHT_T = 1.0;
         private const string DISPLAY_INITIAL = "0";
         private const string DISPLAY_FONT_SIZE = "32";
+        private const string PERFORMANCE_FORMAT = "{0:0.00}";
 
         private static SimState simState = new SimState();
 
@@ -129,8 +129,12 @@ namespace RaahnSimulation
                 menuBar.Append(viewOption);
                 menuBar.Append(helpOption);
 
+                Gtk.Frame simulationFrame = new Gtk.Frame(Utils.SIMULATION_FRAME);
+
                 //Must be instantiated and added to the window before entites.
                 mainGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
+
+                simulationFrame.Add(mainGLWidget);
 
                 //Controls for the simulation.
                 Gtk.HBox controlBox = new Gtk.HBox();
@@ -144,7 +148,7 @@ namespace RaahnSimulation
                 delayChooser.Value = updateDelay;
                 delayChooser.ValueChanged += OnDelayChooserChanged;
 
-                speedControls.PackStart(delayLabel, false, false, NO_PADDING);
+                speedControls.PackStart(delayLabel, false, false, Utils.NO_PADDING);
                 speedControls.PackStart(delayChooser, false, false, VERTICAL_PADDING);
 
                 Pango.FontDescription displayFont = Pango.FontDescription.FromString(DISPLAY_FONT_SIZE);
@@ -156,7 +160,7 @@ namespace RaahnSimulation
                 performanceDescription.ModifyFont(displayFont);
 
                 controlBox.PackStart(speedControls, false, false, HORIZONTAL_PADDING_LONG);
-                controlBox.PackStart(performanceDescription, false, false, NO_PADDING);
+                controlBox.PackStart(performanceDescription, false, false, Utils.NO_PADDING);
                 controlBox.PackEnd(tickCounterDescription, false, false, HORIZONTAL_PADDING_SHORT);
 
                 //Button panel.
@@ -181,16 +185,16 @@ namespace RaahnSimulation
                 performanceDisplay = new Gtk.Label(DISPLAY_INITIAL);
                 performanceDisplay.ModifyFont(displayFont);
 
-                buttonPanel.PackStart(playButton, false, false, NO_PADDING);
-                buttonPanel.PackStart(pauseButton, false, false, NO_PADDING);
-                buttonPanel.PackStart(restartButton, false, false, NO_PADDING);
+                buttonPanel.PackStart(playButton, false, false, Utils.NO_PADDING);
+                buttonPanel.PackStart(pauseButton, false, false, Utils.NO_PADDING);
+                buttonPanel.PackStart(restartButton, false, false, Utils.NO_PADDING);
                 buttonPanel.PackStart(performanceDisplay, false, false, PERFORMANCE_HORIZONTAL_PADDING);
                 buttonPanel.PackEnd(tickCounter, false, false, HORIZONTAL_PADDING_SHORT);
 
-                mcVbox.PackStart(menuBar, false, true, NO_PADDING);
-                mcVbox.PackStart(mainGLWidget, true, true, NO_PADDING);
-                mcVbox.PackStart(controlBox, false, false, NO_PADDING);
-                mcVbox.PackStart(buttonPanel, false, false, NO_PADDING);
+                mcVbox.PackStart(menuBar, false, true, Utils.NO_PADDING);
+                mcVbox.PackStart(simulationFrame, true, true, Utils.NO_PADDING);
+                mcVbox.PackStart(controlBox, false, false, Utils.NO_PADDING);
+                mcVbox.PackStart(buttonPanel, false, false, Utils.NO_PADDING);
 
                 mainWindow.Add(mainContainer);
 
@@ -365,7 +369,7 @@ namespace RaahnSimulation
                 if (!headless)
                 {
                     tickCounter.Text = ticksElapsed.ToString();
-                    performanceDisplay.Text = string.Format("{0:0.00}", performance.GetScore());
+                    performanceDisplay.Text = string.Format(PERFORMANCE_FORMAT, performance.GetScore());
                 }
             }
 
