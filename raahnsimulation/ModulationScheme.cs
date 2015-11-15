@@ -34,6 +34,7 @@ namespace RaahnSimulation
 
             private static double lastAngleBetween = RESET_MODULATION;
             private static double viewDistance = 0.0;
+            private static Wall lastWallInRange = null;
 
             public static void InterpretParameters(string[] parameters, Scheme scheme)
             {
@@ -112,6 +113,7 @@ namespace RaahnSimulation
                 if (nearestWall == null)
                 {
                     lastAngleBetween = RESET_MODULATION;
+                    lastWallInRange = null;
 
                     for (int i = 0; i < modSigs.Count; i++)
                         ModulationSignal.SetSignal(modSigs[i], 0.0);
@@ -127,9 +129,12 @@ namespace RaahnSimulation
 
                 double angleBetween = Utils.RadToDeg(Math.Acos(dotProduct / magnitudeProduct));
 
-                if (lastAngleBetween == RESET_MODULATION)
+                //If this is the first time the angle between this wall was calculated, don't modulate.
+                //The delta between the angleBetween and lastAngleBetween won't be accurate.
+                if (lastAngleBetween == RESET_MODULATION || lastWallInRange != nearestWall)
                 {
                     lastAngleBetween = angleBetween;
+                    lastWallInRange = nearestWall;
                     return;
                 }
 

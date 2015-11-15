@@ -32,7 +32,7 @@
 	<ConnectionGroup UseBias="false">
 		<InputGroup>1</InputGroup>
 		<OutputGroup>2</OutputGroup>
-		<LearningRate>5.0</LearningRate>
+		<LearningRate>0.1</LearningRate>
 		<TrainingMethod>Hebbian</TrainingMethod>
 		<ModulationScheme>WallAvoidance</ModulationScheme>
 	</ConnectionGroup>

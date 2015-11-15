@@ -387,7 +387,7 @@ namespace RaahnSimulation
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-        public const string VERSION_STRING = "Version 20151110";
+        public const string VERSION_STRING = "Version 20151114";
         //Log strings.
         public const string LOG_SCORE_FILE = "Scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";

@@ -91,8 +91,6 @@ namespace RaahnSimulation
 
                 car.brain.PropagateSignal();
 
-                car.brain.AddOutputNoise();
-
                 double output = car.brain.GetOutputValue(0, 0);
                 Console.WriteLine(Utils.OUTPUT_VERBOSE, output);
 
@@ -121,8 +119,6 @@ namespace RaahnSimulation
                 car.brain.AddSample(inputs);
 
                 car.brain.PropagateSignal();
-
-                car.brain.AddOutputNoise();
 
                 //If the left or right arrow key is down, use user control.
                 if (car.context.GetLeftKeyDown())
