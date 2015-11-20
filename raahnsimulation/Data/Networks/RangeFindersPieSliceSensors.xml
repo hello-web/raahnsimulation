@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <NeuralNetwork>
 	<ControlScheme>SensorControl</ControlScheme>
+	<OutputNoiseMagnitude>0.1</OutputNoiseMagnitude>
+	<WeightNoiseMagnitude>0.1</WeightNoiseMagnitude>
 	
 	<NeuronGroup Id="0">
 		<Count>11</Count>

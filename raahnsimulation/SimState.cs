@@ -16,7 +16,7 @@ namespace RaahnSimulation
         private const int HORIZONTAL_PADDING_LONG = 60;
         private const int PERFORMANCE_HORIZONTAL_PADDING = 95;
         private const double DELAY_CHOOSER_MIN = 0.0;
-        private const double DELAY_CHOOSER_MAX = 100.0;
+        private const double DELAY_CHOOSER_MAX = 1000.0;
         private const double DELAY_CHOOSER_STEP = 1.0;
         private const double CAR_WIDTH = 260.0;
         private const double CAR_HEIGHT = 160.0;
@@ -483,7 +483,7 @@ namespace RaahnSimulation
             //Update the car to its original state.
             raahnCar.UpdateMinimal();
 
-            raahnCar.ResetBrain();
+            raahnCar.Reset();
 
             performance.Reset();
         }

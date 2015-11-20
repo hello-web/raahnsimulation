@@ -16,7 +16,7 @@ namespace RaahnSimulation
 
             private const uint DEFAULT_SCHEME_INDEX = 0;
 
-            public delegate void SchemeFunction(Car car);
+            public delegate bool SchemeFunction(Car car);
 
             public static readonly SchemeFunction[] SCHEMES = 
             {
@@ -66,8 +66,10 @@ namespace RaahnSimulation
             }
 
             //Uses both range finders and pie slice sensors.
-            public static void SensorControl(Car car)
+            public static bool SensorControl(Car car)
             {
+                bool userControl = false;
+
                 //Set the inputs.
                 List<double> inputs = new List<double>((int)(car.rangeFinderCount + car.pieSliceSensorCount));
 
@@ -91,20 +93,29 @@ namespace RaahnSimulation
 
                 car.brain.PropagateSignal();
 
-                double output = car.brain.GetOutputValue(0, 0);
-                Console.WriteLine(Utils.OUTPUT_VERBOSE, output);
-
                 //If the left or right arrow key is down, use user control.
                 if (car.context.GetLeftKeyDown())
-                    car.angle += ROTATE_SPEED;
+                {
+                    car.brain.SetOutput(0, 0, Car.MAX_ROTATE);
+                    userControl = true;
+                }
                 else if (car.context.GetRightKeyDown())
-                    car.angle -= ROTATE_SPEED;
-                else
-                    car.angle += (output * ROTATE_RANGE) - ROTATE_SPEED;
+                {
+                    car.brain.SetOutput(0, 0, Car.MIN_ROTATE);
+                    userControl = true;
+                }
+
+                double output = car.brain.GetOutputValue(0, 0);
+
+                car.angle += (output * ROTATE_RANGE) - ROTATE_SPEED;
+
+                return userControl;
             }
 
-            public static void RangeFinderControl(Car car)
+            public static bool RangeFinderControl(Car car)
             {
+                bool userControl = false;
+
                 //Set the inputs.
                 List<double> inputs = new List<double>((int)car.rangeFinderCount);
 
@@ -122,13 +133,21 @@ namespace RaahnSimulation
 
                 //If the left or right arrow key is down, use user control.
                 if (car.context.GetLeftKeyDown())
+                {
                     car.brain.SetOutput(0, 0, Car.MAX_ROTATE);
+                    userControl = true;
+                }
                 else if (car.context.GetRightKeyDown())
+                {
                     car.brain.SetOutput(0, 0, Car.MIN_ROTATE);
+                    userControl = true;
+                }
 
                 double output = car.brain.GetOutputValue(0, 0);
 
                 car.angle += (output * ROTATE_RANGE) - ROTATE_SPEED;
+
+                return userControl;
             }
         }
     }

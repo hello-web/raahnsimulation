@@ -3,8 +3,8 @@
 	<ControlScheme>RangeFinderControl</ControlScheme>
 	<HistoryBufferSize>350</HistoryBufferSize>
 	<WeightCap>10</WeightCap>
-	<NoiseMagnitude>0.2</NoiseMagnitude>
-	<NoiseLowerBound>-0.1</NoiseLowerBound>
+	<OutputNoiseMagnitude>0.1</OutputNoiseMagnitude>
+	<WeightNoiseMagnitude>0.1</WeightNoiseMagnitude>
 	
 	<NeuronGroup Id="0">
 		<Count>11</Count>
@@ -12,7 +12,7 @@
 	</NeuronGroup>
 	
 	<NeuronGroup Id="1">
-		<Count>9</Count>
+		<Count>7</Count>
 		<Type>Hidden</Type>
 	</NeuronGroup>
 	
@@ -32,7 +32,7 @@
 	<ConnectionGroup UseBias="false">
 		<InputGroup>1</InputGroup>
 		<OutputGroup>2</OutputGroup>
-		<LearningRate>0.1</LearningRate>
+		<LearningRate>1.0</LearningRate>
 		<TrainingMethod>Hebbian</TrainingMethod>
 		<ModulationScheme>WallAvoidance</ModulationScheme>
 	</ConnectionGroup>

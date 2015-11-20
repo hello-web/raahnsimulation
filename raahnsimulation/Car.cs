@@ -86,8 +86,10 @@ namespace RaahnSimulation
 
         public override void Update()
         {
+            bool userControlled = false;
+
             if (controlScheme != null)
-                controlScheme(this);
+                userControlled = controlScheme(this);
 
             base.Update();
 
@@ -133,7 +135,15 @@ namespace RaahnSimulation
             }
 
             for (int i = 0; i < modulationSchemes.Count; i++)
-                modulationSchemes[i](this, entitiesInBounds, modulationSignals[i]);
+            {
+                if (!userControlled)
+                    modulationSchemes[i](this, entitiesInBounds, modulationSignals[i]);
+                else
+                {
+                    for (int j = 0; j < modulationSignals[i].Count; j++)
+                        ModulationSignal.SetSignal(modulationSignals[i][j], ModulationSignal.NO_MODULATION);
+                }
+            }
 
             brain.Train();
 
@@ -185,10 +195,16 @@ namespace RaahnSimulation
             PieSliceSensorGroup.Clean();
         }
 
-        public void ResetBrain()
+        public void Reset()
         {
             if (brain != null)
                 brain.Reset();
+
+            for (int x = 0; x < modulationSignals.Count; x++)
+            {
+                for (int y = 0; y < modulationSignals[x].Count; y++)
+                    ModulationSignal.SetSignal(modulationSignals[x][y], ModulationSignal.BENIGN_MODULATION);
+            }
         }
 
         public bool LoadConfig(string sensorFile, string networkFile)
@@ -372,8 +388,8 @@ namespace RaahnSimulation
             else
                 brain = new NeuralNetwork();
 
-            brain.noiseMagnitude = networkConfig.noiseMagnitude;
-            brain.noiseLowerBound = networkConfig.noiseLowerBound;
+            brain.SetOutputNoiseMagnitude(networkConfig.outputNoiseMagnitude);
+            brain.SetWeightNoiseMagnitude(networkConfig.weightNoiseMagnitude);
 
             //No neuron groups, connection groups, or control scheme.
             if (networkConfig.neuronGroups == null)

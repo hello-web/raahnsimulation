@@ -11,11 +11,11 @@ namespace RaahnSimulation
 		[XmlElement("WeightCap")]
 		public double weightCap;
 
-		[XmlElement("NoiseMagnitude")]
-		public double noiseMagnitude;
+		[XmlElement("OutputNoiseMagnitude")]
+		public double outputNoiseMagnitude;
 
-		[XmlElement("NoiseLowerBound")]
-		public double noiseLowerBound;
+        [XmlElement("WeightNoiseMagnitude")]
+        public double weightNoiseMagnitude;
 
 		[XmlElement("ControlScheme")]
 		public string controlScheme;

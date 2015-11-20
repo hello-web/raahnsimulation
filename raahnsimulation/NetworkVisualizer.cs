@@ -50,17 +50,11 @@ namespace RaahnSimulation
         private const int MODULATION_PADDING = 10;
         private const float MAX_NEURON_SIZE = 25.0f;
         private const float MAX_CONNECTION_WIDTH = 10.0f;
-        private const float ARROW_WIDTH = 5.0f;
-        private const float ARROW_MID_X = 3600.0f;
-        private const float ARROW_MID_Y_1 = 1000.0f;
-        private const float ARROW_MID_Y_2 = 1500.0f;
-        private const float ARROW_LEFT_X = 3500.0f;
-        private const float ARROW_RIGHT_X = 3700.0f;
-        private const float ARROW_LEFT_RIGHT_Y = 1250.0f;
         private const double MIN_CONNECTION_STRENGTH = 0.00001;
         private const double MAX_INPUT_NEURON_VALUE = 1.0;
         private const double MIN_NEURON_VALUE = 0.00001;
         private const double COLOR_THRESHOLD = 0.0;
+        private const string DEFAULT_ERROR = "0.0";
 
         //The widget itself stores its width and height as ints.
         private int glWidgetWidth;
@@ -79,6 +73,8 @@ namespace RaahnSimulation
         private GLWidget visualizerGLWidget;
         private Gtk.Label modulationDesc;
         private Gtk.Label modulationDisplay;
+        private Gtk.Label errorDesc;
+        private Gtk.Label errorDisplay;
         private Gtk.SpinButton modulationItem;
         private NeuralNetwork network;
         private Mesh point;
@@ -150,11 +146,11 @@ namespace RaahnSimulation
 
             visualizerGLWidget = new GLWidget(GraphicsMode.Default, InitGraphics, Draw);
 
-            Gtk.Frame modulationControls = new Gtk.Frame(Utils.MODULATION_FRAME);
+            Gtk.Frame debugInfoFrame = new Gtk.Frame(Utils.DEBUG_FRAME);
+
+            Gtk.VBox debugVBox = new Gtk.VBox();
 
             Gtk.HBox modulationHBox = new Gtk.HBox();
-
-            modulationControls.Add(modulationHBox);
 
             //Get the max value for modulationItem.
             modSigCount = ModulationSignal.GetSignalCount();
@@ -170,10 +166,24 @@ namespace RaahnSimulation
 
             modulationHBox.PackStart(modulationItem, false, false, Utils.NO_PADDING);
             modulationHBox.PackStart(modulationDesc, false, false, Utils.NO_PADDING);
-            modulationHBox.PackStart(modulationDisplay, false, false, MODULATION_PADDING);
+            modulationHBox.PackStart(modulationDisplay, false, false, Utils.NO_PADDING);
+
+            debugVBox.PackStart(modulationHBox, false, false, Utils.NO_PADDING);
+
+            Gtk.HBox errorHBox = new Gtk.HBox();
+
+            errorDesc = new Gtk.Label(Utils.ERROR_DESCRIPTION);
+            errorDisplay = new Gtk.Label(DEFAULT_ERROR);
+
+            errorHBox.PackStart(errorDesc, false, false, Utils.NO_PADDING);
+            errorHBox.PackStart(errorDisplay, false, false, Utils.NO_PADDING);
+
+            debugVBox.PackStart(errorHBox, false, false, Utils.NO_PADDING);
+
+            debugInfoFrame.Add(debugVBox);
 
             mainContainer.PackStart(visualizerGLWidget, true, true, Utils.NO_PADDING);
-            mainContainer.PackStart(modulationControls, false, false, MODULATION_FRAME_PADDING);
+            mainContainer.PackStart(debugInfoFrame, false, false, MODULATION_FRAME_PADDING);
 
             visualizerWindow.Add(mainContainer);
 
@@ -186,7 +196,9 @@ namespace RaahnSimulation
             {
                 if (visualizerGLWidget.Visible)
                 {
+                    UpdateUi();
                     Update();
+
                     visualizerGLWidget.RenderFrame();
                 }
             }
@@ -365,9 +377,6 @@ namespace RaahnSimulation
 
         private void Update()
         {
-            if (modSigCount > 0)
-                modulationDisplay.Text = Raahn.ModulationSignal.GetSignal((int)modulationItem.Value).ToString();
-
             if (network == null)
                 return;
 
@@ -404,6 +413,17 @@ namespace RaahnSimulation
             }
         }
 
+        private void UpdateUi()
+        {
+            if (modSigCount > 0)
+                modulationDisplay.Text = Raahn.ModulationSignal.GetSignal((int)modulationItem.Value).ToString();
+
+            if (network == null)
+                return;
+
+            errorDisplay.Text = network.GetOnlineError().ToString();
+        }
+
         private void Draw()
         {
             GL.Viewport(0, 0, glWidgetWidth, glWidgetHeight);
@@ -423,8 +443,6 @@ namespace RaahnSimulation
             connectionDrawFunction();
 
             DrawNeurons();
-
-            DrawArrow();
         }
 
         private void DrawConnectionsUncapped()
@@ -605,45 +623,6 @@ namespace RaahnSimulation
                     }
                 }
             }
-        }
-
-        private void DrawArrow()
-        {
-            GL.Color4(0.0f, 0.0f, 1.0f, 1.0f);
-
-            line.MakeCurrent();
-
-            GL.LineWidth(ARROW_WIDTH);
-
-            //Middle part.
-            lineVertices[0] = ARROW_MID_X;
-            lineVertices[1] = ARROW_MID_Y_1;
-            lineVertices[2] = ARROW_MID_X;
-            lineVertices[3] = ARROW_MID_Y_2;
-
-            line.Update();
-
-            GL.DrawElements(line.GetRenderMode(), line.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
-
-            //Left part.
-            lineVertices[0] = ARROW_MID_X;
-            lineVertices[1] = ARROW_MID_Y_2;
-            lineVertices[2] = ARROW_LEFT_X;
-            lineVertices[3] = ARROW_LEFT_RIGHT_Y;
-
-            line.Update();
-
-            GL.DrawElements(line.GetRenderMode(), line.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
-
-            //Right part.
-            lineVertices[0] = ARROW_MID_X;
-            lineVertices[1] = ARROW_MID_Y_2;
-            lineVertices[2] = ARROW_RIGHT_X;
-            lineVertices[3] = ARROW_LEFT_RIGHT_Y;
-
-            line.Update();
-
-            GL.DrawElements(line.GetRenderMode(), line.GetIndexCount(), DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         private void InitGraphics()

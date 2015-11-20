@@ -377,8 +377,9 @@ namespace RaahnSimulation
         public const string MENU_VISUALIZER = "Network Visualizer";
         public const string MENU_HELP = "Help";
         public const string MENU_ABOUT = "About";
-        public const string MODULATION_DESCRIPTION = "Index#, Modulation:";
-        public const string MODULATION_FRAME = "Modulation";
+        public const string MODULATION_DESCRIPTION = "Index#, Modulation: ";
+        public const string ERROR_DESCRIPTION = "Autoencoder error: ";
+        public const string DEBUG_FRAME = "Modulation and Error";
         public const string HEBBIAN_TRAIN = "Hebbian";
         public const string AUTOENCODER_TRAIN = "Autoencoder";
         public const string MAP_FOLDER = "Data/Maps/";
@@ -387,7 +388,7 @@ namespace RaahnSimulation
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-        public const string VERSION_STRING = "Version 20151114";
+        public const string VERSION_STRING = "Version 20151120";
         //Log strings.
         public const string LOG_SCORE_FILE = "Scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";
