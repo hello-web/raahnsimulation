@@ -307,6 +307,7 @@ namespace RaahnSimulation
 
                     List<NeuralNetwork.NeuronGroup.Identifier> groupsConnected = network.GetGroupsConnected(groupFrom);
 
+                    //Get the number of weights needed for all the groups connected to this one.
                     for (int a = 0; a < neuronLayers.Count; a++)
                     {
                         for (int b = 0; b < neuronLayers[a].Count; b++)
@@ -471,7 +472,7 @@ namespace RaahnSimulation
 
                                 line.MakeCurrent();
 
-                                int weightIndex = b * (int)neuronLayers[x][y].neuronCount + a;
+                                int weightIndex = a * (int)toGroup.neuronCount + b;
                                 double weight = neuronLayers[x][y].connectionsGroups[z].weights[weightIndex];
 
                                 double weightAbs = Math.Abs(weight);
@@ -526,7 +527,7 @@ namespace RaahnSimulation
 
                                 line.MakeCurrent();
 
-                                int weightIndex = b * (int)neuronLayers[x][y].neuronCount + a;
+                                int weightIndex = a * (int)toGroup.neuronCount + b;
                                 double weight = neuronLayers[x][y].connectionsGroups[z].weights[weightIndex];
 
                                 double weightAbs = Math.Abs(weight);

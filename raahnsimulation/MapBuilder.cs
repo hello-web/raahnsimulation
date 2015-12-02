@@ -11,11 +11,13 @@ namespace RaahnSimulation
         public enum Mode
         {
             WALL = 0,
-            POINT = 1
+            POINT = 1,
+            SELECT = 2
         }
 
-        private const uint UNIQUE_ENTITIES = 1;
-        private const uint WALL_INDEX = 0;
+        private const uint UNIQUE_ENTITIES = 2;
+        private const int WALL_INDEX = 0;
+        private const int POINT_INDEX = 1;
         private const int XML_INDENT_SPACE = 4;
 
 		private const double FLAG_WIDTH = 200.0;
@@ -26,6 +28,10 @@ namespace RaahnSimulation
         private const double SNAP_COLOR_G = 0.0;
         private const double SNAP_COLOR_B = 0.0;
         private const double SNAP_COLOR_A = 1.0;
+        private const double SELECTED_R = 0.0;
+        private const double SELECTED_G = 1.0;
+        private const double SELECTED_B = 0.0;
+        private const double SELECTED_A = 1.0;
 
         private uint layer;
         private bool hasSnappingPoint;
@@ -36,6 +42,7 @@ namespace RaahnSimulation
         private TextureManager texMan;
         //The entity being modified by the user.
         private Entity entityInUse;
+        private Entity entitySelected;
         private WallPool wallPool;
         private PointPool pointPool;
 		private Cursor cursor;
@@ -56,6 +63,7 @@ namespace RaahnSimulation
             cursor = c;
             camera = currentState.GetCamera();
             entityInUse = null;
+            entitySelected = null;
 
             layer = stateLayer;
 
@@ -87,11 +95,18 @@ namespace RaahnSimulation
             entities.Clear();
 	    }
 
+        public void SetMode(Mode mode)
+        {
+            //Do not switch modes while an entity is being added.
+            if (entityInUse == null)
+                itemMode = mode;
+        }
+
         public void UpdateEvent(Event e)
         {
-            //Check if the flag's state should be changed.
             if (e.type == Gdk.EventType.KeyPress)
             {
+                //Check if the flag's state should be changed.
                 if (e.key == Gdk.Key.space)
                 {
                     if (flag.visible)
@@ -102,100 +117,41 @@ namespace RaahnSimulation
                         flag.visible = true;
                     }
                 }
+                else if (e.key == Gdk.Key.Delete)
+                {
+                    //Check if a wall should be deleted
+                    if (entitySelected != null)
+                    {
+                        currentState.RemoveEntity(entitySelected);
+
+                        switch (entitySelected.GetEntityType())
+                        {
+                            case Entity.EntityType.POINT:
+                            {
+                                entities[POINT_INDEX].Remove(entitySelected);
+                                pointPool.Free((Point)entitySelected);
+                                break;
+                            }
+                            case Entity.EntityType.WALL:
+                            {
+                                entities[WALL_INDEX].Remove(entitySelected);
+                                wallPool.Free((Wall)entitySelected);
+                                break;
+                            }
+                        }
+
+                        entitySelected.ResetColor();
+                        entitySelected = null;
+                    }
+                }
             }
             else if (e.type == Gdk.EventType.ButtonPress)
             {
                 if (e.button == Utils.GTK_BUTTON_RIGHT)
-                {
-                    //Add a wall if there is no entity is use.
-                    //If there is and it is a wall, stop updating the wall based on the cursor.
-                    if (entityInUse == null)
-                    {
-                        switch (itemMode)
-                        {
-                            case Mode.WALL:
-                            {
-                                AddWall();
-                                break;
-                            }
-                            case Mode.POINT:
-                            {
-                                AddPoint();
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        switch (itemMode)
-                        {
-                            case Mode.WALL:
-                            {
-                                if (hasSnappingPoint)
-                                {
-                                    double xDiff = snappingPoint.x - entityInUse.GetTransformedX();
-                                    double yDiff = snappingPoint.y - entityInUse.GetTransformedY();
-
-                                    ((Wall)entityInUse).SetRelativeEndPoint(xDiff, yDiff);
-                                }
-                    
-                                entityInUse = null;
-                                break;
-                            }
-                            case Mode.POINT:
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
+                    ModeInitial();
             }
             else if (e.type == Gdk.EventType.MotionNotify)
-            {
-                if (itemMode == Mode.WALL)
-                {
-                    hasSnappingPoint = false;
-
-                    foreach (Entity curWall in entities[(int)WALL_INDEX])
-                    {
-                        //Do not use the points of the current wall for snapping.
-                        //Only use walls.
-                        if (curWall == entityInUse || curWall.GetEntityType() != Entity.EntityType.WALL)
-                            continue;
-
-                        Utils.Rect compareRect = camera.TransformWorld(cursor.aabb.GetBounds());
-
-                        //Center around the top left of the cursor.
-                        double horizontalOffset = cursor.GetWidth() / 2.0;
-                        double verticalOffset = cursor.GetHeight() / 2.0;
-
-                        compareRect.left -= horizontalOffset;
-                        compareRect.right -= horizontalOffset;
-                        compareRect.bottom += verticalOffset;
-                        compareRect.top += verticalOffset;
-
-                        double startX = curWall.GetTransformedX();
-                        double startY = curWall.GetTransformedY();
-                        Utils.Point2 endPoint = ((Wall)curWall).GetEndPoint();
-
-                        //After the first snapping point is found, stop.
-                        if (compareRect.Intersects(startX, startY))
-                        {
-                            snappingPoint.x = startX;
-                            snappingPoint.y = startY;
-                            hasSnappingPoint = true;
-                            break;
-                        }
-                        else if (compareRect.Intersects(endPoint.x, endPoint.y))
-                        {
-                            snappingPoint.x = endPoint.x;
-                            snappingPoint.y = endPoint.y;
-                            hasSnappingPoint = true;
-                            break;
-                        }
-                    }
-                }
-            }
+                UpdateSnappingPoint();
 
             if (entityInUse != null)
                 UpdateEntityInUse(e);
@@ -226,13 +182,6 @@ namespace RaahnSimulation
 
                 GL.Color4(1.0, 1.0, 1.0, 1.0);
             }
-        }
-
-        public void SetMode(Mode mode)
-        {
-            //Do not switch modes while an entity is being added.
-            if (entityInUse == null)
-                itemMode = mode;
         }
 
         public bool SaveMap(string file)
@@ -302,36 +251,6 @@ namespace RaahnSimulation
             return true;
         }
 
-        public bool Intersects(double x, double y)
-        {
-            for (int i = 0; i < entities.Count; i++)
-            {
-                foreach (Entity curEntity in entities[i])
-                {
-                    if (x > curEntity.aabb.GetBounds().left && x < curEntity.aabb.GetBounds().right)
-                    {
-                        if (y > curEntity.aabb.GetBounds().bottom && y < curEntity.aabb.GetBounds().top)
-                            return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public bool Intersects(Utils.Rect bounds)
-        {
-            for (int x = 0; x < entities.Count; x++)
-            {
-                foreach (Entity curEntity in entities[x])
-                {
-                    if (!(curEntity.aabb.GetBounds().left > bounds.right || curEntity.aabb.GetBounds().right < bounds.left
-                    || curEntity.aabb.GetBounds().bottom > bounds.top || curEntity.aabb.GetBounds().top < bounds.bottom))
-                        return true;
-                }
-            }
-            return false;
-        }
-
         private void AddWall()
         {
             if (!wallPool.Empty())
@@ -346,7 +265,7 @@ namespace RaahnSimulation
                 wall.SetRelativeEndPoint(0.0, 0.0);
 
                 currentState.AddEntity(wall, layer);
-                entities[(int)WALL_INDEX].AddLast(wall);
+                entities[WALL_INDEX].AddLast(wall);
                 entityInUse = wall;
             }
             else
@@ -355,14 +274,14 @@ namespace RaahnSimulation
 
         private void AddPoint()
         {
-            if (!wallPool.Empty())
+            if (!pointPool.Empty())
             {
                 Point point = pointPool.Alloc();
 
                 point.SetPosition(cursor.GetTransformedX(), cursor.GetTransformedY() + cursor.GetHeight());
 
                 currentState.AddEntity(point, layer);
-                entities[(int)WALL_INDEX].AddLast(point);
+                entities[POINT_INDEX].AddLast(point);
             }
             else
                 Console.WriteLine(Utils.ENTITY_POOL_USED_UP, Entity.ENTITY_TYPE_STRINGS[(int)Entity.EntityType.POINT]);
@@ -374,6 +293,154 @@ namespace RaahnSimulation
             currentState.RemoveEntity(entity);
         }
 
+        //Performs the initial functions of a mode.
+        private void ModeInitial()
+        {
+            switch (itemMode)
+            {
+                case Mode.WALL:
+                {
+                    if (entityInUse == null)
+                        AddWall();
+                    else
+                    {
+                        if (hasSnappingPoint)
+                        {
+                            double xDiff = snappingPoint.x - entityInUse.GetTransformedX();
+                            double yDiff = snappingPoint.y - entityInUse.GetTransformedY();
+
+                            ((Wall)entityInUse).SetRelativeEndPoint(xDiff, yDiff);
+                        }
+
+                        entityInUse = null;
+                    }
+
+                    break;
+                }
+                case Mode.POINT:
+                {
+                    if (entityInUse == null)
+                        AddPoint();
+
+                    break;
+                }
+                case Mode.SELECT:
+                {
+                    //If there are no entities that can be selected do not continue.
+                    if (entities[POINT_INDEX].Count == 0 && entities[WALL_INDEX].Count == 0)
+                        break;
+
+                    Utils.Rect compareRect = camera.TransformWorld(cursor.aabb.GetBounds());
+
+                    //Check points first for a simple intersection.
+                    foreach (Entity curPoint in entities[POINT_INDEX])
+                    {
+                        if (compareRect.Intersects(curPoint.GetTransformedX(), curPoint.GetTransformedY()))
+                        {
+                            if (entitySelected != null)
+                                entitySelected.ResetColor();
+
+                            entitySelected = curPoint;
+                            entitySelected.SetColor(SELECTED_R, SELECTED_G, SELECTED_B, SELECTED_A);
+
+                            //An entity was selected, do not continue.
+                            return;
+                        }
+                    }
+
+                    Utils.LineSegment compareLine = new Utils.LineSegment();
+
+                    //Check the two lines diagonal to the cursor rather than every side for simplicity.
+                    //First line.
+                    compareLine.SetUp(new Utils.Point2(compareRect.left, compareRect.top),
+                                      new Utils.Point2(compareRect.right, compareRect.bottom));
+
+                    //Check walls for line segment collisions.
+                    foreach (Wall curWall in entities[WALL_INDEX])
+                    {
+                        //If there are any intersection points, set the wall to be selected.
+                        if (compareLine.Intersects(curWall.GetLineSegment()).Count > 0)
+                        {
+                            if (entitySelected != null)
+                                entitySelected.ResetColor();
+
+                            entitySelected = curWall;
+                            entitySelected.SetColor(SELECTED_R, SELECTED_G, SELECTED_B, SELECTED_A);
+
+                            return;
+                        }
+                    }
+
+                    //Second line
+                    compareLine.SetUp(new Utils.Point2(compareRect.left, compareRect.bottom),
+                                      new Utils.Point2(compareRect.right, compareRect.top));
+
+                    //Check walls for line segment collisions.
+                    foreach (Wall curWall in entities[WALL_INDEX])
+                    {
+                        //If there are any intersection points, set the wall to be selected.
+                        if (compareLine.Intersects(curWall.GetLineSegment()).Count > 0)
+                        {
+                            if (entitySelected != null)
+                                entitySelected.ResetColor();
+
+                            entitySelected = curWall;
+                            entitySelected.SetColor(SELECTED_R, SELECTED_G, SELECTED_B, SELECTED_A);
+
+                            return;
+                        }
+                    }
+
+                    //No entity intersected. Unselect any entity selected.
+                    if (entitySelected != null)
+                    {
+                        entitySelected.ResetColor();
+                        entitySelected = null;
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        private void UpdateSnappingPoint()
+        {
+            if (itemMode == Mode.WALL)
+            {
+                hasSnappingPoint = false;
+
+                foreach (Entity curWall in entities[WALL_INDEX])
+                {
+                    //Do not use the points of the current wall for snapping.
+                    //Only use walls.
+                    if (curWall == entityInUse)
+                        continue;
+
+                    Utils.Rect compareRect = camera.TransformWorld(cursor.aabb.GetBounds());
+
+                    double startX = curWall.GetTransformedX();
+                    double startY = curWall.GetTransformedY();
+                    Utils.Point2 endPoint = ((Wall)curWall).GetEndPoint();
+
+                    //After the first snapping point is found, stop.
+                    if (compareRect.Intersects(startX, startY))
+                    {
+                        snappingPoint.x = startX;
+                        snappingPoint.y = startY;
+                        hasSnappingPoint = true;
+                        break;
+                    }
+                    else if (compareRect.Intersects(endPoint.x, endPoint.y))
+                    {
+                        snappingPoint.x = endPoint.x;
+                        snappingPoint.y = endPoint.y;
+                        hasSnappingPoint = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         private void UpdateEntityInUse(Event e)
         {
             switch (itemMode)
@@ -382,8 +449,10 @@ namespace RaahnSimulation
                 {
                     if (e.type == Gdk.EventType.MotionNotify)
                     {
-                        double xDiff = cursor.GetTransformedX() - entityInUse.GetTransformedX();
-                        double yDiff = cursor.GetTransformedY() + cursor.GetHeight() - entityInUse.GetTransformedY();
+                        Utils.Rect compareRect = camera.TransformWorld(cursor.aabb.GetBounds());
+
+                        double xDiff = compareRect.left - entityInUse.GetTransformedX();
+                        double yDiff = compareRect.top - entityInUse.GetTransformedY();
 
                         ((Wall)entityInUse).SetRelativeEndPoint(xDiff, yDiff);
                     }
@@ -391,9 +460,7 @@ namespace RaahnSimulation
                     break;
                 }
                 case Mode.POINT:
-                {
                     break;
-                }
             }
         }
 	}

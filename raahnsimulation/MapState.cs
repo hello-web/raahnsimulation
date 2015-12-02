@@ -79,16 +79,21 @@ namespace RaahnSimulation
 
             Gtk.HBox itemPanel = new Gtk.HBox();
 
-            Gtk.Button wallButton = new Gtk.Button(new Gtk.Image("Data/Icons/Line.png"));
+            Gtk.Button wallButton = new Gtk.Button(new Gtk.Image(Utils.LINE_ICON));
             wallButton.Clicked += delegate { WallButtonOnClick(); };
-            wallButton.TooltipText = Utils.TOOLTIP_WALL;
+            wallButton.TooltipText = Utils.WALL_TOOLTIP;
 
-            Gtk.Button pointButton = new Gtk.Button(new Gtk.Image("Data/Icons/Point.png"));
+            Gtk.Button pointButton = new Gtk.Button(new Gtk.Image(Utils.POINT_ICON));
             pointButton.Clicked += delegate { PointButtonOnClick(); };
-            pointButton.TooltipText = Utils.TOOLTIP_POINT;
+            pointButton.TooltipText = Utils.POINT_TOOLTIP;
+
+            Gtk.Button selectButton = new Gtk.Button(new Gtk.Image(Utils.SELECT_ICON));
+            selectButton.Clicked += delegate { SelectButtonOnClick(); };
+            selectButton.TooltipText = Utils.SELECT_TOOLTIP;
 
             itemPanel.PackStart(wallButton, false, false, Utils.NO_PADDING);
             itemPanel.PackStart(pointButton, false, false, Utils.NO_PADDING);
+            itemPanel.PackStart(selectButton, false, false, Utils.NO_PADDING);
 
             controls.PackStart(controlsTitle, false, false, Utils.NO_PADDING);
             controls.PackStart(itemPanel, false, false, Utils.NO_PADDING);
@@ -145,6 +150,7 @@ namespace RaahnSimulation
         {
             base.UpdateEvent(e);
             cursor.Update();
+
             //Update mapBuilder before checking whether or not to pan.
             mapBuilder.UpdateEvent(e);
 
@@ -193,6 +199,8 @@ namespace RaahnSimulation
 
         public override void Clean()
         {
+            Point.CleanShared();
+            Wall.CleanShared();
             base.Clean();
         }
 
@@ -230,6 +238,11 @@ namespace RaahnSimulation
         public void PointButtonOnClick()
         {
             mapBuilder.SetMode(MapBuilder.Mode.POINT);
+        }
+
+        public void SelectButtonOnClick()
+        {
+            mapBuilder.SetMode(MapBuilder.Mode.SELECT);
         }
 
         public static MapState Instance()

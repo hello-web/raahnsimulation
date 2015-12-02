@@ -107,6 +107,7 @@ namespace RaahnSimulation
                     if (curEntity == entity)
                     {
                         layers[i].Remove(entity);
+                        entity.Clean();
                         shouldBreak = true;
                         break;
                     }

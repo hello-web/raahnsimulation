@@ -12,8 +12,6 @@ namespace RaahnSimulation
 		protected bool clicked;
 		private OnClickType OnClick;
 
-		protected ClickableEntity() {}
-
 	    protected ClickableEntity(Simulator sim) : base(sim)
 	    {
 	        pressed = false;

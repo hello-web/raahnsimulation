@@ -29,13 +29,23 @@ namespace RaahnSimulation
             }
 
             type = EntityType.POINT;
+
+            color.x = COLOR_R;
+            color.y = COLOR_G;
+            color.z = COLOR_B;
+            transparency = COLOR_A;
+        }
+
+        public static void CleanShared()
+        {
+            sharedMesh.Free();
         }
 
         public override void Draw()
         {
             GL.Disable(EnableCap.Texture2D);
 
-            GL.Color4(COLOR_R, COLOR_G, COLOR_B, COLOR_A);
+            GL.Color4(color.x, color.y, color.z, transparency);
 
             sharedMesh.MakeCurrent();
 
@@ -48,9 +58,12 @@ namespace RaahnSimulation
             GL.Enable(EnableCap.Texture2D);
         }
 
-        public override void Clean()
+        public override void ResetColor()
         {
-            sharedMesh.Free();
+            color.x = COLOR_R;
+            color.y = COLOR_G;
+            color.z = COLOR_B;
+            transparency = COLOR_A;
         }
     }
 }

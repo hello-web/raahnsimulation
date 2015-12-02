@@ -349,21 +349,6 @@ namespace RaahnSimulation
                 //Reset the list of entities raahnCar collides with.
                 raahnCar.entitiesHovering.Clear();
 
-                for (int i = 0; i < entitiesInBounds.Count; i++)
-                {
-                    //Only colorable entities are added to the quad tree,
-                    //so we can cast it to a colorable entity.
-                    Entity curEntity = (Entity)entitiesInBounds[i];
-
-                    if (raahnCar.aabb.Intersects(curEntity.aabb.GetBounds()))
-                    {
-                        raahnCar.entitiesHovering.Add(curEntity);
-                        curEntity.SetColor(HIGHLIGHT_R, HIGHLIGHT_G, HIGHLIGHT_B, HIGHLIGHT_T);
-                    }
-                    else
-                        curEntity.SetColor(Entity.DEFAULT_COLOR_R, Entity.DEFAULT_COLOR_G, Entity.DEFAULT_COLOR_B, Entity.DEFAULT_COLOR_T);
-                }
-
                 performance.Update();
 
                 if (!headless)
@@ -459,6 +444,8 @@ namespace RaahnSimulation
 
         public override void Clean()
         {
+            Point.CleanShared();
+            Wall.CleanShared();
             base.Clean();
         }
 

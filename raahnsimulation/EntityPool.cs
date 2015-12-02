@@ -4,7 +4,7 @@ namespace RaahnSimulation
 {	
 	public class EntityPool<T>
 	{
-		public const int DEFAULT_SIZE = 100;
+		public const int DEFAULT_SIZE = 200;
 		protected List<T> elements;
 
 		protected EntityPool() {}
@@ -21,7 +21,7 @@ namespace RaahnSimulation
 
 		public bool Empty()
 		{
-			if (elements.Count < 0)
+			if (elements.Count == 0)
 				return true;
 			else
 				return false;

@@ -33,19 +33,19 @@ namespace RaahnSimulation
             NONE = -2,
             GENERIC = -1,
             WALL = 0,
-            CAR = 1,
-            POINT = 2
+            POINT = 1,
+            CAR = 2,
         };
 
         public static readonly string[] ENTITY_TYPE_STRINGS = 
         {
-            "Wall", "Car", "Point"
+            "Wall", "Point", "Car"
         };
 
         public const double DEFAULT_COLOR_R = 1.0;
         public const double DEFAULT_COLOR_G = 1.0;
         public const double DEFAULT_COLOR_B = 1.0;
-        public const double DEFAULT_COLOR_T = 1.0;
+        public const double DEFAULT_COLOR_A = 1.0;
 
         public bool visible;
 		public double angle;		
@@ -73,11 +73,6 @@ namespace RaahnSimulation
         private Utils.Vector2 transformedWorldPos;
         private Utils.Vector2 worldPos;
 
-		protected Entity()
-		{
-
-		}
-
 	    protected Entity(Simulator sim)
 	    {
             context = sim;
@@ -104,7 +99,7 @@ namespace RaahnSimulation
             moved = false;
             previousAngle = 0.0;
             //Initially opaque.
-            transparency = DEFAULT_COLOR_T;
+            transparency = DEFAULT_COLOR_A;
 
             aabb = new AABB();
             aabb.SetSize(width, height);
@@ -199,6 +194,15 @@ namespace RaahnSimulation
             if (!mesh.IsCurrent())
                 mesh.MakeCurrent();
 	    }
+
+        //Allow entities with a default color to reset their color.
+        public virtual void ResetColor()
+        {
+            color.x = DEFAULT_COLOR_R;
+            color.y = DEFAULT_COLOR_G;
+            color.z = DEFAULT_COLOR_B;
+            transparency = DEFAULT_COLOR_A;
+        }
 
         public void UpdateCoordinates()
         {

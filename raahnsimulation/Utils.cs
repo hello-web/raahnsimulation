@@ -370,7 +370,7 @@ namespace RaahnSimulation
         public const string DELAY_DESCRIPTION = "Delay (Milli)";
         public const string SIMULATION_FRAME = "Simulation";
         public const string MAP_FRAME = "Map";
-        public const string MAP_CONTROLS_TITLE = "Items";
+        public const string MAP_CONTROLS_TITLE = "Modes";
         public const string MENU_FILE = "File";
         public const string MENU_SAVE = "Save";
         public const string MENU_VIEW = "View";
@@ -382,13 +382,16 @@ namespace RaahnSimulation
         public const string DEBUG_FRAME = "Modulation and Error";
         public const string HEBBIAN_TRAIN = "Hebbian";
         public const string AUTOENCODER_TRAIN = "Autoencoder";
+        public const string POINT_ICON = "Data/Icons/Point.png";
+        public const string LINE_ICON = "Data/Icons/Line.png";
+        public const string SELECT_ICON = "Data/Icons/Select.png";
         public const string MAP_FOLDER = "Data/Maps/";
         public const string SENSOR_FOLDER = "Data/Sensors/";
         public const string NETWORK_FOLDER = "Data/Networks/";
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-        public const string VERSION_STRING = "Version 20151120";
+        public const string VERSION_STRING = "Version 20151202";
         //Log strings.
         public const string LOG_SCORE_FILE = "Scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";
@@ -399,8 +402,9 @@ namespace RaahnSimulation
         public const string SAVE_BUTTON = "Save";
         public const string CANCEL_BUTTON = "Cancel";
         //Tooltips
-        public const string TOOLTIP_WALL = "Wall";
-        public const string TOOLTIP_POINT = "Point";
+        public const string WALL_TOOLTIP = "Wall";
+        public const string POINT_TOOLTIP = "Point";
+        public const string SELECT_TOOLTIP = "Select";
         //File extensions.
         public const string MAP_FILE_EXTENSION = ".xml";
         //Verbose strings.

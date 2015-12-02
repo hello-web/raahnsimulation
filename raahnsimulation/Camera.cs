@@ -110,6 +110,9 @@ namespace RaahnSimulation
             transform.bottom = (window.bottom / zoom) + vecPos.y;
             transform.top = (window.top / zoom) + vecPos.y;
 
+            transform.width = transform.right - transform.left;
+            transform.height = transform.top - transform.bottom;
+
             return transform;
         }
 
@@ -122,6 +125,9 @@ namespace RaahnSimulation
             transform.right = (world.right - vecPos.x) * zoom;
             transform.bottom = (world.bottom - vecPos.y) * zoom;
             transform.top = (world.top - vecPos.y) * zoom;
+
+            transform.width = transform.right - transform.left;
+            transform.height = transform.top - transform.bottom;
 
             return transform;
         }
@@ -136,6 +142,9 @@ namespace RaahnSimulation
             transform.bottom /= windowWorldRatio.y;
             transform.top /= windowWorldRatio.y;
 
+            transform.width = transform.right - transform.left;
+            transform.height = transform.top - transform.bottom;
+
             return transform;
         }
 
@@ -148,6 +157,9 @@ namespace RaahnSimulation
             transform.right *= windowWorldRatio.x;
             transform.bottom *= windowWorldRatio.y;
             transform.top *= windowWorldRatio.y;
+
+            transform.width = transform.right - transform.left;
+            transform.height = transform.top - transform.bottom;
 
             return transform;
         }

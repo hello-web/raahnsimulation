@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Robot>
+    <X>1561.9331742243444</X>
+    <Y>505.79080279525812</Y>
+    <Angle>0</Angle>
+  </Robot>
+  <Entity Type="Wall">
+    <X>1301.3842482100238</X>
+    <Y>675.13128038897889</Y>
+    <RelX>769.83293556080639</RelX>
+    <RelY>1.4438228390645236E-11</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2071.21718377083</X>
+    <Y>675.13128038899333</Y>
+    <RelX>210.78758949880694</RelX>
+    <RelY>-52.512155591572082</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2282.0047732696371</X>
+    <Y>622.61912479742125</Y>
+    <RelX>155.79952267303088</RelX>
+    <RelY>-171.53970826580246</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2437.804295942668</X>
+    <Y>451.07941653161879</Y>
+    <RelX>128.30548926014308</RelX>
+    <RelY>-297.56888168557509</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2566.1097852028111</X>
+    <Y>153.5105348460437</Y>
+    <RelX>142.05250596658698</RelX>
+    <RelY>-150.53484602917376</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2708.162291169398</X>
+    <Y>2.9756888168699334</Y>
+    <RelX>164.96420047732727</RelX>
+    <RelY>-38.508914100486209</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2873.1264916467253</X>
+    <Y>-35.533225283616275</Y>
+    <RelX>155.79952267303088</RelX>
+    <RelY>45.510534846029145</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3028.9260143197562</X>
+    <Y>9.97730956241287</Y>
+    <RelX>105.39379474940324</RelX>
+    <RelY>94.521880064829816</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3134.3198090691594</X>
+    <Y>104.49918962724269</Y>
+    <RelX>-13.747016706443901</RelX>
+    <RelY>143.53322528363049</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3120.5727923627155</X>
+    <Y>248.03241491087317</Y>
+    <RelX>-128.30548926014308</RelX>
+    <RelY>196.04538087520177</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2992.2673031025724</X>
+    <Y>444.07779578607494</Y>
+    <RelX>0</RelX>
+    <RelY>0</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2992.2673031025724</X>
+    <Y>444.07779578607494</Y>
+    <RelX>-160.38186157517885</RelX>
+    <RelY>227.55267423014607</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2831.8854415273936</X>
+    <Y>671.630470016221</Y>
+    <RelX>-201.622911694511</RelX>
+    <RelY>161.03727714748766</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2630.2625298328826</X>
+    <Y>832.66774716370867</Y>
+    <RelX>-114.55847255369918</RelX>
+    <RelY>154.03565640194506</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2515.7040572791834</X>
+    <Y>986.70340356565373</Y>
+    <RelX>-68.7350835322195</RelX>
+    <RelY>147.03403565640167</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2446.9689737469639</X>
+    <Y>1133.7374392220554</Y>
+    <RelX>-9.164677804295934</RelX>
+    <RelY>129.52998379254495</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2437.804295942668</X>
+    <Y>1263.2674230146004</Y>
+    <RelX>0</RelX>
+    <RelY>0</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2437.804295942668</X>
+    <Y>1263.2674230146004</Y>
+    <RelX>36.658711217183736</RelX>
+    <RelY>154.03565640194483</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2474.4630071598517</X>
+    <Y>1417.3030794165452</Y>
+    <RelX>206.20525059665852</RelX>
+    <RelY>105.02431118314416</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2680.6682577565102</X>
+    <Y>1522.3273905996894</Y>
+    <RelX>531.55131264916554</RelX>
+    <RelY>367.58508914100548</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3212.2195704056758</X>
+    <Y>1889.9124797406948</Y>
+    <RelX>206.20525059665852</RelX>
+    <RelY>234.55429497568866</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3418.4248210023343</X>
+    <Y>2124.4667747163835</Y>
+    <RelX>-9.164677804295934</RelX>
+    <RelY>133.03079416531591</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3409.2601431980383</X>
+    <Y>2257.4975688816994</Y>
+    <RelX>-100.81145584725527</RelX>
+    <RelY>133.03079416531546</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3308.4486873507831</X>
+    <Y>2390.5283630470149</Y>
+    <RelX>-160.38186157517976</RelX>
+    <RelY>38.508914100485526</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3148.0668257756033</X>
+    <Y>2429.0372771475004</Y>
+    <RelX>-288.68735083532192</RelX>
+    <RelY>-35.008103727714115</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2859.3794749402814</X>
+    <Y>2394.0291734197863</Y>
+    <RelX>-192.45823389021461</RelX>
+    <RelY>-101.5235008103723</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2666.9212410500668</X>
+    <Y>2292.505672609414</Y>
+    <RelX>-375.75178997613375</RelX>
+    <RelY>-287.06645056726074</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2291.169451073933</X>
+    <Y>2005.4392220421532</Y>
+    <RelX>-261.19331742243435</RelX>
+    <RelY>-147.034035656402</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2029.9761336514987</X>
+    <Y>1858.4051863857512</Y>
+    <RelX>-169.546539379475</RelX>
+    <RelY>-24.505672609400335</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1860.4295942720237</X>
+    <Y>1833.8995137763509</Y>
+    <RelX>-490.31026252983293</RelX>
+    <RelY>-3.5008103727714115</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1370.1193317421908</X>
+    <Y>1830.3987034035795</Y>
+    <RelX>-174.1288782816232</RelX>
+    <RelY>70.016207455429139</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1195.9904534605676</X>
+    <Y>1900.4149108590086</Y>
+    <RelX>-229.11694510739824</RelX>
+    <RelY>178.54132901134517</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>966.87350835316931</X>
+    <Y>2078.9562398703538</Y>
+    <RelX>-155.79952267303111</RelX>
+    <RelY>203.04700162074505</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>811.07398568013821</X>
+    <Y>2282.0032414910988</Y>
+    <RelX>-219.95226730310253</RelX>
+    <RelY>147.034035656402</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>591.12171837703568</X>
+    <Y>2429.0372771475008</Y>
+    <RelX>-229.11694510739858</RelX>
+    <RelY>45.510534846029259</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>362.0047732696371</X>
+    <Y>2474.54781199353</Y>
+    <RelX>-256.61097852028638</RelX>
+    <RelY>-28.006482982171747</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>105.39379474935072</X>
+    <Y>2446.5413290113584</Y>
+    <RelX>-151.21718377088303</RelX>
+    <RelY>-105.02431118314416</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-45.823389021532307</X>
+    <Y>2341.5170178282142</Y>
+    <RelX>0</RelX>
+    <RelY>-154.03565640194483</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-45.823389021532307</X>
+    <Y>2187.4813614262694</Y>
+    <RelX>192.45823389021473</RelX>
+    <RelY>-238.05510534846053</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>146.63484486868242</X>
+    <Y>1949.4262560778088</Y>
+    <RelX>279.52267303102622</RelX>
+    <RelY>-238.05510534845939</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>426.15751789970864</X>
+    <Y>1711.3711507293494</Y>
+    <RelX>215.36992840095468</RelX>
+    <RelY>-185.54294975688777</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>641.52744630066331</X>
+    <Y>1525.8282009724617</Y>
+    <RelX>119.14081145584737</RelX>
+    <RelY>-168.03889789303093</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>760.66825775651068</X>
+    <Y>1357.7893030794307</Y>
+    <RelX>-4.582338902147967</RelX>
+    <RelY>-185.54294975688754</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1301.3842482100238</X>
+    <Y>675.13128038897889</Y>
+    <RelX>-183.29355608597143</RelX>
+    <RelY>-115.52674230144339</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1118.0906921240523</X>
+    <Y>559.6045380875355</Y>
+    <RelX>-187.87589498806688</RelX>
+    <RelY>-171.53970826580229</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>930.21479713598546</X>
+    <Y>388.06482982173321</Y>
+    <RelX>-183.29355608591868</RelX>
+    <RelY>-94.521880064829816</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>746.92124105006678</X>
+    <Y>293.5429497569034</Y>
+    <RelX>-270.35799522673051</RelX>
+    <RelY>-94.521880064829588</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>476.56324582333627</X>
+    <Y>199.02106969207381</Y>
+    <RelX>-155.79952267303088</RelX>
+    <RelY>14.00324149108576</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>320.7637231503054</X>
+    <Y>213.02431118315957</Y>
+    <RelX>-128.30548926014319</RelX>
+    <RelY>84.019448946515354</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>192.45823389016221</X>
+    <Y>297.04376012967492</Y>
+    <RelX>-64.152744630071652</RelX>
+    <RelY>126.02917341977309</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>128.30548926009055</X>
+    <Y>423.072933549448</Y>
+    <RelX>36.658711217183736</RelX>
+    <RelY>133.03079416531608</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>164.96420047727429</X>
+    <Y>556.10372771476409</Y>
+    <RelX>91.646778042959454</RelX>
+    <RelY>101.52350081037207</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>256.61097852023374</X>
+    <Y>657.62722852513616</Y>
+    <RelX>192.45823389021473</RelX>
+    <RelY>126.02917341977172</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>449.06921241044847</X>
+    <Y>783.65640194490788</Y>
+    <RelX>197.04057279236281</RelX>
+    <RelY>126.02917341977309</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>646.10978520281128</X>
+    <Y>909.685575364681</Y>
+    <RelX>91.646778042959568</RelX>
+    <RelY>94.5218800648297</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>737.75656324577085</X>
+    <Y>1004.2074554295107</Y>
+    <RelX>18.329355608591868</RelX>
+    <RelY>168.03889789303253</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1397.8854415274473</X>
+    <Y>462.13495863941552</Y>
+    <RelX>535.21718377084085</RelX>
+    <RelY>-7.5740259740153988</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1933.1026252982881</X>
+    <Y>454.56093266540012</Y>
+    <RelX>109.97613365155121</RelX>
+    <RelY>-53.2987012987013</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2043.0787589498393</X>
+    <Y>401.26223136669881</Y>
+    <RelX>91.646778042959568</RelX>
+    <RelY>-129.03896103896102</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2134.7255369927989</X>
+    <Y>272.22327032773779</Y>
+    <RelX>91.64677804295934</RelX>
+    <RelY>-162.7012987012987</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1397.8854415274473</X>
+    <Y>462.13495863941552</Y>
+    <RelX>-150.30071599049575</RelX>
+    <RelY>-114.171428571418</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1247.5847255369515</X>
+    <Y>347.96353006799751</Y>
+    <RelX>-128.3054892601433</RelX>
+    <RelY>-143.06493506493496</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1119.2792362768082</X>
+    <Y>204.89859500306255</Y>
+    <RelX>-190.62529832935547</RelX>
+    <RelY>-145.87012987012997</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>928.65393794745273</X>
+    <Y>59.028465132932581</Y>
+    <RelX>-234.615751789976</RelX>
+    <RelY>-84.155844155844363</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>694.03818615747673</X>
+    <Y>-25.127379022911782</Y>
+    <RelX>-340.92601431980904</RelX>
+    <RelY>-64.519480519480737</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>353.11217183766769</X>
+    <Y>-89.646859542392519</Y>
+    <RelX>-157.63245823389019</RelX>
+    <RelY>16.831168831168725</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>195.4797136037775</X>
+    <Y>-72.8156907112238</Y>
+    <RelX>-260.27684964200449</RelX>
+    <RelY>53.298701298701076</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-64.797136038227</X>
+    <Y>-19.516989412522719</Y>
+    <RelX>-164.96420047732698</RelX>
+    <RelY>129.03896103896096</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-229.76133651555398</X>
+    <Y>109.52197162643824</Y>
+    <RelX>-80.649164677804322</RelX>
+    <RelY>165.50649350649354</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-310.4105011933583</X>
+    <Y>275.02846513293179</Y>
+    <RelX>7.3317422434367927</RelX>
+    <RelY>232.83116883116918</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-303.07875894992151</X>
+    <Y>507.85963396410096</Y>
+    <RelX>120.97374701670645</RelX>
+    <RelY>207.584415584415</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-182.10501193321505</X>
+    <Y>715.444049548516</Y>
+    <RelX>278.60620525059659</RelX>
+    <RelY>193.55844155844147</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>96.501193317381535</X>
+    <Y>909.00249110695745</Y>
+    <RelX>208.95465393794734</RelX>
+    <RelY>165.5064935064936</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>305.45584725532888</X>
+    <Y>1074.508984613451</Y>
+    <RelX>109.97613365155144</RelX>
+    <RelY>145.87012987012963</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>415.43198090688031</X>
+    <Y>1220.3791144835807</Y>
+    <RelX>-10.997613365154905</RelX>
+    <RelY>120.623376623377</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>404.43436754172541</X>
+    <Y>1341.0024911069577</Y>
+    <RelX>-153.96658711217174</RelX>
+    <RelY>151.48051948051943</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>250.46778042955367</X>
+    <Y>1492.4830105874771</Y>
+    <RelX>-245.61336515513125</RelX>
+    <RelY>193.55844155844147</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>4.854415274422422</X>
+    <Y>1686.0414521459186</Y>
+    <RelX>-245.61336515513119</RelX>
+    <RelY>235.63636363636351</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-240.75894988070877</X>
+    <Y>1921.6778157822821</Y>
+    <RelX>-142.96897374701678</RelX>
+    <RelY>238.44155844155807</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-383.72792362772554</X>
+    <Y>2160.11937422384</Y>
+    <RelX>0</RelX>
+    <RelY>266.49350649350663</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-383.72792362772554</X>
+    <Y>2426.6128807173468</Y>
+    <RelX>113.64200477326949</RelX>
+    <RelY>143.06493506493507</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-270.08591885445605</X>
+    <Y>2569.6778157822819</Y>
+    <RelX>263.94272076372317</RelX>
+    <RelY>103.79220779220759</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>-6.1431980907328807</X>
+    <Y>2673.4700235744895</Y>
+    <RelX>421.57517899761331</RelX>
+    <RelY>14.025974025973483</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>415.43198090688043</X>
+    <Y>2687.4959976004629</Y>
+    <RelX>344.59188544152744</RelX>
+    <RelY>-109.40259740259808</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>760.02386634840786</X>
+    <Y>2578.0934001978649</Y>
+    <RelX>260.27684964200466</RelX>
+    <RelY>-154.28571428571377</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1020.3007159904125</X>
+    <Y>2423.8076859121511</Y>
+    <RelX>304.26730310262519</RelX>
+    <RelY>-291.74025974025972</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1324.5680190930377</X>
+    <Y>2132.0674261718914</Y>
+    <RelX>201.62291169450987</RelX>
+    <RelY>-100.9870129870128</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1526.1909307875476</X>
+    <Y>2031.0804131848786</Y>
+    <RelX>263.94272076372363</RelX>
+    <RelY>5.610389610389575</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>1790.1336515512712</X>
+    <Y>2036.6908027952682</Y>
+    <RelX>546.2147971360373</RelX>
+    <RelY>356.25974025973892</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2336.3484486873085</X>
+    <Y>2392.9505430550071</Y>
+    <RelX>318.93078758949878</RelX>
+    <RelY>148.6753246753251</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2655.2792362768073</X>
+    <Y>2541.6258677303322</Y>
+    <RelX>421.57517899761342</RelX>
+    <RelY>84.155844155843624</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3076.8544152744207</X>
+    <Y>2625.7817118861758</Y>
+    <RelX>377.58472553699266</RelX>
+    <RelY>-22.4415584415583</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3454.4391408114134</X>
+    <Y>2603.3401534446175</Y>
+    <RelX>194.29116945107398</RelX>
+    <RelY>-58.909090909090082</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3648.7303102624874</X>
+    <Y>2544.4310625355274</Y>
+    <RelX>87.9809069212406</RelX>
+    <RelY>-218.80519480519524</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3736.711217183728</X>
+    <Y>2325.6258677303322</Y>
+    <RelX>-40.324582338901564</RelX>
+    <RelY>-277.71428571428532</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3696.3866348448264</X>
+    <Y>2047.9115820160469</Y>
+    <RelX>-109.97613365155121</RelX>
+    <RelY>-246.85714285714266</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3586.4105011932752</X>
+    <Y>1801.0544391589042</Y>
+    <RelX>-373.91885441527484</RelX>
+    <RelY>-336.62337662337677</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3212.4916467780004</X>
+    <Y>1464.4310625355274</Y>
+    <RelX>-362.92124105011862</RelX>
+    <RelY>-210.38961038961043</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2849.5704057278817</X>
+    <Y>1254.041452145917</Y>
+    <RelX>-40.324582338902474</RelX>
+    <RelY>-117.81818181818198</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2809.2458233889793</X>
+    <Y>1136.223270327735</Y>
+    <RelX>120.97374701670651</RelX>
+    <RelY>-224.41558441558402</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2930.2195704056858</X>
+    <Y>911.807685912151</Y>
+    <RelX>359.2553699284008</RelX>
+    <RelY>-336.62337662337654</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3289.4749403340866</X>
+    <Y>575.18430928877444</Y>
+    <RelX>168.63007159904555</RelX>
+    <RelY>-361.87012987012986</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3458.1050119331321</X>
+    <Y>213.31417941864458</Y>
+    <RelX>7.3317422434374748</RelX>
+    <RelY>-272.10389610389575</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3465.4367541765696</X>
+    <Y>-58.789716685251165</Y>
+    <RelX>-131.97136038186181</RelX>
+    <RelY>-204.77922077922074</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>3333.4653937947078</X>
+    <Y>-263.5689374644719</Y>
+    <RelX>-366.58711217183782</RelX>
+    <RelY>-123.4285714285715</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2966.87828162287</X>
+    <Y>-386.9975088930434</Y>
+    <RelX>-315.26491646778049</RelX>
+    <RelY>25.246753246753258</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2651.6133651550895</X>
+    <Y>-361.75075564629014</Y>
+    <RelX>-205.28878281622883</RelX>
+    <RelY>100.98701298701297</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2446.3245823388606</X>
+    <Y>-260.76374265927717</Y>
+    <RelX>-131.97136038186181</RelX>
+    <RelY>109.40259740259688</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2314.3532219569988</X>
+    <Y>-151.36114525668029</Y>
+    <RelX>0</RelX>
+    <RelY>0</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Wall">
+    <X>2314.3532219569988</X>
+    <Y>-151.36114525668029</Y>
+    <RelX>-87.9809069212406</RelX>
+    <RelY>260.88311688311938</RelY>
+    <Angle>0</Angle>
+  </Entity>
+  <Entity Type="Point">
+    <X>1619.212410501194</X>
+    <Y>1275.6414521459071</Y>
+    <RelX>0</RelX>
+    <RelY>0</RelY>
+    <Angle>0</Angle>
+  </Entity>
+</Map>

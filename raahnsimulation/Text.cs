@@ -20,11 +20,6 @@ namespace RaahnSimulation
 		private Utils.Vector2 charTexPos;
 		private Utils.Vector2 charCenter;
 
-		public Text()
-		{
-
-		}
-
 	    public Text(Simulator sim, string str) : base(sim)
 	    {
 	        text = str;
