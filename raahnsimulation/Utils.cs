@@ -351,12 +351,12 @@ namespace RaahnSimulation
         public const float BACKGROUND_COLOR_VALUE = 0.929411765f;
         public const double INVALID_ACTIVATION = -1.0;
         public const double MIN_GL_VERSION = 1.5;
-        public const double DEFAULT_SCREEN_WIDTH_PERCENTAGE = 0.6;
-        public const double DEFAULT_SCREEN_HEIGHT_PERCENTAGE = 0.7;
-        public const double MENU_SCREEN_WIDTH_PERCENTAGE = 0.4;
-        public const double MENU_SCREEN_HEIGHT_PERCENTAGE = 0.2;
-        public const double VISUALIZER_SCREEN_WIDTH_PERCENTAGE = 0.4;
-        public const double VISUALIZER_SCREEN_HEIGHT_PERCENTAGE = 0.5;
+        public const double WINDOW_WIDTH_PERCENTAGE = 0.6;
+        public const double WINDOW_HEIGHT_PERCENTAGE = 0.7;
+        public const double MENU_WINDOW_WIDTH_PERCENTAGE = 0.4;
+        public const double MENU_WINDOW_HEIGHT_PERCENTAGE = 0.2;
+        public const double VISUALIZER_WINDOW_WIDTH_PERCENTAGE = 0.4;
+        public const double VISUALIZER_WINDOW_HEIGHT_PERCENTAGE = 0.5;
         public const double DISCARD_Z_POS = 0.0;
         public const double DISCARD_Z_SCALE = 1.0;
         public const double DEG_TO_RAD = 3.1415926535 / 180.0;
@@ -399,7 +399,7 @@ namespace RaahnSimulation
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-        public const string VERSION_STRING = "Version 20151203-2";
+        public const string VERSION_STRING = "Version 20151204";
         //Log strings.
         public const string LOG_SCORE_FILE = "Scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";

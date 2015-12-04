@@ -22,6 +22,8 @@ namespace RaahnSimulation
 
         public const uint MIN_WINDOW_WIDTH = 200;
         public const uint MIN_WINDOW_HEIGHT = 200;
+        public const int DEFAULT_MONITOR_INDEX = 0;
+        public const int SECONDARY_MONITOR_INDEX = 1;
         //Scaling down is usually better, if it even matters in this context.
         public const double WORLD_WINDOW_WIDTH = 3840.0;
         public const double WORLD_WINDOW_HEIGHT = 2160.0;
@@ -57,6 +59,7 @@ namespace RaahnSimulation
         private Stopwatch stopwatch;
 		private State requestedState;
 		private StateChangeType changeType;
+        private List<Gdk.Rectangle> monitors;
 
 	    public Simulator()
 	    {
@@ -124,9 +127,18 @@ namespace RaahnSimulation
 	        simWindow = new Window(WindowType.Toplevel);
             simWindow.Title = Utils.WINDOW_TITLE;
 
+            monitors = new List<Gdk.Rectangle>();
+
+            //Get the first monitor dimensions. Don't get the rest yet to speed up centering of the main window.
+            monitors.Add(simWindow.Screen.GetMonitorGeometry(0));
+
             //Create size based on monitor resolution.
-            windowWidth = (uint)((double)simWindow.Screen.Width * Utils.MENU_SCREEN_WIDTH_PERCENTAGE);
-            windowHeight = (uint)((double)simWindow.Screen.Height * Utils.MENU_SCREEN_HEIGHT_PERCENTAGE);
+            windowWidth = (uint)((double)monitors[DEFAULT_MONITOR_INDEX].Width * Utils.MENU_WINDOW_WIDTH_PERCENTAGE);
+            windowHeight = (uint)((double)monitors[DEFAULT_MONITOR_INDEX].Height * Utils.MENU_WINDOW_HEIGHT_PERCENTAGE);
+
+            //Get the rest of the monitors.
+            for (int i = 1; i < simWindow.Screen.NMonitors; i++)
+                monitors.Add(simWindow.Screen.GetMonitorGeometry(i));
 
             simWindow.Resize((int)windowWidth, (int)windowHeight);
 
@@ -652,8 +664,8 @@ namespace RaahnSimulation
         {
             if (simWindow != null)
             {
-                int centerX = (simWindow.Screen.Width / 2) - ((int)windowWidth / 2);
-                int centerY = (simWindow.Screen.Height / 2) - ((int)windowHeight / 2);
+                int centerX = (monitors[DEFAULT_MONITOR_INDEX].Width / 2) - ((int)windowWidth / 2);
+                int centerY = (monitors[DEFAULT_MONITOR_INDEX].Height / 2) - ((int)windowHeight / 2);
                 simWindow.Move(centerX, centerY);
             }
         }
@@ -693,6 +705,11 @@ namespace RaahnSimulation
             return downKeyDown;
         }
 
+        public uint GetMonitorCount()
+        {
+            return (uint)monitors.Count;
+        }
+
         public uint GetWindowWidth()
         {
             return windowWidth;
@@ -711,6 +728,14 @@ namespace RaahnSimulation
         public State GetState()
         {
             return states[states.Count - 1];
+        }
+
+        public Gdk.Rectangle GetMonitor(uint index)
+        {
+            if (monitors.Count <= index)
+                return default(Gdk.Rectangle);
+
+            return monitors[(int)index];
         }
 
         public Window GetWindow()

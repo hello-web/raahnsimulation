@@ -96,8 +96,10 @@ namespace RaahnSimulation
 
                 mainWindow.GdkWindow.Cursor = context.GetBlankCursor();
 
-                uint newWinWidth = (uint)((double)mainWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
-                uint newWinHeight = (uint)((double)mainWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
+                Gdk.Rectangle monitorDims = context.GetMonitor(Simulator.DEFAULT_MONITOR_INDEX);
+
+                uint newWinWidth = (uint)((double)monitorDims.Width * Utils.WINDOW_WIDTH_PERCENTAGE);
+                uint newWinHeight = (uint)((double)monitorDims.Height * Utils.WINDOW_HEIGHT_PERCENTAGE);
 
                 context.SetWindowSize(newWinWidth, newWinHeight);
                 context.CenterWindow();
@@ -115,7 +117,7 @@ namespace RaahnSimulation
                 viewOption.Submenu = viewMenu;
 
                 Gtk.MenuItem viewVisualizer = new Gtk.MenuItem(Utils.MENU_VISUALIZER);
-                viewVisualizer.Activated += delegate { networkVisualizer.Display(); };
+                viewVisualizer.Activated += delegate { networkVisualizer.Display(context); };
                 viewMenu.Append(viewVisualizer);
 
                 Gtk.MenuItem helpOption = new Gtk.MenuItem(Utils.MENU_HELP);
@@ -494,6 +496,10 @@ namespace RaahnSimulation
             raahnCar.Reset();
 
             performance.Reset();
+
+            //Reset the visualization if needed.
+            if (!headless)
+                networkVisualizer.Update();
         }
 
         private void OnDelayChooserChanged(object sender, EventArgs ea)

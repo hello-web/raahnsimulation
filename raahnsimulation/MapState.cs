@@ -31,8 +31,8 @@ namespace RaahnSimulation
 
             mainWindow.GdkWindow.Cursor = context.GetBlankCursor();
 
-            uint newWinWidth = (uint)((double)mainWindow.Screen.Width * Utils.DEFAULT_SCREEN_WIDTH_PERCENTAGE);
-            uint newWinHeight = (uint)((double)mainWindow.Screen.Height * Utils.DEFAULT_SCREEN_HEIGHT_PERCENTAGE);
+            uint newWinWidth = (uint)((double)mainWindow.Screen.Width * Utils.WINDOW_WIDTH_PERCENTAGE);
+            uint newWinHeight = (uint)((double)mainWindow.Screen.Height * Utils.WINDOW_HEIGHT_PERCENTAGE);
 
             context.SetWindowSize(newWinWidth, newWinHeight);
             context.CenterWindow();

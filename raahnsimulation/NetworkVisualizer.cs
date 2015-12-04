@@ -119,7 +119,7 @@ namespace RaahnSimulation
             connectionDrawFunction = DrawConnectionsUncapped;
         }
 
-        public void Display()
+        public void Display(Simulator context)
         {
             if (visualizerWindow != null)
                 return;
@@ -127,8 +127,30 @@ namespace RaahnSimulation
             visualizerWindow = new Gtk.Window(Gtk.WindowType.Toplevel);
             visualizerWindow.Title = Utils.WINDOW_VISUALIZER_TITLE;
 
-            visualizerWidth = (uint)((double)visualizerWindow.Screen.Width * Utils.VISUALIZER_SCREEN_WIDTH_PERCENTAGE);
-            visualizerHeight = (uint)((double)visualizerWindow.Screen.Height * Utils.VISUALIZER_SCREEN_HEIGHT_PERCENTAGE);
+            Gtk.Window simWindow = context.GetWindow();
+
+            uint monitorIndex = Simulator.DEFAULT_MONITOR_INDEX;
+            Gdk.Rectangle monitor;
+
+            //If there is more than one monitor, scale the network visualizer based on the
+            //monitor that the simulation window is not in.
+            if (context.GetMonitorCount() > 1)
+            {
+                if (simWindow.Screen.GetMonitorAtWindow(simWindow.GdkWindow) == Simulator.DEFAULT_MONITOR_INDEX)
+                    monitorIndex = Simulator.SECONDARY_MONITOR_INDEX;
+
+                monitor = context.GetMonitor(monitorIndex);
+
+                visualizerWidth = (uint)((double)monitor.Width * Utils.WINDOW_WIDTH_PERCENTAGE);
+                visualizerHeight = (uint)((double)monitor.Height * Utils.WINDOW_HEIGHT_PERCENTAGE);
+            }
+            else
+            {
+                monitor = context.GetMonitor(monitorIndex);
+
+                visualizerWidth = (uint)((double)monitor.Width * Utils.VISUALIZER_WINDOW_WIDTH_PERCENTAGE);
+                visualizerHeight = (uint)((double)monitor.Height * Utils.VISUALIZER_WINDOW_HEIGHT_PERCENTAGE);
+            }
 
             visualizerWindow.Resize((int)visualizerWidth, (int)visualizerHeight);
 
