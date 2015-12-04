@@ -36,6 +36,7 @@ namespace RaahnSimulation
 
         public List<Entity> entitiesHovering;
         private bool configLoaded;
+        private bool userControlled;
         private uint rangeFinderCount;
         private uint pieSliceSensorCount;
         private QuadTree quadTree;
@@ -52,6 +53,8 @@ namespace RaahnSimulation
         {
             texture = TextureManager.TextureType.CAR;
             type = EntityType.CAR;
+
+            userControlled = false;
 
             quadTree = tree;
 
@@ -84,13 +87,14 @@ namespace RaahnSimulation
                 pieSliceSensorGroups[i].Update();
         }
 
-        public override void Update()
+        public void Control()
         {
-            bool userControlled = false;
-
             if (controlScheme != null)
                 userControlled = controlScheme(this);
+        }
 
+        public override void Update()
+        {
             base.Update();
 
             double worldX = GetWorldX();
@@ -203,8 +207,10 @@ namespace RaahnSimulation
             for (int x = 0; x < modulationSignals.Count; x++)
             {
                 for (int y = 0; y < modulationSignals[x].Count; y++)
-                    ModulationSignal.SetSignal(modulationSignals[x][y], ModulationSignal.BENIGN_MODULATION);
+                    ModulationSignal.SetSignal(modulationSignals[x][y], ModulationSignal.NO_MODULATION);
             }
+
+            ModulationScheme.Reset();
         }
 
         public bool LoadConfig(string sensorFile, string networkFile)

@@ -291,6 +291,29 @@ namespace RaahnSimulation
 
         public override void Update()
         {
+            bool delayPassed = false;
+
+            if (timer.IsRunning)
+            {
+                if (timer.ElapsedMilliseconds >= updateDelay)
+                {
+                    delayPassed = true;
+                    timer.Restart();
+                }
+            }
+            else
+            {
+                delayPassed = true;
+                timer.Start();
+            }
+
+            //Control scheme must be applied before network visualization to get correct neurons values and weights.
+            if (simulationRunning)
+            {
+                if (delayPassed)
+                    raahnCar.Control();
+            }
+
             if (!headless)
             {
                 cursor.Update();
@@ -317,15 +340,8 @@ namespace RaahnSimulation
 
             if (simulationRunning)
             {
-                if (timer.IsRunning)
-                {
-                    if (timer.ElapsedMilliseconds < updateDelay)
-                        return;
-                    else
-                        timer.Restart();
-                }
-                else
-                    timer.Start();
+                if (!delayPassed)
+                    return;
 
                 ticksElapsed++;
 

@@ -36,6 +36,14 @@ namespace RaahnSimulation
                 return (x * vec.x + y * vec.y);
             }
 
+            public double AngleBetween(Utils.Vector2 vec)
+            {
+                double dotProduct = DotProduct(vec);
+                double magnitudeProduct = GetMagnitude() * vec.GetMagnitude();
+
+                return Utils.RadToDeg(Math.Acos(dotProduct / magnitudeProduct));
+            }
+
             public static Vector2 operator+(Vector2 u, Vector2 v)
             {
                 return new Vector2(u.x + v.x, u.y + v.y);
@@ -391,7 +399,7 @@ namespace RaahnSimulation
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-        public const string VERSION_STRING = "Version 20151202";
+        public const string VERSION_STRING = "Version 20151203";
         //Log strings.
         public const string LOG_SCORE_FILE = "Scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";

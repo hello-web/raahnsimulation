@@ -17,7 +17,8 @@ namespace RaahnSimulation
             private const uint DEFAULT_SCHEME_INDEX = 0;
             private const uint WALL_AVOIDANCE_PARAMETER_COUNT = 1;
             private const double MODULATION_STENGTH = 1.0;
-            private const double RESET_MODULATION = 0.0;
+            private const double MODULATION_RESET = 0.0;
+            private const double MODULATION_NOT_RESET = -1.0;
             private const double PERPENDICULAR = 90.0;
 
             public delegate void SchemeFunction(Car car, List<Entity> entitiesInBounds, List<uint> modSigs);
@@ -32,7 +33,7 @@ namespace RaahnSimulation
                 "WallAvoidance"
             };
 
-            private static double lastAngleBetween = RESET_MODULATION;
+            private static double lastAngleBetween = MODULATION_RESET;
             private static double viewDistance = 0.0;
             private static Wall lastWallInRange = null;
 
@@ -49,6 +50,13 @@ namespace RaahnSimulation
                         break;
                     }
                 }
+            }
+
+            //Resets global variables used by schemes.
+            public static void Reset()
+            {
+                lastAngleBetween = MODULATION_RESET;
+                lastWallInRange = null;
             }
 
             public static Scheme GetSchemeFromString(string schemeString)
@@ -83,7 +91,7 @@ namespace RaahnSimulation
                 Utils.LineSegment viewLine = new Utils.LineSegment();
                 viewLine.SetUp(original, viewEndPoint);
 
-                Wall nearestWall = null;
+                Wall compareWall = null;
                 double nearestDist = Utils.GetDist(original, viewEndPoint);
 
                 //Get the nearest wall in the view distance if any.
@@ -104,38 +112,73 @@ namespace RaahnSimulation
                             if (dist < nearestDist)
                             {
                                 nearestDist = dist;
-                                nearestWall = currentWall;
+                                compareWall = currentWall;
                             }
                         }
                     }
                 }
 
-                if (nearestWall == null)
-                {
-                    lastAngleBetween = RESET_MODULATION;
-                    lastWallInRange = null;
-
-                    for (int i = 0; i < modSigs.Count; i++)
-                        ModulationSignal.SetSignal(modSigs[i], 0.0);
-
-                    return;
-                }
+                //The angle to use for modulation. Should never be zero when the angle delta is calculated.
+                //If it is there must be a bug.
+                double angleBetween = 0.0;
+                double newLastAngle = MODULATION_NOT_RESET;
 
                 Utils.Vector2 viewVector = new Utils.Vector2(viewEndPoint.x - car.center.x, viewEndPoint.y - car.center.y);
-                Utils.Vector2 lineVector = new Utils.Vector2(nearestWall.GetRelativeX(), nearestWall.GetRelativeY());
 
-                double dotProduct = viewVector.DotProduct(lineVector);
-                double magnitudeProduct = viewVector.GetMagnitude() * lineVector.GetMagnitude();
-
-                double angleBetween = Utils.RadToDeg(Math.Acos(dotProduct / magnitudeProduct));
-
-                //If this is the first time the angle between this wall was calculated, don't modulate.
-                //The delta between the angleBetween and lastAngleBetween won't be accurate.
-                if (lastAngleBetween == RESET_MODULATION || lastWallInRange != nearestWall)
+                //If there is no nearest wall.
+                if (compareWall == null)
                 {
-                    lastAngleBetween = angleBetween;
-                    lastWallInRange = nearestWall;
-                    return;
+                    //If there is no previous wall, set the modulation to zero and reset the last angle.
+                    if (lastWallInRange == null)
+                    {
+                        if (lastAngleBetween != MODULATION_RESET)
+                        {
+                            lastAngleBetween = MODULATION_RESET;
+
+                            for (int i = 0; i < modSigs.Count; i++)
+                                ModulationSignal.SetSignal(modSigs[i], ModulationSignal.NO_MODULATION);
+                        }
+
+                        //Nothing to modulate and nothing to save. Don't continue.
+                        return;
+                    }
+                    //Just left a wall.
+                    else
+                    {
+                        Utils.Vector2 lastWallVector = new Utils.Vector2(lastWallInRange.GetRelativeX(), lastWallInRange.GetRelativeY());
+
+                        angleBetween = viewVector.AngleBetween(lastWallVector);
+                    }
+                }
+                //If the wall changed.
+                else if (compareWall != lastWallInRange)
+                {
+                    //There was a last wall that is different from the current wall.
+                    if (lastWallInRange != null)
+                    {
+                        Utils.Vector2 compareWallVector = new Utils.Vector2(compareWall.GetRelativeX(), compareWall.GetRelativeY());
+                        Utils.Vector2 lastWallVector = new Utils.Vector2(lastWallInRange.GetRelativeX(), lastWallInRange.GetRelativeY());
+
+                        angleBetween = viewVector.AngleBetween(lastWallVector);
+
+                        newLastAngle = viewVector.AngleBetween(compareWallVector);
+                    }
+                    //It is the first time any wall was hit, don't continue.
+                    //Save the angle between and current wall.
+                    else
+                    {
+                        Utils.Vector2 compareWallVector = new Utils.Vector2(compareWall.GetRelativeX(), compareWall.GetRelativeY());
+
+                        lastAngleBetween = angleBetween = viewVector.AngleBetween(compareWallVector);
+                        lastWallInRange = compareWall;
+                        return;
+                    }
+                }
+                //The usual case, the last wall is equal to the current wall.
+                else
+                {
+                    Utils.Vector2 compareWallVector = new Utils.Vector2(compareWall.GetRelativeX(), compareWall.GetRelativeY());
+                    newLastAngle = angleBetween = viewVector.AngleBetween(compareWallVector);
                 }
 
                 double delta = angleBetween - lastAngleBetween;
@@ -149,7 +192,8 @@ namespace RaahnSimulation
                 for (int i = 0; i < modSigs.Count; i++)
                     ModulationSignal.SetSignal(modSigs[i], modulation);
 
-                lastAngleBetween = angleBetween;
+                lastAngleBetween = newLastAngle;
+                lastWallInRange = compareWall;
             }
         }
     }
