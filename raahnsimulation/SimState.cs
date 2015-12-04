@@ -311,7 +311,12 @@ namespace RaahnSimulation
             if (simulationRunning)
             {
                 if (delayPassed)
+                {
                     raahnCar.Control();
+
+                    if (!headless)
+                        networkVisualizer.Update();
+                }
             }
 
             if (!headless)
@@ -329,7 +334,7 @@ namespace RaahnSimulation
                 else if (mouseX > glBounds.Width || mouseY > glBounds.Height)
                     panning = false;
 
-                networkVisualizer.UpdateWindow();
+                networkVisualizer.Render();
             }
 
             if (panning)

@@ -190,17 +190,24 @@ namespace RaahnSimulation
             visualizerWindow.ShowAll();
         }
 
-        public void UpdateWindow()
+        public void Update()
         {
             if (visualizerGLWidget != null)
             {
                 if (visualizerGLWidget.Visible)
                 {
                     UpdateUi();
-                    Update();
-
-                    visualizerGLWidget.RenderFrame();
+                    UpdateVisualization();
                 }
+            }
+        }
+
+        public void Render()
+        {
+            if (visualizerGLWidget != null)
+            {
+                if (visualizerGLWidget.Visible)
+                    visualizerGLWidget.RenderFrame();
             }
         }
 
@@ -371,12 +378,12 @@ namespace RaahnSimulation
             }
 
             //Update the visualization with the initial state.
-            Update();
+            UpdateVisualization();
 
             return true;
         }
 
-        private void Update()
+        private void UpdateVisualization()
         {
             if (network == null)
                 return;
