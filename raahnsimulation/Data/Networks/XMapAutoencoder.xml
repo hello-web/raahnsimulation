@@ -12,7 +12,7 @@
 	</NeuronGroup>
 	
 	<NeuronGroup Id="1">
-		<Count>7</Count>
+		<Count>5</Count>
 		<Type>Hidden</Type>
 	</NeuronGroup>
 	
@@ -21,7 +21,7 @@
 		<Type>Output</Type>
 	</NeuronGroup>
 	
-	<ConnectionGroup UseBias="true">
+	<ConnectionGroup UseBias="false">
 		<InputGroup>0</InputGroup>
 		<OutputGroup>1</OutputGroup>
 		<SamplesPerTick>20</SamplesPerTick>
