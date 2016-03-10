@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<NeuralNetwork>
+<NeuralNetwork UseNovelty="true">
 	<ControlScheme>RangeFinderControl</ControlScheme>
 	<HistoryBufferSize>350</HistoryBufferSize>
 	<WeightCap>10</WeightCap>
@@ -21,7 +21,7 @@
 		<Type>Output</Type>
 	</NeuronGroup>
 	
-	<ConnectionGroup UseBias="true">
+	<ConnectionGroup UseBias="false">
 		<InputGroup>0</InputGroup>
 		<OutputGroup>1</OutputGroup>
 		<SamplesPerTick>20</SamplesPerTick>

@@ -390,7 +390,7 @@ namespace RaahnSimulation
             }
 
             if (networkConfig.historyBufferSize > 0)
-                brain = new NeuralNetwork(networkConfig.historyBufferSize);
+                brain = new NeuralNetwork(networkConfig.historyBufferSize, networkConfig.useNovelty);
             else
                 brain = new NeuralNetwork();
 

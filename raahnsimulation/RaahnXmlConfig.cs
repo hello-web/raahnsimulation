@@ -5,6 +5,9 @@ namespace RaahnSimulation
 	[XmlRoot("NeuralNetwork")]
 	public class NeuralNetworkConfig
 	{
+        [XmlAttribute("UseNovelty")]
+        public bool useNovelty;
+
 		[XmlElement("HistoryBufferSize")]
 		public uint historyBufferSize;
 

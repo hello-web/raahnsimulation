@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<NeuralNetwork>
+<NeuralNetwork UseNovelty="true">
 	<ControlScheme>RangeFinderControl</ControlScheme>
-	<HistoryBufferSize>350</HistoryBufferSize>
+	<HistoryBufferSize>500</HistoryBufferSize>
 	<WeightCap>10</WeightCap>
 	<OutputNoiseMagnitude>0.1</OutputNoiseMagnitude>
 	<WeightNoiseMagnitude>0.1</WeightNoiseMagnitude>

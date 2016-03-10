@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Experiment>
-	<TicksPerRun>500</TicksPerRun>
-	<RunCount>100</RunCount>
+	<TicksPerRun>10000</TicksPerRun>
+	<RunCount>200</RunCount>
 	
 	<MapFile>XMap.xml</MapFile>
 	<SensorFile>Default.xml</SensorFile>
