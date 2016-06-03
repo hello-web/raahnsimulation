@@ -37,12 +37,6 @@ namespace RaahnSimulation
             nodeBounds.Copy(bounds);
         }
 
-        ~QuadTreeNode()
-        {
-            subNodes.Clear();
-            occupants.Clear();
-        }
-
         public void AddEntity(Entity occupant)
         {
             Utils.Vector2 nodeCenter = nodeBounds.GetCenter();

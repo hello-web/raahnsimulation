@@ -34,5 +34,5 @@
 		<TrainingMethod>HebbianTrain</TrainingMethod>
 	</ConnectionGroup>
 	
-	<Parameter>500</Parameter>
+	<Parameter>400</Parameter>
 </NeuralNetwork>

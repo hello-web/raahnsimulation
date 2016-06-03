@@ -37,7 +37,7 @@ namespace RaahnSimulation
                     {
                         break;
                     }
-                        case Scheme.RANGE_FINDER_CONTROL:
+                    case Scheme.RANGE_FINDER_CONTROL:
                     {
                         break;
                     }
@@ -89,7 +89,7 @@ namespace RaahnSimulation
                         inputs.Add(car.pieSliceSensorGroups[(int)x].GetPieSliceSensorValue(y));
                 }
 
-                car.brain.AddSample(inputs);
+                car.brain.AddExperience(inputs);
 
                 car.brain.PropagateSignal();
 
@@ -127,7 +127,7 @@ namespace RaahnSimulation
                         inputs.Add(car.rangeFinderGroups[(int)x].GetRangeFinderValue(y));
                 }
 
-                car.brain.AddSample(inputs);
+                car.brain.AddExperience(inputs);
 
                 car.brain.PropagateSignal();
 

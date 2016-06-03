@@ -6,24 +6,31 @@ namespace RaahnSimulation
     public class QuadTree
     {
         private LinkedList<Entity> outsideTree;
-        private AABB region;
+        private AABB treeRegion;
         private QuadTreeNode rootNode;
+
+        public QuadTree()
+        {
+            treeRegion = null;
+            rootNode = null;
+            outsideTree = null;
+        }
 
         public QuadTree(AABB bounds)
         {
-            region = bounds;
-            rootNode = new QuadTreeNode(this, region);
-            outsideTree = new LinkedList<Entity>();
+            SetBounds(bounds);
         }
 
-        ~QuadTree()
+        public void SetBounds(AABB bounds)
         {
-            outsideTree.Clear();
+            treeRegion = bounds;
+            rootNode = new QuadTreeNode(this, treeRegion);
+            outsideTree = new LinkedList<Entity>();
         }
 
         public void AddEntity(Entity occupant)
         {
-            if (region.Contains(occupant.aabb.GetBounds()))
+            if (treeRegion.Contains(occupant.aabb.GetBounds()))
                 rootNode.AddEntity(occupant);
             else
                 outsideTree.AddLast(occupant);

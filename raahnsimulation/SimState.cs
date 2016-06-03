@@ -4,7 +4,6 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Diagnostics;
 using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
 
 namespace RaahnSimulation
 {
@@ -208,6 +207,7 @@ namespace RaahnSimulation
                 cursor = new Cursor(context, mainGLWidget);
             }
 
+            //Not too interested in the quad tree right now, for now set to window dimensions.
             quadTree = new QuadTree(new AABB(Simulator.WORLD_WINDOW_WIDTH, Simulator.WORLD_WINDOW_HEIGHT));
 
             raahnCar = new Car(context, quadTree);

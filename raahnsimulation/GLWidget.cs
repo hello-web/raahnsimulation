@@ -206,23 +206,23 @@ namespace RaahnSimulation
         }
 
         //Win32 functions.
-        [SuppressUnmanagedCodeSecurity, DllImport(LIBGDK_WIN32)]
+        [SuppressUnmanagedCodeSecurity, DllImport(LIBGDK_WIN32, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr gdk_win32_drawable_get_handle(IntPtr d);
 
         //X11 functions.
-        [SuppressUnmanagedCodeSecurity, DllImport(LIBX11)]
+        [SuppressUnmanagedCodeSecurity, DllImport(LIBX11, CallingConvention = CallingConvention.Cdecl)]
         private static extern void XFree(IntPtr handle);
 
-        [SuppressUnmanagedCodeSecurity, DllImport(LIBX11_GENERIC)]
+        [SuppressUnmanagedCodeSecurity, DllImport(LIBX11_GENERIC, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr XGetVisualInfo(IntPtr display, IntPtr vinfo_mask, ref XVisualInfo template, out int nitems);
 
-        [SuppressUnmanagedCodeSecurity, DllImport(LIBGDK_X11)]
+        [SuppressUnmanagedCodeSecurity, DllImport(LIBGDK_X11, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr gdk_x11_drawable_get_xid(IntPtr gdkDisplay);
 
-        [SuppressUnmanagedCodeSecurity, DllImport(LIBGDK_X11)]
+        [SuppressUnmanagedCodeSecurity, DllImport(LIBGDK_X11, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr gdk_x11_display_get_xdisplay(IntPtr gdkDisplay);
 
-        [SuppressUnmanagedCodeSecurity, DllImport(LIBGL)]
+        [SuppressUnmanagedCodeSecurity, DllImport(LIBGL, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr glXChooseVisual(IntPtr display, int screen, int[] attr);
     }
 }

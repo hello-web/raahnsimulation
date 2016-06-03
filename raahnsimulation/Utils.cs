@@ -365,10 +365,6 @@ namespace RaahnSimulation
         //Chosen as it works for slope calculations for line segments.
         public const double EPSILON = 0.00000002;
 
-        public const char FILE_COMMENT = '#';
-        public const char FILE_VALUE_SEPERATOR = ' ';
-        public const string NULL_ELEMENT = "";
-        public const string OUTPUT_VERBOSE = "Ouput 0: {0:0.000000}";
         public const string WINDOW_TITLE = "RAAHN Simulation";
         public const string WINDOW_VISUALIZER_TITLE = "Network Visualizer";
         public const string START_SIM = "Start RAAHN simulation";
@@ -399,7 +395,7 @@ namespace RaahnSimulation
         public const string EXPERIMENT_FOLDER = "Data/Experiments/";
         public const string LOG_FOLDER = "Data/Logs/";
         public const string TIME_ELAPSED = "Total Time Elapsed: {0}s";
-        public const string VERSION_STRING = "Version 20160309";
+        public const string VERSION_STRING = "Version 1.0";
         //Log strings.
         public const string LOG_SCORE_FILE = "Scores.txt";
         public const string LOG_SCORE_FORMAT = "{0} ";

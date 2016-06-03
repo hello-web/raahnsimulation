@@ -5,7 +5,6 @@ namespace RaahnSimulation
 {
     public class Wall : Entity
     {
-        private const uint VBO_SIZE = 4;
         private const uint IBO_SIZE = 2;
         private const double COLOR_R = 0.0;
         private const double COLOR_G = 0.0;
@@ -24,18 +23,18 @@ namespace RaahnSimulation
 
         public Wall(Simulator sim) : base(sim)
         {
-            if (sharedMesh == null)
-            {
-                sharedMesh = new Mesh(2, BeginMode.Lines);
-                sharedMesh.AllocateEmpty(VBO_SIZE, IBO_SIZE, BufferUsageHint.DynamicDraw);
-            }
-
             //Second coordinate is the distance from 0,0.
-            vertices = new float[VBO_SIZE]
+            vertices = new float[]
             {
                 0.0f, 0.0f,
                 0.0f, 0.0f
             };
+
+            if (sharedMesh == null)
+            {
+                sharedMesh = new Mesh(2, BeginMode.Lines);
+                sharedMesh.AllocateEmpty((uint)vertices.Length, IBO_SIZE, BufferUsageHint.DynamicDraw);
+            }
 
             sharedMesh.SetVertices(vertices, false);
             sharedMesh.SetIndices(INDICES);
