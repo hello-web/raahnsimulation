@@ -181,7 +181,7 @@ RAAHN Simulation depends on gtk-sharp 2.12 and OpenTK 1.0. OpenTK is used for Op
 
 If using a GNU/Linux distribution, your package repositories probably have gtk-sharp and OpenTK. In Debian and its derivatives the required packages are gtk-sharp2 and libopentk-cil-dev. The package names are probably similar for most other distributions. A mono development environment is also needed. For Debian the package for mono development tools is called mono-devel.
 
-The easiest way to install the dependencies on Windows is to install the NuGet package available at [http://eplex.cs.ucf.edu/uncategorised/software](http://eplex.cs.ucf.edu/uncategorised/software). If your IDE does not have NuGet installed by default, check its extension manager or get it from [https://www.nuget.org/](https://www.nuget.org/). Newer versions of MonoDevelop should include NuGet by default.
+The easiest way to install the dependencies on Windows is to install the NuGet package available at [https://gitlab.com/jbowren/raahnsimulation/wikis/home](https://gitlab.com/jbowren/raahnsimulation/wikis/home). If your IDE does not have NuGet installed by default, check its extension manager or get it from [https://www.nuget.org/](https://www.nuget.org/). Newer versions of MonoDevelop should include NuGet by default.
 
 To install the NuGet package, add a repository for the location on you hard drive where the NuGet package is located. Then go to the installation manager, view packages from the newly repository and install deps 1.0.0.
 
