@@ -38,7 +38,8 @@ namespace RaahnSimulation
 
         public static void CleanShared()
         {
-            sharedMesh.Free();
+            if (sharedMesh != null)
+                sharedMesh.Free();
         }
 
         public override void Draw()
